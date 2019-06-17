@@ -1,0 +1,8 @@
+Makefile*
+build/
+debug/
+release/
+local_settings.pri
+!features/local_settings.pri
+*.pro.user
+*.autosave
