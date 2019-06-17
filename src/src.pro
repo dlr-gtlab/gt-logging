@@ -21,6 +21,8 @@ CONFIG += silent
 
 win32 {
     DEFINES += GT_LOGGING_DLL
+    DEFINES += QSLOG_IS_SHARED_LIBRARY
+    DEFINES += QS_LOG_WIN_PRINTF_CONSOLE
 }
 
 CONFIG(debug, debug|release){
