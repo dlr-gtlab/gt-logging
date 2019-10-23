@@ -11,6 +11,6 @@
 
 GtLogging::GtLogging()
 {
-
+    // nothing to do here
 }
 
