@@ -52,6 +52,7 @@ static const char FatalString[] = "FATAL";
 
 // not using Qt::ISODate because we need the milliseconds too
 //static const QString fmtDateTime("yyyy-MM-ddThh:mm:ss.zzz");
+// bla blup
 static const QString fmtDateTime("[hh:mm:ss]");
 
 static const char* LevelToText(Level theLevel)
