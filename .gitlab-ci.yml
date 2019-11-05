@@ -1,0 +1,74 @@
+stages:
+  - build
+  - test
+  - codingstyle
+  - badges
+
+
+build:
+  stage: build
+  script:
+    - .\tests\build\build.bat 1>buildLog.txt
+  tags:
+    - Qt
+  artifacts:
+    paths:
+      - build/GTlabLogging.dll
+      - build/GTlabLogging.exp
+      - build/GTlabLogging.ilk
+      - build/GTlabLogging.lib
+      - build/GTlabLogging.pdb
+      - build/GTlabUnitTest.exe
+      - build/GTlabUnitTest.pdb
+      - buildLog.txt
+
+# run tests using the binary built before
+test:
+  stage: test
+  script:
+    - .\tests\unittests\runUnittests.bat
+  tags:
+    - Qt
+  artifacts:
+    paths:
+      - "GTlabUnitTestCoverage.xml"
+      - "CoverageReport*"
+      - "New_Coverage.svg"
+      - "unittests.xml"
+    reports:
+      junit: unittests.xml
+
+codingstyle:
+  stage: codingstyle
+  script:
+    - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
+  tags:
+    - Qt
+  artifacts:
+    paths:
+      - "nsiqcppstyle_report.xml"
+      - codingStyleLog.txt
+
+badges:
+  stage: badges
+  script:
+    - $CommitNumber = git rev-list --count HEAD
+    - .\tests\badges\badges.bat --run commits $CommitNumber
+    - $statistics = git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+    - $filesRaw,$linesRaw = $statistics.split(',')
+    - $fileNumber = $filesRaw.split(' ')[1]
+    - $linenumber = $linesRaw.split(' ')[1]
+    - .\tests\badges\badges.bat --run lines $linenumber
+    - .\tests\badges\badges.bat --run files $fileNumber
+    - .\tests\badges\badges.bat --bw .\buildLog.txt .
+    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
+  tags:
+    - Qt
+  artifacts:
+    paths:
+      - "New_commits.svg"
+      - "New_lines.svg"
+      - "New_files.svg"
+      - "New_BuildWarnings.svg"
+      - "New_CodingStyle.svg"
+  
