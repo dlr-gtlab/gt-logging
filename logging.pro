@@ -19,7 +19,7 @@ SUBDIRS += src
 #### UNIT TESTS ####
 contains(BUILD_UNITTESTS, true) {
     message("BUILD_UNITTESTS = true")
-    #SUBDIRS += tests/unittests
+    SUBDIRS += tests/unittests
 }
 
 ######################################################################
