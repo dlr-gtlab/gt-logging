@@ -4,5 +4,6 @@ debug/
 release/
 local_settings.pri
 !features/local_settings.pri
+!tests/build/
 *.pro.user
 *.autosave

@@ -11,6 +11,12 @@
 include( $${PWD}/../settings.pri )
 
 BUILD_DEST = ../build
+BUILD_DEST_TEMP = ../build
+
+contains(NIGHTLYBUILD, true) {
+    message("BUILD_NIGHTLY_BUILD = true")
+    BUILD_DEST = $${NIGHTLY_BUILD}\lib
+}
 
 TARGET = GTlabLogging
 
@@ -26,17 +32,17 @@ win32 {
 }
 
 CONFIG(debug, debug|release){
-    DESTDIR = $${BUILD_DEST}/debug-src/logging
-    OBJECTS_DIR = $${BUILD_DEST}/debug-src/logging/obj
-    MOC_DIR = $${BUILD_DEST}/debug-src/logging/moc
-    RCC_DIR = $${BUILD_DEST}/debug-src/logging/rcc
-    UI_DIR = $${BUILD_DEST}/debug-src/logging/ui
+    DESTDIR = $${BUILD_DEST_TEMP}/debug-src/logging
+    OBJECTS_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/obj
+    MOC_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/moc
+    RCC_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/rcc
+    UI_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/ui
 } else {
-    DESTDIR = $${BUILD_DEST}/release-src/logging
-    OBJECTS_DIR = $${BUILD_DEST}/release-src/logging/obj
-    MOC_DIR = $${BUILD_DEST}/release-src/logging/moc
-    RCC_DIR = $${BUILD_DEST}/release-src/logging/rcc
-    UI_DIR = $${BUILD_DEST}/release-src/logging/ui
+    DESTDIR = $${BUILD_DEST_TEMP}/release-src/logging
+    OBJECTS_DIR = $${BUILD_DEST_TEMP}/release-src/logging/obj
+    MOC_DIR = $${BUILD_DEST_TEMP}/release-src/logging/moc
+    RCC_DIR = $${BUILD_DEST_TEMP}/release-src/logging/rcc
+    UI_DIR = $${BUILD_DEST_TEMP}/release-src/logging/ui
 }
 INCLUDEPATH += .\
 

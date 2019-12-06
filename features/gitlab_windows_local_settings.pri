@@ -9,3 +9,5 @@ DEV_TOOLS = D:\GTlab-DevTools
 
 # build settings
 BUILD_UNITTESTS =   true
+
+NIGHTLYBUILD = false
