@@ -21,7 +21,15 @@ build:
       - build/GTlabUnitTest.exe
       - build/GTlabUnitTest.pdb
       - buildLog.txt
-
+nightlyBuild:
+  stage: build
+  script:
+    - .\tests\build\build-nightly.bat
+    - .\tests\build\copyHeaders.bat
+  tags:
+    - Windows7
+  only:
+    - master
 # run tests using the binary built before
 test:
   stage: test
