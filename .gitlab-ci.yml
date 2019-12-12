@@ -13,11 +13,11 @@ build:
     - Qt
   artifacts:
     paths:
-      - build/GTlabLogging.dll
-      - build/GTlabLogging.exp
-      - build/GTlabLogging.ilk
-      - build/GTlabLogging.lib
-      - build/GTlabLogging.pdb
+      - lib/logging/GTlabLogging.dll
+      - lib/logging/GTlabLogging.exp
+      - lib/logging/GTlabLogging.ilk
+      - lib/logging/GTlabLogging.lib
+      - lib/logging/GTlabLogging.pdb
       - build/GTlabUnitTest.exe
       - build/GTlabUnitTest.pdb
       - buildLog.txt
@@ -77,6 +77,6 @@ badges:
       - "New_commits.svg"
       - "New_lines.svg"
       - "New_files.svg"
-      - "New_BuildWarnings.svg"
+      - "New_BuildWarn-W.svg"
       - "New_CodingStyle.svg"
   

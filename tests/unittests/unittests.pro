@@ -17,6 +17,7 @@ QT += xml core sql widgets
 TARGET = GTlabUnitTest
 
 BUILD_DEST = ../../build
+LOGGING_LIB = ../../lib/logging
 
 CONFIG(debug, debug|release){
     DESTDIR = $${BUILD_DEST}/debug-unittests
@@ -51,7 +52,7 @@ DESTDIR = $${BUILD_DEST}
 
 ####################################################
 
-LIBS += -L$${BUILD_DEST} -lgtest -lGTlabLogging
+LIBS += -L$${LOGGING_LIB} -lgtest -lGTlabLogging
 
 
 ####################################################

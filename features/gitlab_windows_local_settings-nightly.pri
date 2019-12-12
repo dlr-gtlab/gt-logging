@@ -4,12 +4,14 @@
 #          / /_/ / / / / / /_/ / /_/ /
 #          \____/ /_/ /_/\__,_/_.___/
 
+BUILD_UNITTESTS =   false
+
 # path to dev tools
 DEV_TOOLS = D:\GTlab-DevTools
 
-NIGHTLY_BUILD = G:\AT-TW\GTlab\NightlyBuild
 
-# build settings
-BUILD_UNITTESTS =   false
+# THIRD PARTY
+GOOGLE_TEST_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\GoogleTest
 
-NIGHTLYBUILD = true
+# Deployment
+GTLAB_ENVIRONMENT_PATH =

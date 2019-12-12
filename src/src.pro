@@ -9,14 +9,12 @@
 ######################################################################
 
 include( $${PWD}/../settings.pri )
+TARGET_DIR_NAME = logging
 
-BUILD_DEST = ../build
+
+BUILD_DEST = ../lib/$${TARGET_DIR_NAME}
 BUILD_DEST_TEMP = ../build
 
-contains(NIGHTLYBUILD, true) {
-    message("BUILD_NIGHTLY_BUILD = true")
-    BUILD_DEST = $${NIGHTLY_BUILD}\lib
-}
 
 TARGET = GTlabLogging
 
@@ -73,4 +71,6 @@ unix {
 QMAKE_CXXFLAGS += -std=c++11
 }
 
+copyHeaders($$HEADERS)
+copyToEnvironmentPath($${BUILD_DEST}/$${TARGET}.dll)
 ######################################################################
