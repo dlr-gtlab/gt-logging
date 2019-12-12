@@ -7,3 +7,5 @@ local_settings.pri
 !tests/build/
 *.pro.user
 *.autosave
+include/
+lib/

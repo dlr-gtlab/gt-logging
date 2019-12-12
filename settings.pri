@@ -12,19 +12,85 @@
 include( local_settings.pri )
 
 # Google Test
-INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/include
+INCLUDEPATH += $${GOOGLE_TEST_PATH}/include
 win32 {
     CONFIG(debug, debug|release){
-        LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/libDebug
-        DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/libDebug
+        LIBS        += -L$${GOOGLE_TEST_PATH}/libDebug
+        DEPENDPATH  += $${GOOGLE_TEST_PATH}/libDebug
     } else {
-        LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-        DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
+        LIBS        += -L$${GOOGLE_TEST_PATH}/lib
+        DEPENDPATH  += $${GOOGLE_TEST_PATH}/lib
     }
 }
 unix {
-    LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-    DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
+    LIBS        += -L$${GOOGLE_TEST_PATH}/lib
+    DEPENDPATH  += $${GOOGLE_TEST_PATH}/lib
+}
+
+
+## FUNCTION DEFINITION FOR COPY FUNCTION
+defineTest(copyHeaders) {
+
+    files = $$1
+    dir = $${PWD}/../include/$${TARGET_DIR_NAME}
+    win32:dir ~= s,/,\\,g
+
+    !exists($$dir) {
+
+        QMAKE_POST_LINK += $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
+    }
+
+    for(file, files) {
+
+        exists($$file) {
+
+            win32:file ~= s,/,\\,g
+            #message(Copy: $$file)
+            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$file) $$shell_quote($$dir) $$escape_expand(\\n\\t)
+        }
+    }
+
+    export(QMAKE_POST_LINK)
+
+    return(true)
+}
+
+defineTest(copyToEnvironmentPathModules) {
+    environmentPath = $${GTLAB_ENVIRONMENT_PATH}/modules
+
+    copyToEnvironmentPath($$1, $$environmentPath)
+}
+
+defineTest(copyToEnvironmentPath) {
+
+    !isEmpty(GTLAB_ENVIRONMENT_PATH) {
+
+        dllPath = $$1
+        win32:dllPath ~= s,/,\\,g
+
+        args = $$ARGS
+
+        count(args, 2) {
+            environmentPath = $$2
+        } else {
+            environmentPath = $${GTLAB_ENVIRONMENT_PATH}
+        }
+
+        win32:environmentPath ~= s,/,\\,g
+
+        exists($$environmentPath) {
+
+            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
+
+            export(QMAKE_POST_LINK)
+
+            return(true)
+        } else {
+            warning(GTLAB_ENVIRONMENT_PATH ($${environmentPath}) does not exist!)
+        }
+    }
+
+    return(false)
 }
 
 ######################################################################

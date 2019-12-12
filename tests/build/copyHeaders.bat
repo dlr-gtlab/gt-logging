@@ -1,5 +1,8 @@
-SET NIGHTLYBUILDINCL=G:\AT-TW\GTlab\NightlyBuild
+SET NIGHTLYBUILD=G:\AT-TW\GTlab\Nightly_Builds
 
-REM for /r .\src\ %%f in (*.h) do @copy "%%f" D:\devel\GTlab-NightlyBuild\include\logging\
+if not exist "%NIGHTLYBUILD%\include\logging\" mkdir %NIGHTLYBUILD%\include\logging\
+if not exist "%NIGHTLYBUILD%\lib\logging\" mkdir %NIGHTLYBUILD%\lib\logging\
 
-for /r .\src\ %%f in (*.h) do @copy "%%f" %NIGHTLYBUILDINCL%\include\logging\
+for /r .\include %%f in (*.h) do @copy "%%f" %NIGHTLYBUILD%\include\logging\
+for /r .\lib %%f in (*.dll) do @copy "%%f" %NIGHTLYBUILD%\lib\logging\
+for /r .\lib %%f in (*.lib) do @copy "%%f" %NIGHTLYBUILD%\lib\logging\
