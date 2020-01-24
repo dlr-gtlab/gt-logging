@@ -1,3 +1,4 @@
+net use g: \\kpfiler1.intra.dlr.de\AT-KP
 
 copy features\gitlab_windows_local_settings-nightly.pri local_settings.pri
 
