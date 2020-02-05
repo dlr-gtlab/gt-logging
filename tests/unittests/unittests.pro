@@ -52,8 +52,28 @@ DESTDIR = $${BUILD_DEST}
 
 ####################################################
 
-LIBS += -L$${LOGGING_LIB} -lgtest -lGTlabLogging
+LIBS += -L$${LOGGING_LIB}
 
+CONFIG(debug, debug|release){
+LIBS += -lGTlabLogging-d
+} else {
+LIBS += -lGTlabLogging
+}
+
+equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
+    message(Qt Version 5.12 or newer)
+	
+	CONFIG(debug, debug|release){
+		LIBS += -lgtestd
+	} else {
+		LIBS += -lgtest
+	}
+
+} else {
+    message(Qt Version older than 5.12)
+	
+	LIBS += -lgtest
+}
 
 ####################################################
 
