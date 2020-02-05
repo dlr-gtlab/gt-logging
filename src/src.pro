@@ -15,8 +15,11 @@ TARGET_DIR_NAME = logging
 BUILD_DEST = ../lib/$${TARGET_DIR_NAME}
 BUILD_DEST_TEMP = ../build
 
-
+CONFIG(debug, debug|release){
+TARGET = GTlabLogging-d
+} else {
 TARGET = GTlabLogging
+}
 
 QT += core
 TEMPLATE = lib
