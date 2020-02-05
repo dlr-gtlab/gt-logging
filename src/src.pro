@@ -9,10 +9,7 @@
 ######################################################################
 
 include( $${PWD}/../settings.pri )
-TARGET_DIR_NAME = logging
 
-
-BUILD_DEST = ../lib/$${TARGET_DIR_NAME}
 BUILD_DEST_TEMP = ../build
 
 CONFIG(debug, debug|release){
@@ -74,6 +71,9 @@ unix {
 QMAKE_CXXFLAGS += -std=c++11
 }
 
+######################################################################
+
 copyHeaders($$HEADERS)
-copyToEnvironmentPath($${BUILD_DEST}/$${TARGET}.dll)
+unix:   copyToEnvironmentPath($${BUILD_DEST}/$${TARGET}.so*)
+win32:  copyToEnvironmentPath($${BUILD_DEST}/$${TARGET}.dll)
 ######################################################################
