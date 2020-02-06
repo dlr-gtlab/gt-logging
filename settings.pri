@@ -12,7 +12,6 @@
 include( local_settings.pri )
 
 TARGET_DIR_NAME = logging
-
 BUILD_DEST = ../lib/$${TARGET_DIR_NAME}
 
 equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
@@ -55,10 +54,10 @@ defineTest(copyHeaders) {
 
     win32 {
 
-        QMAKE_PRE_LINK += if not exist $$shell_quote($$dir) $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
+        QMAKE_POST_LINK += if not exist $$shell_quote($$dir) $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
 
         exists(*.h) {
-            QMAKE_PRE_LINK += $$QMAKE_COPY $$shell_quote(*.h) $$shell_quote($$dir) $$escape_expand(\\n\\t)
+            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote(*.h) $$shell_quote($$dir) $$escape_expand(\\n\\t)
         }
 
         dirNames =
@@ -80,7 +79,7 @@ defineTest(copyHeaders) {
 
                         exists($${sourceDir}) {
 
-                            QMAKE_PRE_LINK += $$QMAKE_COPY $$shell_quote($${sourceDir}) $$shell_quote($$dir) $$escape_expand(\\n\\t)
+                            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($${sourceDir}) $$shell_quote($$dir) $$escape_expand(\\n\\t)
                         }
                     }
                 }
@@ -89,10 +88,10 @@ defineTest(copyHeaders) {
 
     }
     unix {
-        QMAKE_PRE_LINK += find . -name $$shell_quote(*.h) -exec cp $$shell_quote({}) $$shell_quote($$dir) \; $$escape_expand(\\n\\t)
+        QMAKE_POST_LINK += find . -name $$shell_quote(*.h) -exec cp $$shell_quote({}) $$shell_quote($$dir) \; $$escape_expand(\\n\\t)
     }
 
-    export(QMAKE_PRE_LINK)
+    export(QMAKE_POST_LINK)
 
     return(true)
 }
@@ -122,10 +121,10 @@ defineTest(copyToEnvironmentPath) {
 
         exists($$environmentPath) {
 
-            win32: QMAKE_PRE_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
-            unix:  QMAKE_PRE_LINK += find $$BUILD_DEST -name $$shell_quote(*.so*) -exec cp $$shell_quote({}) $$shell_quote($$environmentPath) \; $$escape_expand(\\n\\t)
+            win32: QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
+            unix:  QMAKE_POST_LINK += find $$BUILD_DEST -name $$shell_quote(*.so*) -exec cp $$shell_quote({}) $$shell_quote($$environmentPath) \; $$escape_expand(\\n\\t)
 
-            export(QMAKE_PRE_LINK)
+            export(QMAKE_POST_LINK)
 
             return(true)
         } else {
