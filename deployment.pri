@@ -5,13 +5,13 @@
 #          \____/ /_/ /_/\__,_/_.___/
 
 ######################################################################
-#### Version 1.0
+#### Version 1.1
 #### DO NOT CHANGE!
 ######################################################################
 
 
 ## CREATE INCLUDE DIRECTORY
-HEADERS_DIR_PATH = $${PWD}/include/
+HEADERS_DIR_PATH = $${PWD}/include
 mkpath($${HEADERS_DIR_PATH})
 
 ## FUNCTION DEFINITION FOR COPY FUNCTION
@@ -59,6 +59,7 @@ defineTest(copyHeaders) {
     }
     unix {
 
+        QMAKE_POST_LINK += $$QMAKE_CHK_DIR_EXISTS $$shell_quote($$dir) || $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
         QMAKE_POST_LINK += find . -name $$shell_quote(*.h) -exec cp $$shell_quote({}) $$shell_quote($$dir) \; $$escape_expand(\\n\\t)
     }
 
@@ -86,7 +87,7 @@ defineTest(copyToEnvironmentPath) {
         return(false)
     }
 
-    isEmpty(BUILD_DEST) {
+    isEmpty(DESTDIR) {
 
         return(false)
     }
@@ -106,13 +107,13 @@ defineTest(copyToEnvironmentPath) {
     exists($$environmentPath) {
 
         win32 {
-            dllPath = $${BUILD_DEST}/$${TARGET}.dll
+            dllPath = $${DESTDIR}/$${TARGET}.dll
             dllPath ~= s,/,\\,g
 
             QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
         }
 
-        unix:  QMAKE_POST_LINK += find $${BUILD_DEST} -name $$shell_quote(*$${TARGET}.so*) -exec cp $$shell_quote({}) $$shell_quote($$environmentPath) \; $$escape_expand(\\n\\t)
+        unix:  QMAKE_POST_LINK += find $${DESTDIR} -name $$shell_quote(*$${TARGET}.so*) -exec cp $$shell_quote({}) $$shell_quote($$environmentPath) \; $$escape_expand(\\n\\t)
 
         export(QMAKE_POST_LINK)
 

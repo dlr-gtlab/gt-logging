@@ -13,6 +13,7 @@ include( local_settings.pri )
 include( deployment.pri )
 
 TARGET_DIR_NAME = logging
+LIB_BUILD_DEST  = lib/$${TARGET_DIR_NAME}
 
 equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
     message(Qt Version 5.12 or newer)
