@@ -10,8 +10,8 @@
 
 include( $${PWD}/../settings.pri )
 
-BUILD_DEST = ../lib/$${TARGET_DIR_NAME}
-BUILD_DEST_TEMP = ../build
+BUILD_DEST     = ../$${LIB_BUILD_DEST}
+MOC_BUILD_DEST = ../build
 
 CONFIG(debug, debug|release){
 TARGET = GTlabLogging-d
@@ -31,17 +31,17 @@ win32 {
 }
 
 CONFIG(debug, debug|release){
-    DESTDIR = $${BUILD_DEST_TEMP}/debug-src/logging
-    OBJECTS_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/obj
-    MOC_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/moc
-    RCC_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/rcc
-    UI_DIR = $${BUILD_DEST_TEMP}/debug-src/logging/ui
+    DESTDIR = $${MOC_BUILD_DEST}/debug-src/$${TARGET_DIR_NAME}
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-src/$${TARGET_DIR_NAME}/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/debug-src/$${TARGET_DIR_NAME}/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/debug-src/$${TARGET_DIR_NAME}/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/debug-src/$${TARGET_DIR_NAME}/ui
 } else {
-    DESTDIR = $${BUILD_DEST_TEMP}/release-src/logging
-    OBJECTS_DIR = $${BUILD_DEST_TEMP}/release-src/logging/obj
-    MOC_DIR = $${BUILD_DEST_TEMP}/release-src/logging/moc
-    RCC_DIR = $${BUILD_DEST_TEMP}/release-src/logging/rcc
-    UI_DIR = $${BUILD_DEST_TEMP}/release-src/logging/ui
+    DESTDIR = $${MOC_BUILD_DEST}/release-src/$${TARGET_DIR_NAME}
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/release-src/$${TARGET_DIR_NAME}/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/release-src/$${TARGET_DIR_NAME}/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/release-src/$${TARGET_DIR_NAME}/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/release-src/$${TARGET_DIR_NAME}/ui
 }
 INCLUDEPATH += .\
 

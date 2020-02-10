@@ -10,27 +10,27 @@
 
 include( $${PWD}/../../settings.pri )
 
+BUILD_DEST     = ../../build
+MOC_BUILD_DEST = $${BUILD_DEST}
+
 TEMPLATE = app
 
 QT += xml core sql widgets
 
 TARGET = GTlabUnitTest
 
-BUILD_DEST = ../../build
-LOGGING_LIB = ../../lib/logging
-
 CONFIG(debug, debug|release){
-    DESTDIR = $${BUILD_DEST}/debug-unittests
-    OBJECTS_DIR = $${BUILD_DEST}/debug-unittests/obj
-    MOC_DIR = $${BUILD_DEST}/debug-unittests/moc
-    RCC_DIR = $${BUILD_DEST}/debug-unittests/rcc
-    UI_DIR = $${BUILD_DEST}/debug-unittests/ui
+    DESTDIR = $${MOC_BUILD_DEST}/debug-unittests
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-unittests/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/debug-unittests/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/debug-unittests/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/debug-unittests/ui
 } else {
-    DESTDIR = $${BUILD_DEST}/release-unittests
-    OBJECTS_DIR = $${BUILD_DEST}/release-unittests/obj
-    MOC_DIR = $${BUILD_DEST}/release-unittests/moc
-    RCC_DIR = $${BUILD_DEST}/release-unittests/rcc
-    UI_DIR = $${BUILD_DEST}/release-unittests/ui
+    DESTDIR = $${MOC_BUILD_DEST}/release-unittests
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/release-unittests/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/release-unittests/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/release-unittests/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/release-unittests/ui
 }
 
 CONFIG += silent
@@ -52,7 +52,7 @@ DESTDIR = $${BUILD_DEST}
 
 ####################################################
 
-LIBS += -L$${LOGGING_LIB}
+LIBS += -L../../$${LIB_BUILD_DEST}
 
 CONFIG(debug, debug|release){
 LIBS += -lGTlabLogging-d
