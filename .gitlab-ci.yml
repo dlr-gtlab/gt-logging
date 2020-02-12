@@ -4,7 +4,6 @@ stages:
   - codingstyle
   - badges
 
-
 build:
   stage: build
   script:
@@ -13,14 +12,15 @@ build:
     - Qt
   artifacts:
     paths:
-      - lib/logging/GTlabLogging.dll
-      - lib/logging/GTlabLogging.exp
-      - lib/logging/GTlabLogging.ilk
-      - lib/logging/GTlabLogging.lib
-      - lib/logging/GTlabLogging.pdb
+      - lib/logging/GTlabLogging-d.dll
+      - lib/logging/GTlabLogging-d.exp
+      - lib/logging/GTlabLogging-d.ilk
+      - lib/logging/GTlabLogging-d.lib
+      - lib/logging/GTlabLogging-d.pdb
       - build/GTlabUnitTest.exe
       - build/GTlabUnitTest.pdb
       - buildLog.txt
+    expire_in: 1 week
 nightlyBuild:
   stage: build
   script:
@@ -28,8 +28,39 @@ nightlyBuild:
     - .\tests\build\copyHeaders.bat
   tags:
     - Windows7
+  artifacts:
+    paths:
+      - lib/logging/GTlabLogging.dll   
+      - lib/logging/GTlabLogging.lib   
+      - include/logging/*.h   	  
+    expire_in: 1 week
   only:
     - master
+
+build-linux:
+  stage: build
+  script:
+    - ./tests/build/build.sh > linuxBuild.txt 2>&1
+  tags:
+    - Linux
+  artifacts:
+    paths:
+      - lib/logging/libGTlabLogging-d.so
+      - build/GTlabUnitTest
+      - linuxBuild.txt
+    expire_in: 1 week
+nightlyBuild-linux:
+  stage: build
+  script:
+    - ./tests/build/build-nightly.sh
+  tags:
+    - Linux
+  artifacts:
+    paths:
+      - lib/logging/libGTlabLogging.so    
+    expire_in: 1 week	  
+  only:
+    - master	
 # run tests using the binary built before
 test:
   stage: test
@@ -43,6 +74,7 @@ test:
       - "CoverageReport*"
       - "New_Coverage.svg"
       - "unittests.xml"
+    expire_in: 1 week
     reports:
       junit: unittests.xml
 
@@ -56,7 +88,7 @@ codingstyle:
     paths:
       - "nsiqcppstyle_report.xml"
       - codingStyleLog.txt
-
+    expire_in: 1 week
 badges:
   stage: badges
   script:
@@ -79,4 +111,5 @@ badges:
       - "New_files.svg"
       - "New_BuildWarn-W.svg"
       - "New_CodingStyle.svg"
+    expire_in: 1 week
   
