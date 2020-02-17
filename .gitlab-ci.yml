@@ -9,7 +9,7 @@ build:
   script:
     - .\tests\build\build.bat 1>buildLog.txt
   tags:
-    - Qt
+    - Windows7
   artifacts:
     paths:
       - lib/logging/GTlabLogging-d.dll
@@ -21,6 +21,7 @@ build:
       - build/GTlabUnitTest.pdb
       - buildLog.txt
     expire_in: 1 week
+    when: always      
 nightlyBuild:
   stage: build
   script:
@@ -49,6 +50,7 @@ build-linux:
       - build/GTlabUnitTest
       - linuxBuild.txt
     expire_in: 1 week
+    when: always      
 nightlyBuild-linux:
   stage: build
   script:
@@ -57,7 +59,8 @@ nightlyBuild-linux:
     - Linux
   artifacts:
     paths:
-      - lib/logging/libGTlabLogging.so    
+      - lib/logging/libGTlabLogging.so  
+      - include/logging/*.h         
     expire_in: 1 week	  
   only:
     - master	
@@ -67,7 +70,7 @@ test:
   script:
     - .\tests\unittests\runUnittests.bat
   tags:
-    - Qt
+    - Windows7
   artifacts:
     paths:
       - "GTlabUnitTestCoverage.xml"
@@ -83,7 +86,7 @@ codingstyle:
   script:
     - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
   tags:
-    - Qt
+    - Windows7
   artifacts:
     paths:
       - "nsiqcppstyle_report.xml"
@@ -103,7 +106,7 @@ badges:
     - .\tests\badges\badges.bat --bw .\buildLog.txt .
     - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
-    - Qt
+    - Windows7
   artifacts:
     paths:
       - "New_commits.svg"
