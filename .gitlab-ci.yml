@@ -63,7 +63,36 @@ nightlyBuild-linux:
       - include/logging/*.h         
     expire_in: 1 week	  
   only:
+    - master
+buildWindowsQt512:
+  stage: build
+  script:
+    - .\tests\build\buildQt512.bat 1>buildLog.txt
+  tags:
+    - Win7Qt512
+  artifacts:
+    paths:
+      - lib/logging/GTlabLogging-d.dll
+      - lib/logging/GTlabLogging-d.lib  
+      - buildLog.txt
+    expire_in: 1 week
+    when: always  	
+nightlyBuildQt512:
+  stage: build
+  script:
+    - .\tests\build\build-nightlyQt512.bat
+    - .\tests\build\copyHeaders512.bat
+  tags:
+    - Win7Qt512
+  only:
     - master	
+  artifacts:
+    paths:
+      - lib/logging/GTlabLogging.dll
+      - lib/logging/GTlabLogging.lib
+      - include/logging/*.h  	  
+    expire_in: 1 week
+    when: always 		
 # run tests using the binary built before
 test:
   stage: test
