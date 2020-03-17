@@ -73,7 +73,12 @@ buildWindowsQt512:
   artifacts:
     paths:
       - lib/logging/GTlabLogging-d.dll
-      - lib/logging/GTlabLogging-d.lib  
+      - lib/logging/GTlabLogging-d.exp
+      - lib/logging/GTlabLogging-d.ilk
+      - lib/logging/GTlabLogging-d.lib
+      - lib/logging/GTlabLogging-d.pdb
+      - build/GTlabUnitTest.exe
+      - build/GTlabUnitTest.pdb
       - buildLog.txt
     expire_in: 1 week
     when: always  	
@@ -100,11 +105,44 @@ test:
     - .\tests\unittests\runUnittests.bat
   tags:
     - Windows7
+  dependencies:
+    - build
   artifacts:
     paths:
       - "GTlabUnitTestCoverage.xml"
       - "CoverageReport*"
       - "New_Coverage.svg"
+      - "unittests.xml"
+    expire_in: 1 week
+    reports:
+      junit: unittests.xml
+
+testQt512:
+  stage: test
+  script:
+    - .\tests\unittests\runUnittestsQt512.bat
+  tags:
+    - Win7Qt512
+  dependencies:
+    - buildWindowsQt512
+  artifacts:
+    paths:
+      - "unittests.xml"
+    expire_in: 1 week
+    reports:
+      junit: unittests.xml
+
+testLinux:
+  stage: test
+  script:
+    - chmod +x ./tests/unittests/runUnittests.sh
+    - ./tests/unittests/runUnittests.sh
+  tags:
+    - Linux
+  dependencies:
+    - build-linux
+  artifacts:
+    paths:
       - "unittests.xml"
     expire_in: 1 week
     reports:
@@ -143,5 +181,6 @@ badges:
       - "New_files.svg"
       - "New_BuildWarn-W.svg"
       - "New_CodingStyle.svg"
+      - "New_Coverage.svg"
     expire_in: 1 week
   
