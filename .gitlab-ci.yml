@@ -182,5 +182,5 @@ badges:
       - "New_BuildWarn-W.svg"
       - "New_CodingStyle.svg"
       - "New_Coverage.svg"
-    expire_in: 1 week
+    expire_in: 52 week
   
