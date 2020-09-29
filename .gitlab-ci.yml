@@ -4,40 +4,6 @@ stages:
   - codingstyle
   - badges
 
-build:
-  stage: build
-  script:
-    - .\tests\build\build.bat 1>buildLog.txt
-  tags:
-    - Windows7
-  artifacts:
-    paths:
-      - lib/logging/GTlabLogging-d.dll
-      - lib/logging/GTlabLogging-d.exp
-      - lib/logging/GTlabLogging-d.ilk
-      - lib/logging/GTlabLogging-d.lib
-      - lib/logging/GTlabLogging-d.pdb
-      - build/GTlabUnitTest.exe
-      - build/GTlabUnitTest.pdb
-      - buildLog.txt
-    expire_in: 1 week
-    when: always      
-nightlyBuild:
-  stage: build
-  script:
-    - .\tests\build\build-nightly.bat
-    - .\tests\build\copyHeaders.bat
-  tags:
-    - Windows7
-  artifacts:
-    paths:
-      - lib/logging/GTlabLogging.dll   
-      - lib/logging/GTlabLogging.lib   
-      - include/logging/*.h   	  
-    expire_in: 1 week
-  only:
-    - master
-
 build-linux:
   stage: build
   script:
@@ -50,11 +16,14 @@ build-linux:
       - build/GTlabUnitTest
       - linuxBuild.txt
     expire_in: 1 week
-    when: always      
+    when: always    
+  variables:
+    DEVTOOLS: "/home/gitlab-runner/gtlab-devtools/"      
 nightlyBuild-linux:
   stage: build
   script:
     - ./tests/build/build-nightly.sh
+  allow_failure: true      
   tags:
     - Linux
   artifacts:
@@ -64,6 +33,8 @@ nightlyBuild-linux:
     expire_in: 1 week	  
   only:
     - master
+  variables:
+    DEVTOOLS: "/home/gitlab-runner/gtlab-devtools/"      
 buildWindowsQt512:
   stage: build
   script:
@@ -82,6 +53,8 @@ buildWindowsQt512:
       - buildLog.txt
     expire_in: 1 week
     when: always  	
+  variables:
+    DEVTOOLS: "C:\\devel\\GTlab-DevTools\\stable\\1_6"    
 nightlyBuildQt512:
   stage: build
   script:
@@ -98,24 +71,10 @@ nightlyBuildQt512:
       - include/logging/*.h  	  
     expire_in: 1 week
     when: always 		
+  variables:
+    NIGHTLYBUILD: "G:\\AT-TW\\GTlab\\Nightly_Builds_512"
+    DEVTOOLS: "C:\\devel\\GTlab-DevTools\\stable\\1_6"
 # run tests using the binary built before
-test:
-  stage: test
-  script:
-    - .\tests\unittests\runUnittests.bat
-  tags:
-    - Windows7
-  dependencies:
-    - build
-  artifacts:
-    paths:
-      - "GTlabUnitTestCoverage.xml"
-      - "CoverageReport*"
-      - "New_Coverage.svg"
-      - "unittests.xml"
-    expire_in: 1 week
-    reports:
-      junit: unittests.xml
 
 testQt512:
   stage: test
@@ -153,7 +112,7 @@ codingstyle:
   script:
     - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
   tags:
-    - Windows7
+    - Win7Qt512
   artifacts:
     paths:
       - "nsiqcppstyle_report.xml"
@@ -173,7 +132,7 @@ badges:
     - .\tests\badges\badges.bat --bw .\buildLog.txt .
     - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
-    - Windows7
+    - Win7Qt512
   artifacts:
     paths:
       - "New_commits.svg"

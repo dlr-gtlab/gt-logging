@@ -9,3 +9,4 @@ local_settings.pri
 *.autosave
 include/
 lib/
+*.qmake.stash
