@@ -1,4 +1,4 @@
-SET NIGHTLYBUILD=G:\AT-TW\GTlab\Nightly_Builds_512
+REM SET NIGHTLYBUILD=G:\AT-TW\GTlab\Nightly_Builds_512
 
 if exist "%NIGHTLYBUILD%\include\logging\" rmdir /s /q %NIGHTLYBUILD%\include\logging\
 if not exist "%NIGHTLYBUILD%\include\logging\" mkdir %NIGHTLYBUILD%\include\logging\

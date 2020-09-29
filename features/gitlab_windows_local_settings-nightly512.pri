@@ -7,7 +7,7 @@
 BUILD_UNITTESTS =   false
 
 # path to dev tools
-DEV_TOOLS = C:\devel\GTlab-DevTools
+DEV_TOOLS = $$(DEVTOOLS)
 
 
 # THIRD PARTY
