@@ -131,6 +131,7 @@ badges:
     - .\tests\badges\badges.bat --run files $fileNumber
     - .\tests\badges\badges.bat --bw .\buildLog.txt .
     - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
+    - .\tests\badges\badges.bat --bw .\linuxBuild.txt .     
   tags:
     - Win7Qt512
   artifacts:
@@ -139,6 +140,7 @@ badges:
       - "New_lines.svg"
       - "New_files.svg"
       - "New_BuildWarn-W.svg"
+      - "New_BuildWarn-L.svg"      
       - "New_CodingStyle.svg"
       - "New_Coverage.svg"
     expire_in: 52 week
