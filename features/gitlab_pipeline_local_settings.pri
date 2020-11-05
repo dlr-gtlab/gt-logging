@@ -4,14 +4,16 @@
 #          / /_/ / / / / / /_/ / /_/ /
 #          \____/ /_/ /_/\__,_/_.___/
 
-BUILD_UNITTESTS =   false
+BUILD_UNITTESTS = $$(BUILDUNITTESTS)
 
 # path to dev tools
 DEV_TOOLS = $$(DEVTOOLS)
 
-
-# THIRD PARTY
-GOOGLE_TEST_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\GoogleTest
+# Third Party
+GOOGLE_TEST_PATH = $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest
 
 # Deployment
 GTLAB_ENVIRONMENT_PATH =
+
+
+
