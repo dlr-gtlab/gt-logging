@@ -1,5 +1,5 @@
 ########################################################
-###############GTlab Pipeline Version 1.2.0 ############
+###############GTlab Pipeline Version 1.2.1 ############
 ########################################################
 
 # Environment variables to use in the pipeline globally
@@ -190,6 +190,9 @@ copyToInstallerServer:
     - Win10
   only:
     - tags
+  variables:
+    BINDIRECTORY: bin
+    DEBUGBINDIRECTORY: binDebug
 
 # code quality
 codingstyle:
