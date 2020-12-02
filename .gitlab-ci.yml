@@ -1,5 +1,5 @@
 ########################################################
-###############GTlab Pipeline Version 1.2.1 ############
+###############GTlab Pipeline Version 1.3.0 ############
 ########################################################
 
 # Environment variables to use in the pipeline globally
@@ -179,10 +179,10 @@ copyToNightlyBuildWin:
   variables:
     NIGHTLYBUILD: "G:\\AT-TW\\GTlab\\Nightly_Builds_512"
 
-copyToInstallerServer:
+copyForDeploymentWin:
   stage: copy
   script:
-    - .\tests\build\copyHeaders-installer.bat
+    - .\tests\build\copyHeaders-deployment.bat
   dependencies:
     - debugBuildWin512
     - releaseBuildWin512
@@ -191,8 +191,25 @@ copyToInstallerServer:
   only:
     - tags
   variables:
-    BINDIRECTORY: bin
-    DEBUGBINDIRECTORY: binDebug
+    PLATFORMNAME: windows
+    BINDIRECTORY: bin\modules
+    DEBUGBINDIRECTORY: binDebug\modules
+
+copyForDeploymentLinux:
+  stage: copy
+  script:
+    - .\tests\build\copyHeaders-deployment.bat
+  dependencies:
+    - debugBuildLinux512
+    - releaseBuildLinux512
+  tags:
+    - Win10
+  only:
+    - tags
+  variables:
+    PLATFORMNAME: linux
+    BINDIRECTORY: bin\modules
+    DEBUGBINDIRECTORY: binDebug\modules
 
 # code quality
 codingstyle:
@@ -254,6 +271,6 @@ badges:
   artifacts:
     paths:
       - "New_*.svg"
-    expire_in: 26 week
+    expire_in: 52 week
   variables:
     BADGEGENERATOR: C:\devel\BadgeBuilder\BadgeGenerator.exe
