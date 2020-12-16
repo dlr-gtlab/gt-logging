@@ -1,9 +1,11 @@
 ########################################################
-###############GTlab Pipeline Version 1.3.0 ############
+###############GTlab Pipeline Version 1.3.2 ############
 ########################################################
 
 # Environment variables to use in the pipeline globally
 variables:
+  PIPELINEVERSION: "1.3.2"
+
   PROFILENAME: logging.pro
   TARGETDIRNAME: logging
   TARGETNAME: GTlabLogging
@@ -192,8 +194,7 @@ copyForDeploymentWin:
     - tags
   variables:
     PLATFORMNAME: windows
-    BINDIRECTORY: bin\modules
-    DEBUGBINDIRECTORY: binDebug\modules
+    CATEGORY: 02_core
 
 copyForDeploymentLinux:
   stage: copy
@@ -208,8 +209,7 @@ copyForDeploymentLinux:
     - tags
   variables:
     PLATFORMNAME: linux
-    BINDIRECTORY: bin\modules
-    DEBUGBINDIRECTORY: binDebug\modules
+    CATEGORY: 02_core
 
 # code quality
 codingstyle:
@@ -264,6 +264,7 @@ badges:
     - '& $env:BADGEGENERATOR --cs .\codingStyleLog.txt .'
     - '& $env:BADGEGENERATOR --cc .\${UNITTESTSNAME}Coverage.xml .'
     - '& $env:BADGEGENERATOR --cl .\${UNITTESTSNAME}Coverage.xml .'
+    - '& $env:BADGEGENERATOR --dp "Pipeline-Version" ${PIPELINEVERSION} .'
   tags:
     - Win10
   except:
