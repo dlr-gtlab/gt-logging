@@ -1,10 +1,10 @@
 ########################################################
-###############GTlab Pipeline Version 1.4.0 ############
+###############GTlab Pipeline Version 1.4.1 ############
 ########################################################
 
 # Environment variables to use in the pipeline globally
 variables:
-  PIPELINEVERSION: "1.4.0"
+  PIPELINEVERSION: "1.4.1"
 
 #  PROFILENAME: logging.pro
 #  TARGETDIRNAME: logging
@@ -132,7 +132,7 @@ debugBuildLinux512:
     - Linux
   artifacts:
     paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
+      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
       - include/$TARGETDIRNAME/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
@@ -174,7 +174,7 @@ debugBuildLinux512Unstable:
     - Linux
   artifacts:
     paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
+      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
       - include/$TARGETDIRNAME/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
@@ -437,6 +437,6 @@ badges:
   artifacts:
     paths:
       - "New_*.svg"
-    expire_in: 52 week
+    expire_in: 4 week
   variables:
     BADGEGENERATOR: C:\devel\BadgeBuilder\BadgeGenerator.exe
