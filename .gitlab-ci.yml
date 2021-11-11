@@ -27,9 +27,10 @@ devtoolsUpdateWindows:
   stage: update
   allow_failure: true
   script:
+    - taskkill /IM "Setup GTlab-DevTools.exe" /F
     - '& $env:MAINTENANCETOOL up --confirm-command'
-  only:
-    - master  
+  #only:
+  #  - master  
   tags:
     - Win10
   variables:
@@ -41,15 +42,15 @@ devtoolsUpdateLinux:
   script:
     - cd /home/gitlab-runner/GTlab-Devtools/
     - ./Setup\ GTlab-DevTools up --confirm-command
-  only:
-    - master  
+  #only:
+  #  - master  
   tags:
     - Linux
   variables:
     MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools/" 
 
 # Windows build
-debugBuildWin512:
+.debugBuildWin512:
   stage: build
   script:
     - .\tests\build\build-512.bat 1>buildLog512.txt
@@ -71,7 +72,7 @@ debugBuildWin512:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-releaseBuildWin512:
+.releaseBuildWin512:
   stage: build
   script:
     - .\tests\build\build-512.bat
@@ -92,7 +93,7 @@ releaseBuildWin512:
     BUILDUNITTESTS: "false"
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-debugBuildWin512Unstable:
+.debugBuildWin512Unstable:
   stage: build
   script:
     - .\tests\build\build-512.bat 1>buildLog512.txt
@@ -114,7 +115,7 @@ debugBuildWin512Unstable:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
 
-releaseBuildWin512Unstable:
+.releaseBuildWin512Unstable:
   stage: build
   script:
     - .\tests\build\build-512.bat
@@ -136,7 +137,7 @@ releaseBuildWin512Unstable:
     DEVTOOLS: $DEVTOOLS_Win_Unstable
 
 # Linux build
-debugBuildLinux512:
+.debugBuildLinux512:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -157,7 +158,7 @@ debugBuildLinux512:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-releaseBuildLinux512:
+.releaseBuildLinux512:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -178,7 +179,7 @@ releaseBuildLinux512:
     BUILDUNITTESTS: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-debugBuildLinux512Unstable:
+.debugBuildLinux512Unstable:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -199,7 +200,7 @@ debugBuildLinux512Unstable:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
 
-releaseBuildLinux512Unstable:
+.releaseBuildLinux512Unstable:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -221,7 +222,7 @@ releaseBuildLinux512Unstable:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
 
 # run tests using the binary built before
-testWin512:
+.testWin512:
   needs: ["debugBuildWin512"]
   stage: test
   script:
@@ -243,7 +244,7 @@ testWin512:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-testWin512Unstable:
+.testWin512Unstable:
   needs: ["debugBuildWin512Unstable"]
   stage: test
   script:
@@ -265,7 +266,7 @@ testWin512Unstable:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable
 
-testLinux512:
+.testLinux512:
   needs: ["debugBuildLinux512"]
   stage: test
   before_script:
@@ -285,7 +286,7 @@ testLinux512:
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-testLinux512Unstable:
+.testLinux512Unstable:
   needs: ["debugBuildLinux512Unstable"]
   stage: test
   before_script:
@@ -306,7 +307,7 @@ testLinux512Unstable:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
 
 # copy files to servers
-copyToNightlyBuildWin:
+.copyToNightlyBuildWin:
   stage: copy
   script:
     - .\tests\build\copyHeaders-nightlybuild.bat
@@ -320,7 +321,7 @@ copyToNightlyBuildWin:
   variables:
     NIGHTLYBUILD: "G:\\AT-TW\\GTlab\\Nightly_Builds_512"
 
-copyForDeploymentWin:
+.copyForDeploymentWin:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -336,7 +337,7 @@ copyForDeploymentWin:
     RELEASESTATUS: stable
 #    CATEGORY: 02_core
 
-copyForDeploymentWinUnstable:
+.copyForDeploymentWinUnstable:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -352,7 +353,7 @@ copyForDeploymentWinUnstable:
     RELEASESTATUS: unstable
 #    CATEGORY: 02_core
 
-copyForDeploymentLinux:
+.copyForDeploymentLinux:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -368,7 +369,7 @@ copyForDeploymentLinux:
     RELEASESTATUS: stable
 #    CATEGORY: 02_core
 
-copyForDeploymentLinuxUnstable:
+.copyForDeploymentLinuxUnstable:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -385,7 +386,7 @@ copyForDeploymentLinuxUnstable:
 #    CATEGORY: 02_core
 
 # code quality
-codingstyle:
+.codingstyle:
   needs: []
   stage: codequality
   allow_failure: true
@@ -404,7 +405,7 @@ codingstyle:
   variables:
     CODINGSTYLETOOL: "C:\\Program Files\\nsiqcppstyle_0.2.2.3\\nsiqcppstyle\\nsiqcppstyle"
     
-cppcheck:
+.cppcheck:
   needs: []
   stage: codequality
   allow_failure: true
@@ -421,7 +422,7 @@ cppcheck:
     reports:
       codequality: codequality.json      
 
-pages:
+.pages:
   needs: []
   dependencies:
   stage: badges
@@ -439,7 +440,7 @@ pages:
        - public/
        
 # badges
-badges:
+.badges:
   stage: badges
   script:
     - $CommitNumber = git rev-list --count HEAD
