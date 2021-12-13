@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <Source>gtlab-logging</Source>
+    <Destination>02_core</Destination>
+    <Name>de.dlr.gtlab.dev.{RELEASESTATUS}.{FRAMEWORK_MAJOR}.{FRAMEWORK_MINOR}.logging</Name>
+    <DisplayName>GTlab Logging Library</DisplayName>
+    <Description>GTlab logging library.</Description>
+    <ReleaseDate>{RELEASEDATE}</ReleaseDate>
+    <Version>{VERSION}</Version>
+    <SortingPriority>101</SortingPriority>
+	<Default>false</Default>
+	<Dependencies>de.dlr.gtlab.dev.{RELEASESTATUS}.{FRAMEWORK_MAJOR}.{FRAMEWORK_MINOR}.thirdpartylibs.googletest</Dependencies>
+</Package>
