@@ -1,0 +1,3 @@
+[submodule "tests/pipeline-scripts"]
+	path = tests/pipeline-scripts
+	url = https://gitlab.dlr.de/at-twk/gitlab-pipeline-scripts.git
