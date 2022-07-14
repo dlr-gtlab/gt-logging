@@ -1,5 +1,5 @@
 #################################################################
-############### GTlab Standard Pipeline Version 2.0.0 ###########
+############### GTlab Standard Pipeline Version 2.1.0 ###########
 #################################################################
 # These variables are defined in the CI project settings:
 #  CATEGORY: 02_core
@@ -21,7 +21,7 @@
 
 # Variables that are defined globally for the pipeline
 variables:
-  PIPELINEVERSION: "2.0.0"
+  PIPELINEVERSION: "2.1.0"
   GIT_SUBMODULE_STRATEGY: none
   
   # Regulare expression pattern
@@ -35,7 +35,7 @@ variables:
 
 include:
   - project: 'at-twk/gitlab-templates'
-    file: '/ci-templates/.ci-templates-2-0.yml'
+    file: '/ci-templates/.ci-templates-2-1.yml'
 
 stages:
   - update
@@ -48,6 +48,26 @@ stages:
   - codequality
   - package
   - badges
+
+# Tag pipeline jobs
+findCodeBaseStatus:
+  stage: .pre
+  extends: 
+    - .only-tags-parent
+    - .findCodeBaseStatusTemplate
+  tags:
+    - Win10
+
+triggerDeployment:
+  stage: deploy
+  extends: .only-tags-parent
+  trigger:
+    include: .gitlab-ci.yml
+    forward:
+      pipeline_variables: true
+    strategy: depend
+  variables:
+    STABLE_BASE: $BUILD_STABLE_BASE
 
 # DevTools update
 devtoolsUpdateWindows:
@@ -69,6 +89,9 @@ windowsBuildDebug:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
+    JOM_PATH: $JOM_PATH_512
+    QMAKE_PATH: $QMAKE_PATH_512
+    VCvarsall: $VCvarsall_512
 
 windowsBuildDebugUnstable:
   stage: unstableBuild
@@ -80,6 +103,9 @@ windowsBuildDebugUnstable:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable
+    JOM_PATH: $JOM_PATH_515
+    QMAKE_PATH: $QMAKE_PATH_515
+    VCvarsall: $VCvarsall_515
 
 windowsBuildRelease:
   stage: build
@@ -91,6 +117,9 @@ windowsBuildRelease:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
+    JOM_PATH: $JOM_PATH_512
+    QMAKE_PATH: $QMAKE_PATH_512
+    VCvarsall: $VCvarsall_512
 
 windowsBuildReleaseUnstable:
   stage: unstableBuild
@@ -102,7 +131,10 @@ windowsBuildReleaseUnstable:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable
-
+    JOM_PATH: $JOM_PATH_515
+    QMAKE_PATH: $QMAKE_PATH_515
+    VCvarsall: $VCvarsall_515
+    
 # build on Linux system
 linuxBuildDebug:
   stage: build
@@ -114,6 +146,7 @@ linuxBuildDebug:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable
+    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
 linuxBuildDebugUnstable:
   stage: unstableBuild
@@ -125,6 +158,7 @@ linuxBuildDebugUnstable:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
+    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
  
 linuxBuildRelease:
   stage: build
@@ -136,6 +170,7 @@ linuxBuildRelease:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable
+    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
 linuxBuildReleaseUnstable:
   stage: unstableBuild
@@ -147,9 +182,10 @@ linuxBuildReleaseUnstable:
       optional: true
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
+    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
 
 # run tests using the binary built before
-testWin512:
+testWin:
   stage: test
   extends: 
     - .stable-debug
@@ -161,7 +197,7 @@ testWin512:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-testWin512Unstable:
+testWinUnstable:
   stage: unstableTest
   extends:
     - .unstable-debug  
@@ -173,7 +209,7 @@ testWin512Unstable:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
-testLinux512:
+testLinux:
   stage: test
   extends: 
     - .stable-debug
@@ -185,8 +221,11 @@ testLinux512:
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
-testLinux512Unstable:
+testLinuxUnstable:
   stage: unstableTest
+  variables:
+    DEVTOOLS: $DEVTOOLS_Linux_Unstable 
+    LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
   extends: 
     - .unstable-debug
     - .linuxTestTemplate
@@ -194,8 +233,6 @@ testLinux512Unstable:
     - linuxBuildDebugUnstable
   dependencies:
     - linuxBuildDebugUnstable
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
 # deployment
 createJobs:
@@ -215,7 +252,7 @@ createJobs:
 
 triggerJobs:
   stage: deploy
-  extends: .only-tags
+  extends: .only-tags-child
   needs:
     - createJobs
   trigger:
@@ -225,7 +262,7 @@ triggerJobs:
     strategy: depend
   variables:
     PARENT_PIPELINE_ID: $CI_PIPELINE_ID
-  
+
 # code quality
 codingstyle:
   stage: codequality
@@ -233,7 +270,8 @@ codingstyle:
  
 cppcheck:
   stage: codequality
-  extends: .cppCheckTemplate
+  extends: .cppCheckReportTemplate
+  allow_failure: true
 
 pages:
   stage: badges
@@ -252,8 +290,8 @@ badges:
   dependencies:
     - windowsBuildDebug
     - linuxBuildDebug
-    - testWin512
-    - testLinux512
+    - testWin
+    - testLinux
     - codingstyle
 
 badgesUnstable:
@@ -264,6 +302,6 @@ badgesUnstable:
   dependencies:
     - windowsBuildDebugUnstable
     - linuxBuildDebugUnstable
-    - testWin512Unstable
-    - testLinux512Unstable
+    - testWinUnstable
+    - testLinuxUnstable
     - codingstyle
