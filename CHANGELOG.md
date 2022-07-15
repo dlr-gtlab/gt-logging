@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security 
 
-## [2.0.0] - 2022-07-12
+## [2.0.0] - 2022-07-15
 
 ### Changed
 - Switched to Qt 5.15 as a foundation for further development
