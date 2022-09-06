@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(GTlabLogging)
-
-if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
-  set(CMAKE_DEBUG_POSTFIX "-d")
+if (EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
+    cmake_policy(SET CMP0091 NEW)
+    include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 endif()
+
+project(GTlabLogging)
 
 set(GTLAB_TARGET_DIR $ENV{GTLAB_DEVTOOLS_DIR}/bin CACHE PATH "Target Dir")
 
