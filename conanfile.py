@@ -11,6 +11,8 @@ class GTlabLoggingConan(ConanFile):
     license = "GTlab license"
     author = "Martin Siggel <martin.siggel@dlr.de>"
     url = "https://gitlab.dlr.de/at-twk/gtlab-logging"
+    homepage = "https://gitlab.dlr.de/at-twk/gtlab-logging"
+    toppics = "logging", "qt"
     description = "Simple logging interface"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "build": ["stable", "unstable"]}
@@ -53,3 +55,6 @@ class GTlabLoggingConan(ConanFile):
             self.cpp_info.libs = ['GTlabLogging']
         else:
             self.cpp_info.libs = ['GTlabLogging-d']
+
+        self.cpp_info.set_property("cmake_file_name", "GTlabLogging")
+        self.cpp_info.set_property("cmake_target_name", "GTlabLogging")
