@@ -68,7 +68,17 @@ public:
             level(logLevel),
             qtDebug(&buffer) {}
         ~Helper();
-        QDebug& stream(){ return qtDebug; }
+        QDebug& stream()
+        {
+            return qtDebug
+#ifndef GT_LOG_USE_QUOTE
+                .noquote()
+#endif
+#ifdef GT_LOG_USE_NOSPACE
+                .nospace()
+#endif
+            ;
+        }
 
     private:
         void writeToLog();
