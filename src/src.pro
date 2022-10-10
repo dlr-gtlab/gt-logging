@@ -24,6 +24,9 @@ TEMPLATE = lib
 CONFIG += plugin
 CONFIG += silent
 
+# logging id
+DEFINES += GT_MODULE_ID=Logging
+
 win32 {
     DEFINES += GT_LOGGING_DLL
     DEFINES += QSLOG_IS_SHARED_LIBRARY

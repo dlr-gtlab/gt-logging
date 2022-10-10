@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] 
 
 ### Added
+- The logging system can now log an identification string, which may be specified by `GT_MODULE_ID` globally at compile time - #28
+- Dedicated macros for logging a custom id - #28
+
+### Fixed
+- A reference to the `QDebug` object will now be returned when logging line numbers 
 
 ### Changed
-- using  `noquote` by default
+- using  `noquote` by default - #25
+- Renamed the `QS_LOG_LINE_NUMBERS` macro to `GT_LOG_LINE_NUMBERS` for logging file and line numbers
 
 ### Deprecated
 
