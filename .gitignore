@@ -10,3 +10,4 @@ local_settings.pri
 include/
 lib/
 *.qmake.stash
+.qtc_clangd/

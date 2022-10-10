@@ -1,3 +1,5 @@
+// Based on QsLog 2.1
+
 // Copyright (c) 2013, Razvan Petru
 // All rights reserved.
 
@@ -31,7 +33,14 @@
 #include <QDebug>
 #include <QString>
 
-#define QS_LOG_VERSION "2.1"
+// macros to convert an argument to string
+#define GT_LOG_TO_STR_HELPER(X) #X
+#define GT_LOG_TO_STR(X) GT_LOG_TO_STR_HELPER(X)
+
+// logging id
+#ifndef GT_MODULE_ID
+#define GT_MODULE_ID ""
+#endif
 
 namespace QsLogging
 {
@@ -64,9 +73,13 @@ public:
     class QSLOG_SHARED_OBJECT Helper
     {
     public:
-        explicit Helper(Level logLevel) :
-            level(logLevel),
-            qtDebug(&buffer) {}
+        explicit Helper(Level logLevel,
+                        QString id = GT_LOG_TO_STR(GT_MODULE_ID)) :
+            level{logLevel},
+            buffer{id.isEmpty() ? std::move(id) :
+                                  QString{"["} + std::move(id) + QString{"] "}},
+            qtDebug{&buffer}
+        {}
         ~Helper();
         QDebug& stream()
         {
@@ -103,47 +116,61 @@ private:
 
 } // end namespace
 
-//! Logging macros: define QS_LOG_LINE_NUMBERS to get the file and line number
-//! in the log output.
-#ifndef QS_LOG_LINE_NUMBERS
-#define gtTrace() \
-    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::TraceLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::TraceLevel).stream()
-#define gtDebug() \
-    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::DebugLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::DebugLevel).stream()
-#define gtInfo()  \
-    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::InfoLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::InfoLevel).stream()
-#define gtWarning()  \
-    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::WarnLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::WarnLevel).stream()
-#define gtError() \
-    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::ErrorLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::ErrorLevel).stream()
-#define gtFatal() \
-    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::FatalLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::FatalLevel).stream()
+
+//lLogging line numbers
+#ifdef GT_LOG_LINE_NUMBERS
+  // add extra space when logging line numbers
+  #ifdef GT_LOG_USE_NOSPACE
+    #define GT_LOG_IMPL_SPACE " "
+  #else
+    #define GT_LOG_IMPL_SPACE
+  #endif  
+  // call operator explicitly to return stream object
+  #define GT_LOG_IMPL_LINE_NUMBERS .operator<<( __FILE__ "@" GT_LOG_TO_STR(__LINE__) ":" GT_LOG_IMPL_SPACE)
 #else
+  #define GT_LOG_IMPL_LINE_NUMBERS
+#endif
+
+//! Logging macros: define GT_LOG_LINE_NUMBERS to get the file and line number
+//! in the log output.
 #define gtTrace() \
     if (QsLogging::Logger::instance().loggingLevel() > QsLogging::TraceLevel) {} \
-    else  QsLogging::Logger::Helper(QsLogging::TraceLevel).stream() << __FILE__ << '@' << __LINE__
+    else QsLogging::Logger::Helper(QsLogging::TraceLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
 #define gtDebug() \
     if (QsLogging::Logger::instance().loggingLevel() > QsLogging::DebugLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::DebugLevel).stream() << __FILE__ << '@' << __LINE__
+    else QsLogging::Logger::Helper(QsLogging::DebugLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
 #define gtInfo()  \
     if (QsLogging::Logger::instance().loggingLevel() > QsLogging::InfoLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::InfoLevel).stream() << __FILE__ << '@' << __LINE__
+    else QsLogging::Logger::Helper(QsLogging::InfoLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
 #define gtWarning()  \
     if (QsLogging::Logger::instance().loggingLevel() > QsLogging::WarnLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::WarnLevel).stream() << __FILE__ << '@' << __LINE__
+    else QsLogging::Logger::Helper(QsLogging::WarnLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
 #define gtError() \
     if (QsLogging::Logger::instance().loggingLevel() > QsLogging::ErrorLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::ErrorLevel).stream() << __FILE__ << '@' << __LINE__
+    else QsLogging::Logger::Helper(QsLogging::ErrorLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
 #define gtFatal() \
     if (QsLogging::Logger::instance().loggingLevel() > QsLogging::FatalLevel) {} \
-    else QsLogging::Logger::Helper(QsLogging::FatalLevel).stream() << __FILE__ << '@' << __LINE__
-#endif
+    else QsLogging::Logger::Helper(QsLogging::FatalLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
+
+//! Logging macros with fixed logging id
+#define gtTraceId(ID) \
+    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::TraceLevel) {} \
+    else QsLogging::Logger::Helper(QsLogging::TraceLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
+#define gtDebugId(ID) \
+    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::DebugLevel) {} \
+    else QsLogging::Logger::Helper(QsLogging::DebugLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
+#define gtInfoId(ID)  \
+    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::InfoLevel) {} \
+    else QsLogging::Logger::Helper(QsLogging::InfoLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
+#define gtWarningId(ID)  \
+    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::WarnLevel) {} \
+    else QsLogging::Logger::Helper(QsLogging::WarnLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
+#define gtErrorId(ID) \
+    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::ErrorLevel) {} \
+    else QsLogging::Logger::Helper(QsLogging::ErrorLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
+#define gtFatalId(ID) \
+    if (QsLogging::Logger::instance().loggingLevel() > QsLogging::FatalLevel) {} \
+    else QsLogging::Logger::Helper(QsLogging::FatalLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
 
 #ifdef QS_LOG_DISABLE
 #include "QsLogDisableForThisFile.h"
