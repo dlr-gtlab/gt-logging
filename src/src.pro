@@ -60,10 +60,10 @@ HEADERS += \
     QsLogDestFile.h \
     QsLogDestFunctor.h \
     QsLogDisableForThisFile.h \
-    QsLogLevel.h
+    QsLogLevel.h \
+    gt_logstream.h
 
 SOURCES += \
-    gt_logging.cpp \
     gt_logmodel.cpp \
     QsLog.cpp \
     QsLogDest.cpp \

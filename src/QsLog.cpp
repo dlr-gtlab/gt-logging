@@ -102,6 +102,7 @@ public:
     QMutex logMutex;
     Level level;
     DestinationList destList;
+    gt::Verbosity verbosity{gt::SILENT};
 };
 
 #ifdef QS_LOG_SEPARATE_THREAD
@@ -227,21 +228,29 @@ Level Logger::loggingLevel() const
     return d->level;
 }
 
+void Logger::setVerbosity(gt::Verbosity v)
+{
+    d->verbosity = std::move(v);
+}
+
+gt::Verbosity Logger::verbosity() const
+{
+    return d->verbosity;
+}
+
 //! creates the complete log message and passes it to the logger
 void Logger::Helper::writeToLog()
 {
-//    const char* const levelName = LevelToText(level);
-//    const QString completeMessage(QString("%1 %2 %3")
-//                                  .arg(levelName)
-//                                  .arg(QDateTime::currentDateTime().toString(fmtDateTime))
-//                                  .arg(buffer)
-//                                  );
-    const QString completeMessage(QString("%1 %2")
-                                  .arg(QDateTime::currentDateTime().toString(fmtDateTime))
-                                  .arg(buffer)
+    if (!buffer.isEmpty())
+    {
+        QString idStr = id.isEmpty() ? "" : QString{"["} + id + QString{"] "};
+        const QString completeMessage(QString("%1%2 %3")
+                                      .arg(idStr)
+                                      .arg(QDateTime::currentDateTime().toString(fmtDateTime))
+                                      .arg(buffer)
                                   );
-
-    Logger::instance().enqueueWrite(completeMessage, level);
+        Logger::instance().enqueueWrite(completeMessage, level);
+    }
 }
 
 Logger::Helper::~Helper()
@@ -287,3 +296,8 @@ void Logger::write(const QString& message, Level level)
 }
 
 } // end namespace
+
+bool gt::LogStream::mayLog(gt::Verbosity msgLevel)
+{
+    return msgLevel <= QsLogging::Logger::instance().verbosity();
+}

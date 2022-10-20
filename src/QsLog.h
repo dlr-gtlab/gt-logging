@@ -32,6 +32,11 @@
 #include "QsLogDest.h"
 #include <QDebug>
 #include <QString>
+#include <qglobal.h>
+
+#include <gt_logstream.h>
+
+#include <iostream>
 
 // macros to convert an argument to string
 #define GT_LOG_TO_STR_HELPER(X) #X
@@ -68,6 +73,9 @@ public:
     //! The default level is INFO
     Level loggingLevel() const;
 
+    void setVerbosity(gt::Verbosity);
+    gt::Verbosity verbosity() const;
+
     //! The helper forwards the streaming to QDebug and builds the final
     //! log message.
     class QSLOG_SHARED_OBJECT Helper
@@ -76,12 +84,14 @@ public:
         explicit Helper(Level logLevel,
                         QString id = GT_LOG_TO_STR(GT_MODULE_ID)) :
             level{logLevel},
-            buffer{id.isEmpty() ? std::move(id) :
-                                  QString{"["} + std::move(id) + QString{"] "}},
-            qtDebug{&buffer}
-        {}
+            qtDebug{&buffer},
+            id(id)
+        {
+            // trim quotes
+            this->id = id.mid(1, id.size()-2);
+        }
         ~Helper();
-        QDebug& stream()
+        gt::LogStream& stream()
         {
             return qtDebug
 #ifndef GT_LOG_USE_QUOTE
@@ -98,7 +108,8 @@ public:
 
         Level level;
         QString buffer;
-        QDebug qtDebug;
+        gt::LogStream qtDebug;
+        QString id;
     };
 
 private:

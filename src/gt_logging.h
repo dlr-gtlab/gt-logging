@@ -14,11 +14,4 @@
 
 #include "QsLog.h"
 
-class GT_LOGGING_EXPORT GtLogging
-{
-public:
-    GtLogging();
-
-};
-
 #endif // GTLOGGING_H
