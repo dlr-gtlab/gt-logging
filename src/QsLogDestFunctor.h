@@ -46,9 +46,9 @@ public:
     explicit FunctorDestination(LogFunction f);
     FunctorDestination(QObject *receiver, const char *member);
 
-    virtual void write(const QString &message, Level level);
-    virtual bool isValid();
-    virtual QString type() const;
+    void write(const QString &message, Level level) override;
+    bool isValid() override;
+    QString type() const override;
 
 protected:
     // int used to avoid registering a new enum type

@@ -227,8 +227,6 @@ GtLogModel::insertQueue()
         {
             m_tmpEntries.removeFirst();
         }
-
-        newRows = m_tmpEntries.size();
     }
 
     int delta = (m_entries.size() + m_tmpEntries.size()) - m_maxEntries;

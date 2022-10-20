@@ -174,7 +174,7 @@ void QsLogging::FileDestination::write(const QString& message, Level)
         mOutputStream.setCodec(QTextCodec::codecForName("UTF-8"));
     }
 
-    mOutputStream << message << endl;
+    mOutputStream << message << '\n';
     mOutputStream.flush();
 }
 

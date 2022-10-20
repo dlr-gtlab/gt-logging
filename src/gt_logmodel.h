@@ -101,7 +101,7 @@ protected:
     /**
      * @brief GtLogModel
      */
-    GtLogModel(QObject* parent);
+    explicit GtLogModel(QObject* parent);
 
 private:
     struct Entry

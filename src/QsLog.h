@@ -82,13 +82,13 @@ public:
     {
     public:
         explicit Helper(Level logLevel,
-                        QString id = GT_LOG_TO_STR(GT_MODULE_ID)) :
+                        QString logId = GT_LOG_TO_STR(GT_MODULE_ID)) :
             level{logLevel},
             qtDebug{&buffer},
-            id(id)
+            id(std::move(logId))
         {
             // trim quotes
-            this->id = id.mid(1, id.size()-2);
+            id = id.mid(1, id.size()-2);
         }
         ~Helper();
         gt::LogStream& stream()
