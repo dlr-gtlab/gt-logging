@@ -1,34 +1,10 @@
 #include "gtest/gtest.h"
 #include "gt_logging.h"
 
-class Types : public testing::Test
-{
-public:
-    Types() : logger(QsLogging::Logger::instance())
-    {
-        logger.addDestination(QsLogging::DestinationFactory::MakeFunctorDestination(logToStr));
-    }
+#include "test_log_helper.h"
 
-    void SetUp() override
-    {
-        log.clear();
-    }
-
-    void TearDown() override
-    {
-        log.clear();
-    }
-
-    static void logToStr(const QString& msg, QsLogging::Level)
-    {
-        log.append(msg);
-    }
-
-    QsLogging::Logger& logger;
-    static QString log;
-};
-
-QString Types::log;
+class Types : public LogHelperTest
+{};
 
 TEST_F(Types, QStringList)
 {

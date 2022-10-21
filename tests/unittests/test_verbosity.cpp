@@ -1,39 +1,22 @@
 #include "gtest/gtest.h"
 
 #include "gt_logging.h"
+#include "test_log_helper.h"
 
-class Verbosity : public testing::Test
+class Verbosity : public LogHelperTest
 {
-public:
-    Verbosity() : logger(QsLogging::Logger::instance())
-    {
-        logger.addDestination(QsLogging::DestinationFactory::MakeFunctorDestination(logToStr));
-    }
-
     void SetUp() override
     {
-        log.clear();
         logger.setVerbosity(gt::SILENT);
+        LogHelperTest::SetUp();
     }
 
     void TearDown() override
     {
         logger.setVerbosity(gt::SILENT);
-        log.clear();
+        LogHelperTest::SetUp();
     }
-
-    static void logToStr(const QString& msg, QsLogging::Level)
-    {
-        log.append(msg);
-    }
-
-
-    QsLogging::Logger& logger;
-    static QString log;
 };
-
-QString Verbosity::log;
-
 
 TEST_F(Verbosity, logError)
 {
@@ -79,14 +62,4 @@ TEST_F(Verbosity, logErrorVerboseMediumSuccess)
 
     gtError().verbose(gt::MEDIUM) << "This verbose error should must still appear";
     EXPECT_TRUE(log.contains("This verbose error should must still appear"));
-
-    log.clear();
-}
-
-TEST_F(Verbosity, logError2)
-{
-    ASSERT_TRUE(log.isEmpty());
-
-    gtError() << "This error should appear";
-    EXPECT_TRUE(log.contains("This error should appear"));
 }
