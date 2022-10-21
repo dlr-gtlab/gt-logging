@@ -16,6 +16,13 @@
 #undef gtError
 #undef gtFatal
 
+#undef gtTraceId
+#undef gtDebugId
+#undef gtInfoId
+#undef gtWarningId
+#undef gtErrorId
+#undef gtFatalId
+
 #define gtTrace() if (!FORCE_LOGGING) {} else qDebug()
 #define gtDebug() if (!FORCE_LOGGING) {} else qDebug()
 #define gtInfo()  if (!FORCE_LOGGING) {} else qDebug()

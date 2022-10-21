@@ -73,8 +73,11 @@ public:
     //! The default level is INFO
     Level loggingLevel() const;
 
-    void setVerbosity(gt::Verbosity);
-    gt::Verbosity verbosity() const;
+    //! Sets the verbosity level of the logger (from 0 ... 9)
+    void setVerbosity(int);
+
+    //! Gets the verbosity level of the logger (from 0 ... 9)
+    int verbosity() const;
 
     //! The helper forwards the streaming to QDebug and builds the final
     //! log message.
@@ -91,7 +94,7 @@ public:
             id = id.mid(1, id.size()-2);
         }
         ~Helper();
-        gt::LogStream& stream()
+        gt::log::Stream& stream()
         {
             return qtDebug
 #ifndef GT_LOG_USE_QUOTE
@@ -108,7 +111,7 @@ public:
 
         Level level;
         QString buffer;
-        gt::LogStream qtDebug;
+        gt::log::Stream qtDebug;
         QString id;
     };
 

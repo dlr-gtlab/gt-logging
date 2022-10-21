@@ -105,7 +105,7 @@ public:
     QMutex logMutex;
     Level level;
     DestinationList destList;
-    gt::Verbosity verbosity{gt::SILENT};
+    int verbosity{gt::log::silent};
 };
 
 #ifdef QS_LOG_SEPARATE_THREAD
@@ -231,12 +231,12 @@ Level Logger::loggingLevel() const
     return d->level;
 }
 
-void Logger::setVerbosity(gt::Verbosity v)
+void Logger::setVerbosity(int v)
 {
     d->verbosity = std::move(v);
 }
 
-gt::Verbosity Logger::verbosity() const
+int Logger::verbosity() const
 {
     return d->verbosity;
 }
@@ -300,7 +300,7 @@ void Logger::write(const QString& message, Level level)
 
 } // end namespace
 
-bool gt::LogStream::mayLog(gt::Verbosity msgLevel)
+bool gt::log::Stream::mayLog(int msgLevel)
 {
     return msgLevel <= QsLogging::Logger::instance().verbosity();
 }
