@@ -105,7 +105,7 @@ public:
     QMutex logMutex;
     Level level;
     DestinationList destList;
-    int verbosity{gt::log::silent};
+    int verbosity{gt::log::Silent};
 };
 
 #ifdef QS_LOG_SEPARATE_THREAD

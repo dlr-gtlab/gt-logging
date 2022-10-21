@@ -7,13 +7,13 @@ class Verbosity : public LogHelperTest
 {
     void SetUp() override
     {
-        logger.setVerbosity(gt::log::silent);
+        logger.setVerbosity(gt::log::Silent);
         LogHelperTest::SetUp();
     }
 
     void TearDown() override
     {
-        logger.setVerbosity(gt::log::silent);
+        logger.setVerbosity(gt::log::Silent);
         LogHelperTest::SetUp();
     }
 };
@@ -38,7 +38,7 @@ TEST_F(Verbosity, logErrorVerboseHigh)
 {
     ASSERT_TRUE(log.isEmpty());
 
-    logger.setVerbosity(gt::log::everything);
+    logger.setVerbosity(gt::log::Everything);
 
     gtError().verbose() << "This verbose error should must appear";
     EXPECT_TRUE(log.contains("This verbose error should must appear"));
@@ -48,7 +48,7 @@ TEST_F(Verbosity, logErrorVerboseMedium)
 {
     ASSERT_TRUE(log.isEmpty());
 
-    logger.setVerbosity(gt::log::medium);
+    logger.setVerbosity(gt::log::Medium);
 
     gtError().verbose() << "This verbose error should must not appear";
     EXPECT_FALSE(log.contains("This verbose error should must not appear"));
@@ -58,9 +58,9 @@ TEST_F(Verbosity, logErrorVerboseMediumSuccess)
 {
     ASSERT_TRUE(log.isEmpty());
 
-    logger.setVerbosity(gt::log::medium);
+    logger.setVerbosity(gt::log::Medium);
 
-    gtError().verbose(gt::log::medium) << "This verbose error should must still appear";
+    gtError().verbose(gt::log::Medium) << "This verbose error should must still appear";
     EXPECT_TRUE(log.contains("This verbose error should must still appear"));
 }
 
@@ -69,7 +69,7 @@ TEST_F(Verbosity, logErrorVerboseMediumSuccess2)
 {
     ASSERT_TRUE(log.isEmpty());
 
-    logger.setVerbosity(gt::log::medium);
+    logger.setVerbosity(gt::log::Medium);
 
     gtError().medium() << "This verbose error should must still appear";
     EXPECT_TRUE(log.contains("This verbose error should must still appear"));

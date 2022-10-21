@@ -13,9 +13,9 @@ namespace log
 
 enum Verbosity
 {
-    silent = 0,
-    medium = 5,
-    everything = 9
+    Silent = 0,
+    Medium = 5,
+    Everything = 9
 };
 
 class Stream : private QDebug
@@ -28,7 +28,7 @@ public:
     inline Stream &noquote() { return static_cast<Stream&>(QDebug::noquote());}
     inline Stream &nospace() { return static_cast<Stream&>(QDebug::nospace());}
 
-    Stream& verbose(int level = gt::log::everything)
+    Stream& verbose(int level = gt::log::Everything)
     {
         msgLevel = level;
         return *this;
@@ -36,7 +36,7 @@ public:
 
     Stream& medium()
     {
-        return verbose(gt::log::medium);
+        return verbose(gt::log::Medium);
     }
 
     QSLOG_SHARED_OBJECT
@@ -151,7 +151,7 @@ private:
 
     }
 
-    int msgLevel{gt::log::silent};
+    int msgLevel{gt::log::Silent};
 };
 } // namespace log
 } // namespace gt
