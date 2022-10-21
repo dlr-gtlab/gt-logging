@@ -21,6 +21,7 @@ public:
     using QDebug::QDebug;
 
     inline LogStream &quote() { return static_cast<LogStream&>(QDebug::quote());}
+    inline LogStream &space() { return static_cast<LogStream&>(QDebug::space());}
     inline LogStream &noquote() { return static_cast<LogStream&>(QDebug::noquote());}
     inline LogStream &nospace() { return static_cast<LogStream&>(QDebug::nospace());}
 
