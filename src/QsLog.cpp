@@ -259,6 +259,12 @@ void Logger::Helper::writeToLog()
     }
 }
 
+Logger::Helper::Helper(Level logLevel, QString logId) :
+    level{logLevel},
+    qtDebug{&buffer},
+    id(std::move(logId))
+{}
+
 Logger::Helper::~Helper()
 {
     try {

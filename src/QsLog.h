@@ -84,16 +84,9 @@ public:
     class QSLOG_SHARED_OBJECT Helper
     {
     public:
-        explicit Helper(Level logLevel,
-                        QString logId = GT_LOG_TO_STR(GT_MODULE_ID)) :
-            level{logLevel},
-            qtDebug{&buffer},
-            id(std::move(logId))
-        {
-            // trim quotes
-            id = id.mid(1, id.size()-2);
-        }
+        explicit Helper(Level logLevel, QString logId = GT_MODULE_ID);
         ~Helper();
+
         gt::log::Stream& stream()
         {
             return qtDebug

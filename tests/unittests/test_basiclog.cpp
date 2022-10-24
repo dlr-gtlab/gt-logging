@@ -21,3 +21,10 @@ TEST_F(BasicLog, checkLogId)
     EXPECT_TRUE(log.contains("[BasicLog]"));
 }
 
+TEST_F(BasicLog, checkLogIdInline)
+{
+    gtWarningId("FancyTag") << "Hello World";
+    EXPECT_TRUE(log.contains("[FancyTag]"));
+
+    std::cout << log.toStdString() << std::endl;
+}
