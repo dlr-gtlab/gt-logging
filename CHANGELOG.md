@@ -5,10 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] 
+### Added
+### Fixed
+### Changed
+### Deprecated
+### Removed
+### Security 
 
+## [2.1.0] - 2022-10-25
 ### Added
 - The logging system can now log an identification string, which may be specified by `GT_MODULE_ID` globally at compile time - #28
 - Dedicated macros for logging a custom id - #28
+- Handling of verbose logging messages - #29
 
 ### Fixed
 - A reference to the `QDebug` object will now be returned when logging line numbers 
@@ -16,12 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - using  `noquote` by default - #25
 - Renamed the `QS_LOG_LINE_NUMBERS` macro to `GT_LOG_LINE_NUMBERS` for logging file and line numbers
-
-### Deprecated
-
-### Removed
-
-### Security 
 
 ## [2.0.0] - 2022-07-15
 
