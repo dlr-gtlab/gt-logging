@@ -25,7 +25,6 @@
 
 #include "QsLog.h"
 #include "QsLogDest.h"
-#include "QsLogDestFunctor.h"
 #ifdef QS_LOG_SEPARATE_THREAD
 #include <QThreadPool>
 #include <QRunnable>
@@ -52,7 +51,11 @@ static const char FatalString[] = "FATAL";
 
 // not using Qt::ISODate because we need the milliseconds too
 //static const QString fmtDateTime("yyyy-MM-ddThh:mm:ss.zzz");
-static const QString fmtDateTime("[hh:mm:ss]");
+const QString& fmtDateTime()
+{
+    static QString dt("[hh:mm:ss]");
+    return dt;
+}
 
 static const char* LevelToText(Level theLevel)
 {
@@ -102,13 +105,14 @@ public:
     QMutex logMutex;
     Level level;
     DestinationList destList;
+    int verbosity{gt::log::Silent};
 };
 
 #ifdef QS_LOG_SEPARATE_THREAD
 LogWriterRunnable::LogWriterRunnable(QString message, Level level)
     : QRunnable()
-    , mMessage(message)
-    , mLevel(level)
+    , mMessage(std::move(message))
+    , mLevel(std::move(level))
 {
 }
 
@@ -227,22 +231,39 @@ Level Logger::loggingLevel() const
     return d->level;
 }
 
+void Logger::setVerbosity(int v)
+{
+    d->verbosity = std::move(v);
+}
+
+int Logger::verbosity() const
+{
+    return d->verbosity;
+}
+
 //! creates the complete log message and passes it to the logger
 void Logger::Helper::writeToLog()
 {
-//    const char* const levelName = LevelToText(level);
-//    const QString completeMessage(QString("%1 %2 %3")
-//                                  .arg(levelName)
-//                                  .arg(QDateTime::currentDateTime().toString(fmtDateTime))
-//                                  .arg(buffer)
-//                                  );
-    const QString completeMessage(QString("%1 %2")
-                                  .arg(QDateTime::currentDateTime().toString(fmtDateTime))
-                                  .arg(buffer)
-                                  );
+    if (!buffer.isEmpty())
+    {
+        QString idStr;
 
-    Logger::instance().enqueueWrite(completeMessage, level);
+        if (!id.isEmpty()) idStr = QString{"[%1] "}.arg(id);
+
+        const QString completeMessage(QString("%1%2 %3")
+            .arg(idStr,
+                 QDateTime::currentDateTime().toString(fmtDateTime()),
+                 buffer)
+                                  );
+        Logger::instance().enqueueWrite(completeMessage, level);
+    }
 }
+
+Logger::Helper::Helper(Level logLevel, QString logId) :
+    level{logLevel},
+    qtDebug{&buffer},
+    id(std::move(logId))
+{}
 
 Logger::Helper::~Helper()
 {
@@ -250,9 +271,6 @@ Logger::Helper::~Helper()
         writeToLog();
     }
     catch(std::exception&) {
-        // you shouldn't throw exceptions from a sink
-        assert(!"exception in logger helper destructor");
-        throw;
     }
 }
 
@@ -287,3 +305,8 @@ void Logger::write(const QString& message, Level level)
 }
 
 } // end namespace
+
+bool gt::log::Stream::mayLog(int msgLevel)
+{
+    return msgLevel <= QsLogging::Logger::instance().verbosity();
+}

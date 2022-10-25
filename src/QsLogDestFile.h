@@ -50,11 +50,11 @@ public:
 class NullRotationStrategy : public RotationStrategy
 {
 public:
-    virtual void setInitialInfo(const QFile &) {}
-    virtual void includeMessageInCalculation(const QString &) {}
-    virtual bool shouldRotate() { return false; }
-    virtual void rotate() {}
-    virtual QIODevice::OpenMode recommendedOpenModeFlag() { return QIODevice::Truncate; }
+    void setInitialInfo(const QFile &) override {}
+    void includeMessageInCalculation(const QString &) override {}
+    bool shouldRotate() override { return false; }
+    void rotate() override {}
+    QIODevice::OpenMode recommendedOpenModeFlag() override { return QIODevice::Truncate; }
 };
 
 // Rotates after a size is reached, keeps a number of <= 10 backups, appends to existing file.
@@ -64,12 +64,12 @@ public:
     SizeRotationStrategy();
     static const int MaxBackupCount;
 
-    virtual void setInitialInfo(const QFile &file);
+    void setInitialInfo(const QFile &file) override;
     void setInitialInfo(const QString& filePath, int fileSize);
-    virtual void includeMessageInCalculation(const QString &message);
-    virtual bool shouldRotate();
-    virtual void rotate();
-    virtual QIODevice::OpenMode recommendedOpenModeFlag();
+    void includeMessageInCalculation(const QString &message) override;
+    bool shouldRotate() override;
+    void rotate() override;
+    QIODevice::OpenMode recommendedOpenModeFlag() override;
 
     void setMaximumSizeInBytes(qint64 size);
     void setBackupCount(int backups);
@@ -96,9 +96,9 @@ public:
     static const char* const Type;
 
     FileDestination(const QString& filePath, RotationStrategyPtr rotationStrategy);
-    virtual void write(const QString& message, Level level);
-    virtual bool isValid();
-    virtual QString type() const;
+    void write(const QString& message, Level level) override;
+    bool isValid() override;
+    QString type() const override;
 
 private:
     QFile mFile;

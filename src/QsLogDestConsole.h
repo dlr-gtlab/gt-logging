@@ -44,9 +44,9 @@ class DebugOutputDestination : public Destination
 public:
     static const char* const Type;
 
-    virtual void write(const QString& message, Level level);
-    virtual bool isValid();
-    virtual QString type() const;
+    void write(const QString& message, Level level) override;
+    bool isValid() override;
+    QString type() const override;
 };
 
 }
