@@ -12,7 +12,6 @@ include( local_settings.pri )
 
 TEMPLATE = subdirs
 CONFIG += ordered console
-CONFIG += c++11
 
 SUBDIRS += src
 

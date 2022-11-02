@@ -2,3 +2,7 @@
 
 // initialize
 QString LogHelperTest::log;
+
+// ctor
+MyQObject::MyQObject() = default;
+

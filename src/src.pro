@@ -23,6 +23,7 @@ QT += core
 TEMPLATE = lib
 CONFIG += plugin
 CONFIG += silent
+CONFIG += c++14
 
 # logging id
 DEFINES += GT_MODULE_ID='"\\\"Logging\\\""'

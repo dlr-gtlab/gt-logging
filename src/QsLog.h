@@ -89,7 +89,7 @@ public:
 
         gt::log::Stream& stream()
         {
-            return qtDebug
+            return gtStream
 #ifndef GT_LOG_USE_QUOTE
                 .noquote()
 #endif
@@ -104,7 +104,7 @@ public:
 
         Level level;
         QString buffer;
-        gt::log::Stream qtDebug;
+        gt::log::Stream gtStream;
         QString id;
     };
 

@@ -18,6 +18,63 @@ enum Verbosity
     Everything = 9
 };
 
+namespace detail
+{
+
+/// Maps all types to void
+template<class... _Ts>
+using void_t = void;
+
+
+/// Uses SFINAE to check for a global operator<<(QDebug&)
+template <typename T, class = void>
+struct has_global_qdebug_shiftop
+        : std::false_type{};
+
+template <typename T>
+struct has_global_qdebug_shiftop<T,
+        void_t<decltype(::operator<<(std::declval<QDebug&>(),
+                                     std::declval<T>()))>>
+        : std::true_type{};
+
+
+/// Uses SFINAE to check for a operator<<(T) in QDebug
+template <typename T, class = void>
+struct has_dedicated_qdebug_shiftop
+        : std::false_type{};
+
+template <typename T>
+struct has_dedicated_qdebug_shiftop<T,
+        void_t<decltype(std::declval<QDebug>().operator<<(std::declval<T>()))>>
+        : std::true_type{};
+
+
+/// Aliases for enables ifs
+template <typename T>
+using if_has_global_qdebug_shiftop =
+        std::enable_if_t<
+                has_global_qdebug_shiftop<std::decay_t<T>>::value, bool>;
+template <typename T>
+using if_has_no_global_qdebug_shiftop =
+        std::enable_if_t<
+                !has_global_qdebug_shiftop<std::decay_t<T>>::value, bool>;
+
+template <typename T>
+using if_has_dedicated_qdebug_shiftop =
+        std::enable_if_t<
+                has_dedicated_qdebug_shiftop<std::decay_t<T>>::value, bool>;
+template <typename T>
+using if_has_no_dedicated_qdebug_shiftop =
+        std::enable_if_t<
+                !has_dedicated_qdebug_shiftop<std::decay_t<T>>::value, bool>;
+
+/// Alias for no pointer or integral type
+template <typename T>
+using if_not_integral = std::enable_if_t<!std::is_pointer<T>::value &&
+                                         !std::is_integral<T>::value, bool>;
+
+} // namsepace detail
+
 class Stream : private QDebug
 {
 public:
@@ -41,103 +98,75 @@ public:
 
     QSLOG_SHARED_OBJECT
     static bool mayLog(int v);
+    bool mayLog() const { return mayLog(msgLevel); }
 
-    inline Stream &operator<<(QChar t) {return logMember(t);}
+    // pod
+    inline Stream &operator<<(std::nullptr_t) {return logMember("(nullptr)");}
+    inline Stream &operator<<(void const* t) {return logMember(t);}
     inline Stream &operator<<(bool t) {return logMember(t);}
+
+    // chars
     inline Stream &operator<<(char t) {return logMember(t);}
-    inline Stream &operator<<(signed short t) {return logMember(t);}
-    inline Stream &operator<<(unsigned short t) {return logMember(t);}
 #ifdef Q_COMPILER_UNICODE_STRINGS
     inline Stream &operator<<(char16_t t) {return logMember(t);}
     inline Stream &operator<<(char32_t t) {return logMember(t);}
 #endif
+    inline Stream &operator<<(QChar t) {return logMember(t);}
+
+    // ints
+    inline Stream &operator<<(signed short t) {return logMember(t);}
+    inline Stream &operator<<(unsigned short t) {return logMember(t);}
     inline Stream &operator<<(signed int t) {return logMember(t);}
     inline Stream &operator<<(unsigned int  t) {return logMember(t);}
     inline Stream &operator<<(signed long t) {return logMember(t);}
     inline Stream &operator<<(unsigned long t) {return logMember(t);}
-    inline Stream &operator<<(qint64 t) {return logMember(t);}
-    inline Stream &operator<<(quint64 t) {return logMember(t);}
+    inline Stream &operator<<(qlonglong t) {return logMember(t);}
+    inline Stream &operator<<(qulonglong t) {return logMember(t);}
+
+    // floats
     inline Stream &operator<<(float t) {return logMember(t);}
     inline Stream &operator<<(double t) {return logMember(t);}
+
+    // strings
     inline Stream &operator<<(const char* t) {return logMember(t);}
-#if QT_STRINGVIEW_LEVEL < 2
+    inline Stream &operator<<(std::string const& t) {return logMember(t.c_str());}
     inline Stream &operator<<(const QString& t) {return logMember(t);}
-    inline Stream &operator<<(const QStringRef& t) {return logMember(t);}
-#endif
-    inline Stream &operator<<(QStringView t) {return logMember(t);}
     inline Stream &operator<<(QLatin1String t) {return logMember(t);}
-    inline Stream &operator<<(const QByteArray & t) {return logMember(t);}
-    inline Stream &operator<<(const void * t) {return logMember(t);}
-    inline Stream &operator<<(std::nullptr_t) {return logMember("(nullptr)");}
-    inline Stream &operator<<(QTextStreamFunction t) {return logMember(t);}
+    inline Stream &operator<<(const QByteArray& t) {return logMember(t);}
+    inline Stream &operator<<(QTextStreamFunction t) {return t ? logMember(t) :
+                                                                 *this;}
+
+    // other
     inline Stream &operator<<(const QVariant& t) {return logOp(t);}
-    inline Stream &operator<<(const QModelIndex& t) {return logOp(t);}
+    inline Stream &operator<<(const QObject* t) {return logOp(t);}
 
-    template <class T>
-    inline Stream& operator<<(const QList<T> &t) {return logOp(t);}
+    // template based operators
 
-    template <class T>
-    inline Stream& operator<<(const QVector<T> &t) {return logOp(t);}
-
-    template <typename T, typename Alloc>
-    inline Stream& operator<<(const std::vector<T, Alloc> &t) {return logOp(t);}
-
-    template <typename T, typename Alloc>
-    inline Stream& operator<<(const std::list<T, Alloc> &t) {return logOp(t);}
-
-    template <typename Key, typename T, typename Compare, typename Alloc>
-    inline Stream& operator<<(const std::map<Key, T, Compare, Alloc>& t) {return logOp(t);}
-
-    template <typename Key, typename T, typename Compare, typename Alloc>
-    inline Stream& operator<<(const std::multimap<Key, T, Compare, Alloc>& t) {return logOp(t);}
-
-    template <class Key, class T>
-    inline Stream& operator<<(const QMap<Key, T> &t) {return logOp(t);}
-
-    template <class Key, class T>
-    inline Stream& operator<<(const QHash<Key, T> &t) {return logOp(t);}
-
-    template <class T1, class T2>
-    inline Stream& operator<<(const QPair<T1, T2> &t) {return logOp(t);}
-
-    template <class T1, class T2>
-    inline Stream& operator<<(const std::pair<T1, T2> &t) {return logOp(t);}
-
-    template <typename T>
-    inline Stream& operator<<(const QSet<T> &t) {return logOp(t);}
-
-    template <typename T>
-    inline Stream& operator<<(const QContiguousCache<T> &t) {return logOp(t);}
-
-    template <typename T>
-    inline Stream& operator<<(const QSharedPointer<T> &t) {return logOp(t);}
-
+    // check for global qdebug support<<
     template<typename T,
-             typename A = typename std::enable_if<std::is_enum<T>::value, void>::type,
-             typename B = typename std::enable_if<sizeof(T) <= sizeof(int), void>::type,
-             typename C = typename std::enable_if<!QtPrivate::IsQEnumHelper<T>::Value, void>::type,
-             typename D = typename std::enable_if<QtPrivate::IsQEnumHelper<QFlags<T>>::Value, void>::type>
-    inline Stream& operator<<(T t) {return logOp(std::move(t));}
+             detail::if_not_integral<T> = true,
+             detail::if_has_global_qdebug_shiftop<T> = true>
+    inline Stream& operator<<(T const& t) {return logOp(t);}
 
-    template<typename T>
-    typename std::enable_if<QtPrivate::IsQEnumHelper<T>::Value, Stream&>::type
-    operator<<(T value) {return logOp(std::move(value));}
+    // check for dedicated qdebug operator<<
+    template<typename T,
+             detail::if_not_integral<T> = true,
+             detail::if_has_no_global_qdebug_shiftop<T> = true,
+             detail::if_has_dedicated_qdebug_shiftop<T> = true>
+    inline Stream& operator<<(T const& t) {return logMember(t);}
 
-    template<typename T>
-    inline Stream& operator<<(const QFlags<T> &t) {return logOp(t);}
 private:
 
     using QDebug::operator=;
-
 
     template <typename T>
     Stream& logOp(T&& t)
     {
         if (mayLog(msgLevel))
         {
-            *this = ::operator<<(static_cast<QDebug&>(*this), std::forward<T>(t));
+            *this = ::operator<<(static_cast<QDebug&>(*this),
+                                 std::forward<T>(t));
         }
-
         return *this;
     }
 
@@ -145,15 +174,16 @@ private:
     inline Stream & logMember(T&& t) {
         if (mayLog(msgLevel))
         {
-            *this =  QDebug::operator<<(t);
+            *this = QDebug::operator<<(t);
         }
         return *this;
-
     }
 
     int msgLevel{gt::log::Silent};
 };
+
 } // namespace log
+
 } // namespace gt
 
 #endif // GT_LOGSTREAM_H
