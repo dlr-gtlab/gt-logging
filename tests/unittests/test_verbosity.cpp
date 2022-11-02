@@ -1,6 +1,4 @@
-#include "gtest/gtest.h"
 
-#include "gt_logging.h"
 #include "test_log_helper.h"
 
 class Verbosity : public LogHelperTest

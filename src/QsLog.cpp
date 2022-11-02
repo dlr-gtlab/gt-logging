@@ -248,20 +248,20 @@ void Logger::Helper::writeToLog()
     {
         QString idStr;
 
-        if (!id.isEmpty()) idStr = QString{"[%1] "}.arg(id);
+        if (!id.isEmpty()) idStr = QStringLiteral("[%1] ").arg(id);
 
-        const QString completeMessage(QString("%1%2 %3")
-            .arg(idStr,
-                 QDateTime::currentDateTime().toString(fmtDateTime()),
-                 buffer)
-                                  );
-        Logger::instance().enqueueWrite(completeMessage, level);
+        Logger::instance().enqueueWrite(
+            QStringLiteral("%1%2 %3")
+                .arg(idStr,
+                     QDateTime::currentDateTime().toString(fmtDateTime()),
+                     buffer),
+            level);
     }
 }
 
 Logger::Helper::Helper(Level logLevel, QString logId) :
     level{logLevel},
-    qtDebug{&buffer},
+    gtStream{&buffer},
     id(std::move(logId))
 {}
 

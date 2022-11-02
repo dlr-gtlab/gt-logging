@@ -34,8 +34,8 @@ CONFIG(debug, debug|release){
 }
 
 CONFIG += silent
-CONFIG += c++11
 CONFIG += console
+CONFIG += c++14
 
 #### INCLUDES
 INCLUDEPATH += $${PWD}/../../src
