@@ -70,8 +70,10 @@ using if_has_no_dedicated_qdebug_shiftop =
 
 /// Alias for no pointer or integral type
 template <typename T>
-using if_not_integral = std::enable_if_t<!std::is_pointer<T>::value &&
-                                         !std::is_integral<T>::value, bool>;
+using if_not_integral_and_pointer =
+        std::enable_if_t<
+                !std::is_pointer<T>::value &&
+                !std::is_integral<T>::value, bool>;
 
 } // namsepace detail
 
@@ -133,24 +135,30 @@ public:
     inline Stream &operator<<(const QString& t) {return logMember(t);}
     inline Stream &operator<<(QLatin1String t) {return logMember(t);}
     inline Stream &operator<<(const QByteArray& t) {return logMember(t);}
-    inline Stream &operator<<(QTextStreamFunction t) {return t ? logMember(t) :
-                                                                 *this;}
+    inline Stream &operator<<(QTextStreamFunction t) {return t ? logMember(t) : *this;}
 
     // other
     inline Stream &operator<<(const QVariant& t) {return logOp(t);}
-    inline Stream &operator<<(const QObject* t) {return logOp(t);}
 
-    // template based operators
+    // template based operators: QObject*
+    template <typename T,
+              std::enable_if_t<std::is_base_of<QObject, T>::value, bool> = true>
+    inline Stream& operator<<(T const* t) {return logOp(t);}
+
+    // template based operators: non QObject*
+    template <typename T,
+              std::enable_if_t<!std::is_base_of<QObject, T>::value, bool> = true>
+    inline Stream& operator<<(T const* t) {return logMember(static_cast<void const*>(t));}
 
     // check for global qdebug support<<
     template<typename T,
-             detail::if_not_integral<T> = true,
+             detail::if_not_integral_and_pointer<T> = true,
              detail::if_has_global_qdebug_shiftop<T> = true>
     inline Stream& operator<<(T const& t) {return logOp(t);}
 
     // check for dedicated qdebug operator<<
     template<typename T,
-             detail::if_not_integral<T> = true,
+             detail::if_not_integral_and_pointer<T> = true,
              detail::if_has_no_global_qdebug_shiftop<T> = true,
              detail::if_has_dedicated_qdebug_shiftop<T> = true>
     inline Stream& operator<<(T const& t) {return logMember(t);}

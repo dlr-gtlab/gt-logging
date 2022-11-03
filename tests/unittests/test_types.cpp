@@ -6,6 +6,9 @@
 #include <QVector4D>
 #include <QModelIndex>
 
+#include <QWidget>
+#include <QJsonValue>
+
 
 // test fixture
 class Types : public LogHelperTest {};
@@ -326,8 +329,6 @@ TEST_F(Types, StringViews)
 
 TEST_F(Types, QPoints)
 {
-    ASSERT_TRUE(log.isEmpty());
-
     QModelIndex idx;
     QPoint pt{10, 11};
     QPointF ptf{12.1, 13.2};
@@ -348,3 +349,12 @@ TEST_F(Types, QPoints)
     gtError() << v4d;
     EXPECT_TRUE(log.contains("QVector4D(19.1, 20, 21, 22)"));
 }
+
+TEST_F(Types, QWidget)
+{
+    QWidget const* w{};
+    gtError() << w;
+    EXPECT_TRUE(log.contains("QWidget(0x0)") ||
+                log.contains("QObject(0x0)"));
+}
+
