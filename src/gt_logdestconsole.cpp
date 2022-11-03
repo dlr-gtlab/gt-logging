@@ -23,32 +23,47 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef QSLOGDESTCONSOLE_H
-#define QSLOGDESTCONSOLE_H
+#include "gt_logdestconsole.h"
+#include "gt_logging.h"
+#include <QString>
+#include <QtGlobal>
 
-#include "QsLogDest.h"
-class QString;
+#if defined(Q_OS_UNIX) || defined(Q_OS_WIN) && defined(GT_LOG_WIN_PRINTF_CONSOLE)
+#include <cstdio>
 
-class QsDebugOutput
+using namespace gt;
+
+void log::DebugOutput::output( const QString& message )
 {
-public:
-   static void output(const QString& a_message);
-};
-
-namespace QsLogging
+   fprintf(stderr, "%s\n", qPrintable(message));
+   fflush(stderr);
+}
+#elif defined(Q_OS_WIN)
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+void log::DebugOutput::output( const QString& message )
 {
+   OutputDebugStringW(reinterpret_cast<const WCHAR*>(message.utf16()));
+   OutputDebugStringW(L"\n");
+}
+#endif
 
-// debugger sink
-class DebugOutputDestination : public Destination
+const char* const log::DebugOutputDestination::Type = "console";
+
+void log::DebugOutputDestination::write(const QString& message,
+                                              Level level)
 {
-public:
-    static const char* const Type;
-
-    void write(const QString& message, Level level) override;
-    bool isValid() override;
-    QString type() const override;
-};
-
+    QString tmpMsg = log::Logger::levelToString(level) + " " +
+                     message;
+    DebugOutput::output(tmpMsg);
 }
 
-#endif // QSLOGDESTCONSOLE_H
+bool log::DebugOutputDestination::isValid()
+{
+    return true;
+}
+
+QString log::DebugOutputDestination::type() const
+{
+    return QString::fromLatin1(Type);
+}

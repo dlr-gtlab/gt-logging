@@ -8,9 +8,9 @@
 class LogHelperTest : public testing::Test
 {
 public:
-    LogHelperTest() : logger(QsLogging::Logger::instance())
+    LogHelperTest() : logger(gt::log::Logger::instance())
     {
-        dest = QsLogging::DestinationFactory::MakeFunctorDestination(logToStr);
+        dest = gt::log::DestinationFactory::MakeFunctorDestination(logToStr);
         logger.addDestination(dest);
     }
 
@@ -27,13 +27,13 @@ public:
         logger.removeDestination(dest);
     }
 
-    static void logToStr(const QString& msg, QsLogging::Level)
+    static void logToStr(const QString& msg, gt::log::Level)
     {
         log.append(msg);
     }
 
-    QsLogging::DestinationPtr dest;
-    QsLogging::Logger& logger;
+    gt::log::DestinationPtr dest;
+    gt::log::Logger& logger;
     static QString log;
 };
 

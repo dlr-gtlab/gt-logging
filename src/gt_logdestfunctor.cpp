@@ -1,4 +1,5 @@
-// Copyright (c) 2013, Razvan Petru
+// Copyright (c) 2014, Razvan Petru
+// Copyright (c) 2014, Omar Carey
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without modification,
@@ -23,44 +24,44 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "QsLogDestConsole.h"
-#include "QsLog.h"
-#include <QString>
+#include "gt_logdestfunctor.h"
+#include <cstddef>
 #include <QtGlobal>
+#include <QString>
 
-#if defined(Q_OS_UNIX) || defined(Q_OS_WIN) && defined(QS_LOG_WIN_PRINTF_CONSOLE)
-#include <cstdio>
-void QsDebugOutput::output( const QString& message )
-{
-   fprintf(stderr, "%s\n", qPrintable(message));
-   fflush(stderr);
-}
-#elif defined(Q_OS_WIN)
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-void QsDebugOutput::output( const QString& message )
-{
-   OutputDebugStringW(reinterpret_cast<const WCHAR*>(message.utf16()));
-   OutputDebugStringW(L"\n");
-}
-#endif
+using namespace gt::log;
 
-const char* const QsLogging::DebugOutputDestination::Type = "console";
+const char* const FunctorDestination::Type = "functor";
 
-void QsLogging::DebugOutputDestination::write(const QString& message,
-                                              Level level)
+FunctorDestination::FunctorDestination(LogFunction f)
+    : QObject(NULL)
+    , mLogFunction(f)
 {
-    QString tmpMsg = QsLogging::Logger::levelToString(level) + " " +
-                     message;
-    QsDebugOutput::output(tmpMsg);
 }
 
-bool QsLogging::DebugOutputDestination::isValid()
+FunctorDestination::FunctorDestination(QObject *receiver, const char *member)
+    : QObject(NULL)
+    , mLogFunction(NULL)
+{
+    connect(this, SIGNAL(logMessageReady(QString,int)), receiver, member, Qt::QueuedConnection);
+}
+
+
+void FunctorDestination::write(const QString &message, Level level)
+{
+    if (mLogFunction)
+        mLogFunction(message, level);
+
+    if (level > TraceLevel)
+        emit logMessageReady(message, static_cast<int>(level));
+}
+
+bool FunctorDestination::isValid()
 {
     return true;
 }
 
-QString QsLogging::DebugOutputDestination::type() const
+QString FunctorDestination::type() const
 {
     return QString::fromLatin1(Type);
 }

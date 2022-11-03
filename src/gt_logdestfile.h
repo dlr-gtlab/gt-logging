@@ -23,16 +23,18 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef QSLOGDESTFILE_H
-#define QSLOGDESTFILE_H
+#ifndef GT_LOGDESTFILE_H
+#define GT_LOGDESTFILE_H
 
-#include "QsLogDest.h"
+#include "gt_logdest.h"
 #include <QFile>
 #include <QTextStream>
 #include <QtGlobal>
 #include <QSharedPointer>
 
-namespace QsLogging
+namespace gt
+{
+namespace log
 {
 class RotationStrategy
 {
@@ -106,6 +108,7 @@ private:
     QSharedPointer<RotationStrategy> mRotationStrategy;
 };
 
-}
+} // namespace log
+} // namespace gt
 
-#endif // QSLOGDESTFILE_H
+#endif // GT_LOGDESTFILE_H

@@ -23,27 +23,29 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef QSLOGDEST_H
-#define QSLOGDEST_H
+#ifndef GT_LOGDEST_H
+#define GT_LOGDEST_H
 
-#include "QsLogLevel.h"
+#include "gt_loglevel.h"
 #include <QSharedPointer>
 #include <QtGlobal>
 class QString;
 class QObject;
 
-#ifdef QSLOG_IS_SHARED_LIBRARY
-#define QSLOG_SHARED_OBJECT Q_DECL_EXPORT
-#elif QSLOG_IS_SHARED_LIBRARY_IMPORT
-#define QSLOG_SHARED_OBJECT Q_DECL_IMPORT
+#ifdef GTLOG_IS_SHARED_LIBRARY
+#define GTLOG_SHARED_OBJECT Q_DECL_EXPORT
+#elif GTLOG_IS_SHARED_LIBRARY_IMPORT
+#define GTLOG_SHARED_OBJECT Q_DECL_IMPORT
 #else
-#define QSLOG_SHARED_OBJECT
+#define GTLOG_SHARED_OBJECT
 #endif
 
-namespace QsLogging
+namespace gt
+{
+namespace log
 {
 
-class QSLOG_SHARED_OBJECT Destination
+class GTLOG_SHARED_OBJECT Destination
 {
 public:
     typedef void (*LogFunction)(const QString &message, Level level);
@@ -59,7 +61,7 @@ public:
     //!
     //! \brief type
     //! \return the type as a string e.g: console, file.
-    //!         The returned value may change in different versions of QsLog, but two destinations
+    //!         The returned value may change in different versions of GtLog, but two destinations
     //!         of the same type will return the same value.
     //!
     virtual QString type() const = 0;
@@ -74,14 +76,14 @@ enum LogRotationOption
     EnableLogRotation  = 1
 };
 
-struct QSLOG_SHARED_OBJECT MaxSizeBytes
+struct GTLOG_SHARED_OBJECT MaxSizeBytes
 {
     MaxSizeBytes() : size(0) {}
     explicit MaxSizeBytes(qint64 size_) : size(size_) {}
     qint64 size;
 };
 
-struct QSLOG_SHARED_OBJECT MaxOldLogCount
+struct GTLOG_SHARED_OBJECT MaxOldLogCount
 {
     MaxOldLogCount() : count(0) {}
     explicit MaxOldLogCount(int count_) : count(count_) {}
@@ -91,7 +93,7 @@ struct QSLOG_SHARED_OBJECT MaxOldLogCount
 
 //! Creates logging destinations/sinks. The caller shares ownership of the destinations with the logger.
 //! After being added to a logger, the caller can discard the pointers.
-class QSLOG_SHARED_OBJECT DestinationFactory
+class GTLOG_SHARED_OBJECT DestinationFactory
 {
 public:
     static DestinationPtr MakeFileDestination(const QString& filePath,
@@ -105,6 +107,7 @@ public:
     static DestinationPtr MakeFunctorDestination(QObject *receiver, const char *member);
 };
 
-} // end namespace
+} // end namespace log
+} // end namespace gt
 
-#endif // QSLOGDEST_H
+#endif // GT_LOGDEST_H

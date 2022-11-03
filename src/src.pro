@@ -30,8 +30,8 @@ DEFINES += GT_MODULE_ID='"\\\"Logging\\\""'
 
 win32 {
     DEFINES += GT_LOGGING_DLL
-    DEFINES += QSLOG_IS_SHARED_LIBRARY
-    DEFINES += QS_LOG_WIN_PRINTF_CONSOLE
+    DEFINES += GTLOG_IS_SHARED_LIBRARY
+    DEFINES += GT_LOG_WIN_PRINTF_CONSOLE
 }
 
 CONFIG(debug, debug|release){
@@ -52,25 +52,24 @@ INCLUDEPATH += .\
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
+    gt_logdest.h \
+    gt_logdestconsole.h \
+    gt_logdestfile.h \
+    gt_logdestfunctor.h \
+    gt_logdisablelogforfile.h \
     gt_logging_exports.h \
     gt_logging.h \
+    gt_loglevel.h \
     gt_logmodel.h \
-    QsLog.h \
-    QsLogDest.h \
-    QsLogDestConsole.h \
-    QsLogDestFile.h \
-    QsLogDestFunctor.h \
-    QsLogDisableForThisFile.h \
-    QsLogLevel.h \
     gt_logstream.h
 
 SOURCES += \
-    gt_logmodel.cpp \
-    QsLog.cpp \
-    QsLogDest.cpp \
-    QsLogDestConsole.cpp \
-    QsLogDestFile.cpp \
-    QsLogDestFunctor.cpp
+    gt_log.cpp \
+    gt_logdest.cpp \
+    gt_logdestconsole.cpp \
+    gt_logdestfile.cpp \
+    gt_logdestfunctor.cpp \
+    gt_logmodel.cpp
 
 unix {
 QMAKE_CXXFLAGS += -std=c++11

@@ -23,55 +23,57 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "QsLogDestFile.h"
+#include "gt_logdestfile.h"
 #include <QTextCodec>
 #include <QDateTime>
 #include <QString>
 #include <QtGlobal>
 #include <iostream>
 
-const int QsLogging::SizeRotationStrategy::MaxBackupCount = 10;
+using namespace gt;
 
-QsLogging::RotationStrategy::~RotationStrategy()
+const int log::SizeRotationStrategy::MaxBackupCount = 10;
+
+log::RotationStrategy::~RotationStrategy()
 {
 }
 
-QsLogging::SizeRotationStrategy::SizeRotationStrategy()
+log::SizeRotationStrategy::SizeRotationStrategy()
     : mCurrentSizeInBytes(0)
     , mMaxSizeInBytes(0)
     , mBackupsCount(0)
 {
 }
 
-void QsLogging::SizeRotationStrategy::setInitialInfo(const QFile &file)
+void log::SizeRotationStrategy::setInitialInfo(const QFile &file)
 {
     mFileName = file.fileName();
     mCurrentSizeInBytes = file.size();
 }
 
-void QsLogging::SizeRotationStrategy::setInitialInfo(const QString &filePath, int fileSize)
+void log::SizeRotationStrategy::setInitialInfo(const QString &filePath, int fileSize)
 {
     mFileName = filePath;
     mCurrentSizeInBytes = fileSize;
 }
 
-void QsLogging::SizeRotationStrategy::includeMessageInCalculation(const QString &message)
+void log::SizeRotationStrategy::includeMessageInCalculation(const QString &message)
 {
     mCurrentSizeInBytes += message.toUtf8().size();
 }
 
-bool QsLogging::SizeRotationStrategy::shouldRotate()
+bool log::SizeRotationStrategy::shouldRotate()
 {
     return mCurrentSizeInBytes > mMaxSizeInBytes;
 }
 
 // Algorithm assumes backups will be named filename.X, where 1 <= X <= mBackupsCount.
 // All X's will be shifted up.
-void QsLogging::SizeRotationStrategy::rotate()
+void log::SizeRotationStrategy::rotate()
 {
     if (!mBackupsCount) {
         if (!removeFileAtPath(mFileName)) {
-            std::cerr << "QsLog: backup delete failed " << qPrintable(mFileName);
+            std::cerr << "GtLog: backup delete failed " << qPrintable(mFileName);
         }
         return;
     }
@@ -96,7 +98,7 @@ void QsLogging::SizeRotationStrategy::rotate()
          removeFileAtPath(newName);
          const bool renamed = renameFileFromTo(oldName, newName);
          if (!renamed) {
-             std::cerr << "QsLog: could not rename backup " << qPrintable(oldName)
+             std::cerr << "GtLog: could not rename backup " << qPrintable(oldName)
                        << " to " << qPrintable(newName);
          }
      }
@@ -107,51 +109,51 @@ void QsLogging::SizeRotationStrategy::rotate()
          removeFileAtPath(newName);
      }
      if (!renameFileFromTo(mFileName, newName)) {
-         std::cerr << "QsLog: could not rename log " << qPrintable(mFileName)
+         std::cerr << "GtLog: could not rename log " << qPrintable(mFileName)
                    << " to " << qPrintable(newName);
      }
 }
 
-QIODevice::OpenMode QsLogging::SizeRotationStrategy::recommendedOpenModeFlag()
+QIODevice::OpenMode log::SizeRotationStrategy::recommendedOpenModeFlag()
 {
     return QIODevice::Append;
 }
 
-void QsLogging::SizeRotationStrategy::setMaximumSizeInBytes(qint64 size)
+void log::SizeRotationStrategy::setMaximumSizeInBytes(qint64 size)
 {
     Q_ASSERT(size >= 0);
     mMaxSizeInBytes = size;
 }
 
-void QsLogging::SizeRotationStrategy::setBackupCount(int backups)
+void log::SizeRotationStrategy::setBackupCount(int backups)
 {
     Q_ASSERT(backups >= 0);
     mBackupsCount = qMin(backups, SizeRotationStrategy::MaxBackupCount);
 }
 
-bool QsLogging::SizeRotationStrategy::removeFileAtPath(const QString &path)
+bool log::SizeRotationStrategy::removeFileAtPath(const QString &path)
 {
     return QFile::remove(path);
 }
 
-bool QsLogging::SizeRotationStrategy::fileExistsAtPath(const QString &path)
+bool log::SizeRotationStrategy::fileExistsAtPath(const QString &path)
 {
     return QFile::exists(path);
 }
 
-bool QsLogging::SizeRotationStrategy::renameFileFromTo(const QString &from, const QString &to)
+bool log::SizeRotationStrategy::renameFileFromTo(const QString &from, const QString &to)
 {
     return QFile::rename(from, to);
 }
 
-const char* const QsLogging::FileDestination::Type = "file";
+const char* const log::FileDestination::Type = "file";
 
-QsLogging::FileDestination::FileDestination(const QString& filePath, RotationStrategyPtr rotationStrategy)
+log::FileDestination::FileDestination(const QString& filePath, RotationStrategyPtr rotationStrategy)
     : mRotationStrategy(rotationStrategy)
 {
     mFile.setFileName(filePath);
     if (!mFile.open(QFile::WriteOnly | QFile::Text | mRotationStrategy->recommendedOpenModeFlag())) {
-        std::cerr << "QsLog: could not open log file " << qPrintable(filePath);
+        std::cerr << "GtLog: could not open log file " << qPrintable(filePath);
     }
     mOutputStream.setDevice(&mFile);
     mOutputStream.setCodec(QTextCodec::codecForName("UTF-8"));
@@ -159,7 +161,7 @@ QsLogging::FileDestination::FileDestination(const QString& filePath, RotationStr
     mRotationStrategy->setInitialInfo(mFile);
 }
 
-void QsLogging::FileDestination::write(const QString& message, Level)
+void log::FileDestination::write(const QString& message, Level)
 {
     mRotationStrategy->includeMessageInCalculation(message);
     if (mRotationStrategy->shouldRotate()) {
@@ -167,7 +169,7 @@ void QsLogging::FileDestination::write(const QString& message, Level)
         mFile.close();
         mRotationStrategy->rotate();
         if (!mFile.open(QFile::WriteOnly | QFile::Text | mRotationStrategy->recommendedOpenModeFlag())) {
-            std::cerr << "QsLog: could not reopen log file " << qPrintable(mFile.fileName());
+            std::cerr << "GtLog: could not reopen log file " << qPrintable(mFile.fileName());
         }
         mRotationStrategy->setInitialInfo(mFile);
         mOutputStream.setDevice(&mFile);
@@ -178,12 +180,12 @@ void QsLogging::FileDestination::write(const QString& message, Level)
     mOutputStream.flush();
 }
 
-bool QsLogging::FileDestination::isValid()
+bool log::FileDestination::isValid()
 {
     return mFile.isOpen();
 }
 
-QString QsLogging::FileDestination::type() const
+QString log::FileDestination::type() const
 {
     return QString::fromLatin1(Type);
 }

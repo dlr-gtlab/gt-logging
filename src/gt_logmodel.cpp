@@ -14,16 +14,18 @@
 
 #include "gt_logmodel.h"
 #include "gt_logging.h"
-#include "QsLogDest.h"
+#include "gt_logdest.h"
+
+using namespace gt::log;
 
 GtLogModel::GtLogModel(QObject* parent) : QAbstractListModel(parent),
     m_tmpClearLog(false),
     m_maxEntries(2000)
 {
-    QsLogging::Logger& logger = QsLogging::Logger::instance();
+    Logger& logger = Logger::instance();
 
-    QsLogging::DestinationPtr widgetDestination(
-                QsLogging::DestinationFactory::MakeFunctorDestination(
+    DestinationPtr widgetDestination(
+                DestinationFactory::MakeFunctorDestination(
                     this, SLOT(onMessage(QString,int))));
 
     logger.addDestination(widgetDestination);
@@ -45,9 +47,9 @@ GtLogModel::mimeData(const QModelIndexList& indexes) const
 
         const int lvl = m_entries[index.row()].m_level;
 
-        QsLogging::Level level = QsLogging::Logger::levelFromInt(lvl);
+        Level level = Logger::levelFromInt(lvl);
 
-        str = str + QsLogging::Logger::levelToString(level) + "\t" +
+        str = str + Logger::levelToString(level) + "\t" +
               m_entries[index.row()].m_msg + "\r\n";
     }
 
@@ -110,9 +112,9 @@ GtLogModel::exportLogToFile(const QString& filename)
 
     foreach (const Entry& entry, m_entries)
     {
-        QsLogging::Level level = QsLogging::Logger::levelFromInt(entry.m_level);
+        Level level = Logger::levelFromInt(entry.m_level);
 
-        out << QsLogging::Logger::levelToString(level) << "\t"
+        out << Logger::levelToString(level) << "\t"
             << entry.m_msg << "\r\n";
     }
 
