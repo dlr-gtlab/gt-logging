@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Fixed
 ### Changed
-- Renamed QsLogging namespace to gt::log
 ### Deprecated
 ### Removed
 ### Security 
+
+## [3.0.0 ] - 2022-11-03
+### Changed
+- Renamed QsLogging namespace to gt::log
 
 ## [2.2.0] - 2022-11-02
 ### Fixed
