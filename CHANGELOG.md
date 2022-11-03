@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Security 
 
+## [2.2.0] - 2022-11-02
+### Fixed
+- Ambiguous overloads for `operator<<`
+
 ## [2.1.0] - 2022-10-25
 ### Added
 - The logging system can now log an identification string, which may be specified by `GT_MODULE_ID` globally at compile time - #28
