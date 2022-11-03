@@ -1,5 +1,4 @@
-// Copyright (c) 2014, Razvan Petru
-// Copyright (c) 2014, Omar Carey
+// Copyright (c) 2013, Razvan Petru
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without modification,
@@ -24,39 +23,51 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef QSLOGDESTFUNCTOR_H
-#define QSLOGDESTFUNCTOR_H
+#include "gt_logdest.h"
+#include "gt_logdestconsole.h"
+#include "gt_logdestfile.h"
+#include "gt_logdestfunctor.h"
+#include <QString>
 
-#include "QsLogDest.h"
-#include <QObject>
-
-namespace QsLogging
+namespace gt
 {
-// Offers various types of function-like sinks.
-// This is an advanced destination type. Depending on your configuration, LogFunction might be
-// called from a different thread or even a different binary. You should not access QsLog from
-// inside LogFunction and should not perform any time-consuming operations.
-// logMessageReady is connected through a queued connection and trace messages are not included
-class FunctorDestination : public QObject, public Destination
+namespace log
 {
-    Q_OBJECT
-public:
-    static const char* const Type;
 
-    explicit FunctorDestination(LogFunction f);
-    FunctorDestination(QObject *receiver, const char *member);
-
-    void write(const QString &message, Level level) override;
-    bool isValid() override;
-    QString type() const override;
-
-protected:
-    // int used to avoid registering a new enum type
-    Q_SIGNAL void logMessageReady(const QString &message, int level);
-
-private:
-    LogFunction mLogFunction;
-};
+Destination::~Destination()
+{
 }
 
-#endif // QSLOGDESTFUNCTOR_H
+//! destination factory
+DestinationPtr DestinationFactory::MakeFileDestination(const QString& filePath,
+    LogRotationOption rotation, const MaxSizeBytes &sizeInBytesToRotateAfter,
+    const MaxOldLogCount &oldLogsToKeep)
+{
+    if (EnableLogRotation == rotation) {
+        QScopedPointer<SizeRotationStrategy> logRotation(new SizeRotationStrategy);
+        logRotation->setMaximumSizeInBytes(sizeInBytesToRotateAfter.size);
+        logRotation->setBackupCount(oldLogsToKeep.count);
+
+        return DestinationPtr(new FileDestination(filePath, RotationStrategyPtr(logRotation.take())));
+    }
+
+    return DestinationPtr(new FileDestination(filePath, RotationStrategyPtr(new NullRotationStrategy)));
+}
+
+DestinationPtr DestinationFactory::MakeDebugOutputDestination()
+{
+    return DestinationPtr(new DebugOutputDestination);
+}
+
+DestinationPtr DestinationFactory::MakeFunctorDestination(Destination::LogFunction f)
+{
+    return DestinationPtr(new FunctorDestination(f));
+}
+
+DestinationPtr DestinationFactory::MakeFunctorDestination(QObject *receiver, const char *member)
+{
+    return DestinationPtr(new FunctorDestination(receiver, member));
+}
+
+} // end namespace log
+} // end namespace gt

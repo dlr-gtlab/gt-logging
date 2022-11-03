@@ -23,9 +23,10 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "QsLog.h"
-#include "QsLogDest.h"
-#ifdef QS_LOG_SEPARATE_THREAD
+#include "gt_logging.h"
+
+#include "gt_logdest.h"
+#ifdef GT_LOG_SEPARATE_THREAD
 #include <QThreadPool>
 #include <QRunnable>
 #endif
@@ -38,8 +39,11 @@
 #include <cstdlib>
 #include <stdexcept>
 
-namespace QsLogging
+namespace gt
 {
+namespace log
+{
+
 typedef QVector<DestinationPtr> DestinationList;
 
 static const char TraceString[] = "TRACE";
@@ -81,7 +85,7 @@ static const char* LevelToText(Level theLevel)
     }
 }
 
-#ifdef QS_LOG_SEPARATE_THREAD
+#ifdef GT_LOG_SEPARATE_THREAD
 class LogWriterRunnable : public QRunnable
 {
 public:
@@ -99,7 +103,7 @@ class LoggerImpl
 public:
     LoggerImpl();
 
-#ifdef QS_LOG_SEPARATE_THREAD
+#ifdef GT_LOG_SEPARATE_THREAD
     QThreadPool threadPool;
 #endif
     QMutex logMutex;
@@ -108,7 +112,7 @@ public:
     int verbosity{gt::log::Silent};
 };
 
-#ifdef QS_LOG_SEPARATE_THREAD
+#ifdef GT_LOG_SEPARATE_THREAD
 LogWriterRunnable::LogWriterRunnable(QString message, Level level)
     : QRunnable()
     , mMessage(std::move(message))
@@ -128,7 +132,7 @@ LoggerImpl::LoggerImpl()
 {
     // assume at least file + console
     destList.reserve(2);
-#ifdef QS_LOG_SEPARATE_THREAD
+#ifdef GT_LOG_SEPARATE_THREAD
     threadPool.setMaxThreadCount(1);
     threadPool.setExpiryTimeout(-1);
 #endif
@@ -174,7 +178,7 @@ Level Logger::levelFromLogMessage(const QString& logMessage, bool* conversionSuc
 Level
 Logger::levelFromInt(const int lvl)
 {
-    return static_cast<QsLogging::Level>(lvl);
+    return static_cast<Level>(lvl);
 }
 
 QString
@@ -185,7 +189,7 @@ Logger::levelToString(Level level)
 
 Logger::~Logger()
 {
-#ifdef QS_LOG_SEPARATE_THREAD
+#ifdef GT_LOG_SEPARATE_THREAD
     d->threadPool.waitForDone();
 #endif
     delete d;
@@ -277,7 +281,7 @@ Logger::Helper::~Helper()
 //! directs the message to the task queue or writes it directly
 void Logger::enqueueWrite(const QString& message, Level level)
 {
-#ifdef QS_LOG_SEPARATE_THREAD
+#ifdef GT_LOG_SEPARATE_THREAD
     LogWriterRunnable *r = new LogWriterRunnable(message, level);
     d->threadPool.start(r);
 #else
@@ -304,9 +308,10 @@ void Logger::write(const QString& message, Level level)
     }
 }
 
-} // end namespace
+} // end namespace log
+} // end namespace gt
 
 bool gt::log::Stream::mayLog(int msgLevel)
 {
-    return msgLevel <= QsLogging::Logger::instance().verbosity();
+    return msgLevel <= Logger::instance().verbosity();
 }

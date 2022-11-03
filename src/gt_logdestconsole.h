@@ -23,23 +23,37 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef QSLOGLEVEL_H
-#define QSLOGLEVEL_H
+#ifndef GT_LOGDESTCONSOLE_H
+#define GT_LOGDESTCONSOLE_H
 
-namespace QsLogging
+#include "gt_logdest.h"
+class QString;
+
+namespace gt
 {
 
-enum Level
+namespace log
 {
-    TraceLevel = 0,
-    DebugLevel,
-    InfoLevel,
-    WarnLevel,
-    ErrorLevel,
-    FatalLevel,
-    OffLevel
+
+class DebugOutput
+{
+public:
+    static void output(const QString& a_message);
 };
 
-}
+// debugger sink
+class DebugOutputDestination : public Destination
+{
+public:
+    static const char* const Type;
 
-#endif // QSLOGLEVEL_H
+    void write(const QString& message, Level level) override;
+    bool isValid() override;
+    QString type() const override;
+};
+
+} // namespace log
+
+} // namespace gt
+
+#endif // GT_LOGDESTCONSOLE_H

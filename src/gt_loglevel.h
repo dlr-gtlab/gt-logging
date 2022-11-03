@@ -1,5 +1,4 @@
-// Copyright (c) 2014, Razvan Petru
-// Copyright (c) 2014, Omar Carey
+// Copyright (c) 2013, Razvan Petru
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without modification,
@@ -24,42 +23,28 @@
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "QsLogDestFunctor.h"
-#include <cstddef>
-#include <QtGlobal>
-#include <QString>
+#ifndef GT_LOGLEVEL_H
+#define GT_LOGLEVEL_H
 
-const char* const QsLogging::FunctorDestination::Type = "functor";
-
-QsLogging::FunctorDestination::FunctorDestination(LogFunction f)
-    : QObject(NULL)
-    , mLogFunction(f)
+namespace gt
 {
-}
 
-QsLogging::FunctorDestination::FunctorDestination(QObject *receiver, const char *member)
-    : QObject(NULL)
-    , mLogFunction(NULL)
+namespace log
 {
-    connect(this, SIGNAL(logMessageReady(QString,int)), receiver, member, Qt::QueuedConnection);
-}
 
-
-void QsLogging::FunctorDestination::write(const QString &message, QsLogging::Level level)
+enum Level
 {
-    if (mLogFunction)
-        mLogFunction(message, level);
+    TraceLevel = 0,
+    DebugLevel,
+    InfoLevel,
+    WarnLevel,
+    ErrorLevel,
+    FatalLevel,
+    OffLevel
+};
 
-    if (level > QsLogging::TraceLevel)
-        emit logMessageReady(message, static_cast<int>(level));
-}
+} // namespace log
 
-bool QsLogging::FunctorDestination::isValid()
-{
-    return true;
-}
+} // namespace gt
 
-QString QsLogging::FunctorDestination::type() const
-{
-    return QString::fromLatin1(Type);
-}
+#endif // GT_LOGLEVEL_H

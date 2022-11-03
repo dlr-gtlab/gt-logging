@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-#include <QsLogDest.h>
+#include <gt_logdest.h>
 
 namespace gt
 {
@@ -98,7 +98,7 @@ public:
         return verbose(gt::log::Medium);
     }
 
-    QSLOG_SHARED_OBJECT
+    GTLOG_SHARED_OBJECT
     static bool mayLog(int v);
     bool mayLog() const { return mayLog(msgLevel); }
 

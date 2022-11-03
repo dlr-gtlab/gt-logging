@@ -1,8 +1,8 @@
-#ifndef QSLOGDISABLEFORTHISFILE_H
-#define QSLOGDISABLEFORTHISFILE_H
+#ifndef GT_LOGDISABLELOGFORFILE_H
+#define GT_LOGDISABLELOGFORFILE_H
 
 #include <QtDebug>
-// When included AFTER QsLog.h, this file will disable logging in that C++ file. When included
+// When included AFTER gt_log.h, this file will disable logging in that C++ file. When included
 // before, it will lead to compiler warnings or errors about macro redefinitions.
 
 #ifndef FORCE_LOGGING
@@ -37,4 +37,4 @@
 #define gtErrorId(ID)   gtError()   << QString("[%1]").arg(ID).toStdString().c_str()
 #define gtFatalId(ID)   gtFatal()   << QString("[%1]").arg(ID).toStdString().c_str()
 
-#endif // QSLOGDISABLEFORTHISFILE_H
+#endif // GT_LOGDISABLELOGFORFILE_H

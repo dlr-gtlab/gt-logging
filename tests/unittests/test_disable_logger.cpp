@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "gt_logging.h"
-#include "QsLogDisableForThisFile.h"
+#include "gt_logdisablelogforfile.h"
 
 class TestDisableLogger : public testing::Test
 {};
