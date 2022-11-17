@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Fixed
 ### Changed
+- Removed Qt dependencies. Optional Qt bindings may be renabled using `GT_LOG_USE_QT_BINDINGS` - #33
+
 ### Deprecated
 ### Removed
 ### Security 

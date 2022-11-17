@@ -1,5 +1,6 @@
 
 #include "test_log_helper.h"
+#include "gt_logging_qt_bindings.h"
 
 #include <QVector2D>
 #include <QVector3D>
@@ -21,6 +22,16 @@ gt::log::Stream& operator<<(gt::log::Stream& d, MyDebugObject const& /*obj*/)
     return d << "MyDebugObject";
 }
 
+std::ostream& operator<<(std::ostream& d, MyDebugObject const& /*obj*/)
+{
+    return d << "this_wont_be_used";
+}
+
+QDebug& operator<<(QDebug& d, MyDebugObject const& /*obj*/)
+{
+    return d << "this_wont_be_used_either";
+}
+
 TEST_F(Types, QStringList)
 {
     gtWarning() << QStringList{"Hallo", "Welt"};
@@ -40,6 +51,7 @@ TEST_F(Types, QHash)
     hash.insert("b", 2);
 
     gtError() << hash;
+
     // note, the order of args is random
     EXPECT_TRUE(log.contains("QHash("));
     EXPECT_TRUE(log.contains("(a, 1)"));
@@ -158,7 +170,7 @@ TEST_F(Types, QObject)
     gtError() << &obj;
 
     EXPECT_TRUE(log.contains("MyObjectName"));
-    EXPECT_TRUE(log.contains(QString::number((size_t)&obj, 16)));
+    EXPECT_TRUE(log.contains(QString::number((size_t)&obj, 16), Qt::CaseInsensitive));
 }
 
 TEST_F(Types, MyDebugObject)
@@ -168,9 +180,8 @@ TEST_F(Types, MyDebugObject)
     gtError() << &obj;
 
     EXPECT_TRUE(log.contains("MyDebugObject"));
-    EXPECT_TRUE(log.contains(QString::number((size_t)&obj, 16)));
+    EXPECT_TRUE(log.contains(QString::number((size_t)&obj, 16), Qt::CaseInsensitive));
 }
-
 
 TEST_F(Types, Enum)
 {
@@ -233,9 +244,9 @@ TEST_F(Types, POD_chars)
     gtInfo() << cs;
     EXPECT_TRUE(log.contains(cs));
     gtInfo() << wc;
-    EXPECT_TRUE(log.contains(wc));
+    EXPECT_TRUE(log.contains("u'" + QString::number(wc)));
     gtInfo() << wc32;
-    EXPECT_TRUE(log.contains(wc32));
+    EXPECT_TRUE(log.contains("U'" + QString::number(wc32)));
     gtInfo() << qc;
     EXPECT_TRUE(log.contains(qc));
 }
@@ -296,6 +307,8 @@ TEST_F(Types, Strings)
     EXPECT_TRUE(log.contains(qlt1));
     gtError() << s << qAsConst(s);
     EXPECT_TRUE(log.contains(s.c_str()));
+    gtDebug() << QObject::tr("Test");
+    EXPECT_TRUE(log.contains("Test"));
 }
 
 TEST_F(Types, QStringRef)

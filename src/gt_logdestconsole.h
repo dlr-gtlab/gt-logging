@@ -27,7 +27,6 @@
 #define GT_LOGDESTCONSOLE_H
 
 #include "gt_logdest.h"
-class QString;
 
 namespace gt
 {
@@ -35,22 +34,22 @@ namespace gt
 namespace log
 {
 
-class DebugOutput
-{
-public:
-    static void output(const QString& a_message);
-};
-
 // debugger sink
 class DebugOutputDestination : public Destination
 {
 public:
-    static const char* const Type;
 
-    void write(const QString& message, Level level) override;
-    bool isValid() override;
-    QString type() const override;
+    GT_LOGGING_EXPORT
+    void write(std::string const& message, Level level) override;
+
+    std::string type() const override { return "console"; }
 };
+
+inline DestinationPtr makeDebugOutputDestination()
+{
+    return std::make_shared<DebugOutputDestination>();
+}
+
 
 } // namespace log
 

@@ -19,18 +19,14 @@ TARGET = GTlabLogging-d
 TARGET = GTlabLogging
 }
 
-QT += core
+QT -= core
 TEMPLATE = lib
 CONFIG += plugin
 CONFIG += silent
 CONFIG += c++14
 
-# logging id
-DEFINES += GT_MODULE_ID='"\\\"Logging\\\""'
-
 win32 {
     DEFINES += GT_LOGGING_DLL
-    DEFINES += GTLOG_IS_SHARED_LIBRARY
     DEFINES += GT_LOG_WIN_PRINTF_CONSOLE
 }
 
@@ -59,20 +55,17 @@ HEADERS += \
     gt_logdisablelogforfile.h \
     gt_logging_exports.h \
     gt_logging.h \
+    gt_logging_qt_bindings.h \
     gt_loglevel.h \
-    gt_logmodel.h \
     gt_logstream.h
 
 SOURCES += \
-    gt_log.cpp \
-    gt_logdest.cpp \
     gt_logdestconsole.cpp \
     gt_logdestfile.cpp \
-    gt_logdestfunctor.cpp \
-    gt_logmodel.cpp
+    gt_logging.cpp
 
 unix {
-QMAKE_CXXFLAGS += -std=c++11
+    QMAKE_CXXFLAGS += -std=c++14
 }
 
 unix:{

@@ -1,9 +1,10 @@
 #ifndef GT_LOGSTREAM_H
 #define GT_LOGSTREAM_H
 
-#include <QDebug>
+#include "gt_logging_exports.h"
 
-#include <gt_logdest.h>
+#include <sstream>
+#include <iostream>
 
 namespace gt
 {
@@ -11,6 +12,7 @@ namespace gt
 namespace log
 {
 
+//! Enum for verbosity log levels
 enum Verbosity
 {
     Silent = 0,
@@ -18,180 +20,185 @@ enum Verbosity
     Everything = 9
 };
 
-namespace detail
+//! Enum for setting certain flags of a stream
+enum StreamFlag
 {
+    LogSpace = 2, // 0b0010 else no space
+    LogQuote = 4  // 0b0100 else no quote
+};
 
-/// Maps all types to void
-template<class... _Ts>
-using void_t = void;
-
-
-/// Uses SFINAE to check for a global operator<<(QDebug&)
-template <typename T, class = void>
-struct has_global_qdebug_shiftop
-        : std::false_type{};
-
-template <typename T>
-struct has_global_qdebug_shiftop<T,
-        void_t<decltype(::operator<<(std::declval<QDebug&>(),
-                                     std::declval<T>()))>>
-        : std::true_type{};
-
-
-/// Uses SFINAE to check for a operator<<(T) in QDebug
-template <typename T, class = void>
-struct has_dedicated_qdebug_shiftop
-        : std::false_type{};
-
-template <typename T>
-struct has_dedicated_qdebug_shiftop<T,
-        void_t<decltype(std::declval<QDebug>().operator<<(std::declval<T>()))>>
-        : std::true_type{};
-
-
-/// Aliases for enables ifs
-template <typename T>
-using if_has_global_qdebug_shiftop =
-        std::enable_if_t<
-                has_global_qdebug_shiftop<std::decay_t<T>>::value, bool>;
-template <typename T>
-using if_has_no_global_qdebug_shiftop =
-        std::enable_if_t<
-                !has_global_qdebug_shiftop<std::decay_t<T>>::value, bool>;
-
-template <typename T>
-using if_has_dedicated_qdebug_shiftop =
-        std::enable_if_t<
-                has_dedicated_qdebug_shiftop<std::decay_t<T>>::value, bool>;
-template <typename T>
-using if_has_no_dedicated_qdebug_shiftop =
-        std::enable_if_t<
-                !has_dedicated_qdebug_shiftop<std::decay_t<T>>::value, bool>;
-
-/// Alias for no pointer or integral type
-template <typename T>
-using if_not_integral_and_pointer =
-        std::enable_if_t<
-                !std::is_pointer<T>::value &&
-                !std::is_integral<T>::value, bool>;
-
-} // namsepace detail
-
-class Stream : private QDebug
+class Stream;
+//! Helper class to restore state of a stream object once destroyed.
+//! Stream object may not go out of scope before state saver does
+class StreamStateSaver
 {
 public:
-    using QDebug::QDebug;
 
-    inline Stream &quote() { return static_cast<Stream&>(QDebug::quote());}
-    inline Stream &space() { return static_cast<Stream&>(QDebug::space());}
-    inline Stream &noquote() { return static_cast<Stream&>(QDebug::noquote());}
-    inline Stream &nospace() { return static_cast<Stream&>(QDebug::nospace());}
+    //! ctor (copies states)
+    explicit StreamStateSaver(Stream& s);
+    //! dtor (reapplies states)
+    ~StreamStateSaver();
 
+private:
+    Stream* stream;
+    std::ios_base::fmtflags iosflags;
+    int flags;
+    int vlevel;
+};
+
+//! Main stream class for logging most types. May work with Qt symbols as well.
+class Stream
+{
+    friend class StreamStateSaver;
+
+public:
+
+    Stream() {
+        // manipulators
+        m_stream << std::boolalpha;
+    };
+    ~Stream() = default;
+
+    Stream(Stream const&) = delete;
+    Stream(Stream&&) = delete;
+    Stream& operator=(Stream const&) = delete;
+    Stream& operator=(Stream&&) = delete;
+
+    inline Stream& space()   { m_flags |=  LogSpace; return *this; }
+    inline Stream& nospace() { m_flags &= ~LogSpace; return *this; }
+    inline Stream& quote()   { m_flags |=  LogQuote; return *this; }
+    inline Stream& noquote() { m_flags &= ~LogQuote; return *this; }
+
+    Stream& medium() { return verbose(gt::log::Medium); }
     Stream& verbose(int level = gt::log::Everything)
     {
-        msgLevel = level;
+        m_vlevel = level;
         return *this;
     }
 
-    Stream& medium()
-    {
-        return verbose(gt::log::Medium);
-    }
+    std::string str() { return m_stream.str(); }
 
-    GTLOG_SHARED_OBJECT
-    static bool mayLog(int v);
-    bool mayLog() const { return mayLog(msgLevel); }
+    GT_LOGGING_EXPORT static bool mayLog(int level);
+    bool mayLog() const { return mayLog(m_vlevel); }
+    bool mayLogSpace() const { return m_flags & LogSpace; }
+    bool mayLogQuote() const { return m_flags & LogQuote; }
 
     // pod
-    inline Stream &operator<<(std::nullptr_t) {return logMember("(nullptr)");}
-    inline Stream &operator<<(void const* t) {return logMember(t);}
-    inline Stream &operator<<(bool t) {return logMember(t);}
+    inline Stream& operator<<(std::nullptr_t) { return doLog("(nullptr)"); }
+    inline Stream& operator<<(void const* t)
+    {
+        // format pointers
+        StreamStateSaver s{*this};
+        return nospace().
+                doLog(std::hex).
+                doLog("0x").doLog(reinterpret_cast<std::uint64_t>(t));
+    }
+
+    inline Stream& operator<<(bool t) { return doLog(t); }
 
     // chars
-    inline Stream &operator<<(char t) {return logMember(t);}
-#ifdef Q_COMPILER_UNICODE_STRINGS
-    inline Stream &operator<<(char16_t t) {return logMember(t);}
-    inline Stream &operator<<(char32_t t) {return logMember(t);}
-#endif
-    inline Stream &operator<<(QChar t) {return logMember(t);}
+    inline Stream& operator<<(char t) { return doLog(t); }
+    // indicate wide chars
+    inline Stream& operator<<(char16_t t)
+    {
+        { // block for state saver
+            StreamStateSaver s{*this};
+            nospace().operator<<("u'").doLog(t);
+        }
+        return operator<<('\'');
+    }
+    inline Stream& operator<<(char32_t t)
+    {
+        { // block for state saver
+            StreamStateSaver s{*this};
+            nospace().operator<<("U'").doLog(t);
+        }
+        return operator<<('\'');
+    }
 
     // ints
-    inline Stream &operator<<(signed short t) {return logMember(t);}
-    inline Stream &operator<<(unsigned short t) {return logMember(t);}
-    inline Stream &operator<<(signed int t) {return logMember(t);}
-    inline Stream &operator<<(unsigned int  t) {return logMember(t);}
-    inline Stream &operator<<(signed long t) {return logMember(t);}
-    inline Stream &operator<<(unsigned long t) {return logMember(t);}
-    inline Stream &operator<<(qlonglong t) {return logMember(t);}
-    inline Stream &operator<<(qulonglong t) {return logMember(t);}
+    inline Stream& operator<<(short t) { return doLog(t); }
+    inline Stream& operator<<(unsigned short t) { return doLog(t); }
+    inline Stream& operator<<(int t) { return doLog(t); }
+    inline Stream& operator<<(unsigned int  t) { return doLog(t); }
+    inline Stream& operator<<(long t) { return doLog(t); }
+    inline Stream& operator<<(unsigned long t) { return doLog(t); }
+    inline Stream& operator<<(long long t) { return doLog(t); }
+    inline Stream& operator<<(unsigned long long t) { return doLog(t); }
 
     // floats
-    inline Stream &operator<<(float t) {return logMember(t);}
-    inline Stream &operator<<(double t) {return logMember(t);}
+    inline Stream& operator<<(float t) { return doLog(t); }
+    inline Stream& operator<<(double t) { return doLog(t); }
 
     // strings
-    inline Stream &operator<<(const char* t) {return logMember(t);}
-    inline Stream &operator<<(std::string const& t) {return logMember(t.c_str());}
-    inline Stream &operator<<(const QString& t) {return logMember(t);}
-    inline Stream &operator<<(QLatin1String t) {return logMember(t);}
-    inline Stream &operator<<(const QByteArray& t) {return logMember(t);}
-    inline Stream &operator<<(QTextStreamFunction t) {return t ? logMember(t) : *this;}
+    inline Stream& operator<<(const char* t) { return doLog(t); }
+    inline Stream& operator<<(std::string const& t) { return doLog(t); }
 
-    // other
-    inline Stream &operator<<(const QVariant& t) {return logOp(t);}
+    //! Default logging method
+    template <typename T>
+    inline Stream& doLog(T const& t)
+    {
+        if (mayLog())
+        {
+            m_stream << t;
+            logSpace();
+        }
+        return *this;
+    }
 
-    // template based operators: QObject*
-    template <typename T,
-              std::enable_if_t<std::is_base_of<QObject, T>::value, bool> = true>
-    inline Stream& operator<<(T const* t) {return logOp(t);}
-
-    // template based operators: non QObject*
-    template <typename T,
-              std::enable_if_t<!std::is_base_of<QObject, T>::value, bool> = true>
-    inline Stream& operator<<(T const* t) {return logMember(static_cast<void const*>(t));}
-
-    // check for global qdebug support<<
-    template<typename T,
-             detail::if_not_integral_and_pointer<T> = true,
-             detail::if_has_global_qdebug_shiftop<T> = true>
-    inline Stream& operator<<(T const& t) {return logOp(t);}
-
-    // check for dedicated qdebug operator<<
-    template<typename T,
-             detail::if_not_integral_and_pointer<T> = true,
-             detail::if_has_no_global_qdebug_shiftop<T> = true,
-             detail::if_has_dedicated_qdebug_shiftop<T> = true>
-    inline Stream& operator<<(T const& t) {return logMember(t);}
+    //! Logging with quotes (if enabled)
+    template <typename T>
+    inline Stream& doLogQuoted(T const& t)
+    {
+        if (mayLog())
+        {
+            logQuote();
+            m_stream << t;
+            logQuote().logSpace();
+        }
+        return *this;
+    }
 
 private:
 
-    using QDebug::operator=;
+    /// flags
+    int m_flags{gt::log::LogSpace};
+    /// verbosity level
+    int m_vlevel{gt::log::Silent};
+    /// ostream
+    std::ostringstream m_stream;
 
-    template <typename T>
-    Stream& logOp(T&& t)
+    //! Helper function to log ' '
+    inline Stream& logSpace() noexcept
     {
-        if (mayLog(msgLevel))
-        {
-            *this = ::operator<<(static_cast<QDebug&>(*this),
-                                 std::forward<T>(t));
-        }
+        if (mayLogSpace()) m_stream << ' ';
         return *this;
-    }
+    };
 
-    template <typename T>
-    inline Stream & logMember(T&& t) {
-        if (mayLog(msgLevel))
-        {
-            *this = QDebug::operator<<(t);
-        }
+    //! Helper function to log '"'
+    inline Stream& logQuote() noexcept
+    {
+        if (mayLogQuote()) m_stream << '"';
         return *this;
-    }
-
-    int msgLevel{gt::log::Silent};
+    };
 };
 
 } // namespace log
 
 } // namespace gt
+
+inline gt::log::StreamStateSaver::StreamStateSaver(Stream& s)
+    : stream{&s}
+    , iosflags{s.m_stream.flags()}
+    , flags{s.m_flags}
+    , vlevel{s.m_vlevel}
+{}
+
+inline gt::log::StreamStateSaver::~StreamStateSaver()
+{
+    stream->m_stream.setf(iosflags);
+    stream->m_flags = flags;
+    stream->m_vlevel = vlevel;
+}
 
 #endif // GT_LOGSTREAM_H

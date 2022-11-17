@@ -28,40 +28,50 @@
 #define GT_LOGDESTFUNCTOR_H
 
 #include "gt_logdest.h"
-#include <QObject>
+
+#include <cassert>
+#include <functional>
 
 namespace gt
 {
 
 namespace log
 {
-// Offers various types of function-like sinks.
-// This is an advanced destination type. Depending on your configuration, LogFunction might be
-// called from a different thread or even a different binary. You should not access GtLog from
-// inside LogFunction and should not perform any time-consuming operations.
-// logMessageReady is connected through a queued connection and trace messages are not included
-class FunctorDestination : public QObject, public Destination
+
+//! Destination sink for various functors. Functor may not be null. Do not
+//! access gt::log::Logger from inside LogFunction nor perform any
+//! time-consuming operations.
+class FunctorDestination : public Destination
 {
-    Q_OBJECT
 public:
-    static const char* const Type;
 
-    explicit FunctorDestination(LogFunction f);
-    FunctorDestination(QObject *receiver, const char *member);
+    using Functor = std::function<void(std::string const&, Level)>;
 
-    void write(const QString &message, Level level) override;
-    bool isValid() override;
-    QString type() const override;
+    explicit FunctorDestination(Functor f)
+        : m_functor(std::move(f))
+    {
+        assert(m_functor);
+    }
 
-protected:
-    // int used to avoid registering a new enum type
-    Q_SIGNAL void logMessageReady(const QString &message, int level);
+    void write(std::string const& message, Level level) override
+    {
+        m_functor(message, level);
+    }
+
+    std::string type() const override { return "functor"; }
 
 private:
-    LogFunction mLogFunction;
+
+    Functor m_functor;
 };
 
+inline DestinationPtr makeFunctorDestination(FunctorDestination::Functor f)
+{
+    return std::make_shared<FunctorDestination>(std::move(f));
+}
+
 } // namespace log
+
 } // namespace gt
 
 #endif // GT_LOGDESTFUNCTOR_H

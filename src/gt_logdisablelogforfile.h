@@ -1,7 +1,7 @@
 #ifndef GT_LOGDISABLELOGFORFILE_H
 #define GT_LOGDISABLELOGFORFILE_H
 
-#include <QtDebug>
+#include "gt_logstream.h"
 // When included AFTER gt_log.h, this file will disable logging in that C++ file. When included
 // before, it will lead to compiler warnings or errors about macro redefinitions.
 
@@ -23,18 +23,18 @@
 #undef gtErrorId
 #undef gtFatalId
 
-#define gtTrace() if (!FORCE_LOGGING) {} else qDebug()
-#define gtDebug() if (!FORCE_LOGGING) {} else qDebug()
-#define gtInfo()  if (!FORCE_LOGGING) {} else qDebug()
-#define gtWarning()  if (!FORCE_LOGGING) {} else qDebug()
-#define gtError() if (!FORCE_LOGGING) {} else qDebug()
-#define gtFatal() if (!FORCE_LOGGING) {} else qDebug()
+#define gtTrace()    if (!FORCE_LOGGING) {} else gt::log::Stream()
+#define gtDebug()    if (!FORCE_LOGGING) {} else gt::log::Stream()
+#define gtInfo()     if (!FORCE_LOGGING) {} else gt::log::Stream()
+#define gtWarning()  if (!FORCE_LOGGING) {} else gt::log::Stream()
+#define gtError()    if (!FORCE_LOGGING) {} else gt::log::Stream()
+#define gtFatal()    if (!FORCE_LOGGING) {} else gt::log::Stream()
 
-#define gtTraceId(ID)   gtTrace()   << QString("[%1]").arg(ID).toStdString().c_str()
-#define gtDebugId(ID)   gtDebug()   << QString("[%1]").arg(ID).toStdString().c_str()
-#define gtInfoId(ID)    gtInfo()    << QString("[%1]").arg(ID).toStdString().c_str()
-#define gtWarningId(ID) gtWarning() << QString("[%1]").arg(ID).toStdString().c_str()
-#define gtErrorId(ID)   gtError()   << QString("[%1]").arg(ID).toStdString().c_str()
-#define gtFatalId(ID)   gtFatal()   << QString("[%1]").arg(ID).toStdString().c_str()
+#define gtTraceId(ID)   gtTrace()   .operator<<('[' + std::string{ID} + ']')
+#define gtDebugId(ID)   gtDebug()   .operator<<('[' + std::string{ID} + ']')
+#define gtInfoId(ID)    gtInfo()    .operator<<('[' + std::string{ID} + ']')
+#define gtWarningId(ID) gtWarning() .operator<<('[' + std::string{ID} + ']')
+#define gtErrorId(ID)   gtError()   .operator<<('[' + std::string{ID} + ']')
+#define gtFatalId(ID)   gtFatal()   .operator<<('[' + std::string{ID} + ']')
 
 #endif // GT_LOGDISABLELOGFORFILE_H

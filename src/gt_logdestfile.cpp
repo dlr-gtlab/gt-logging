@@ -24,169 +24,206 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gt_logdestfile.h"
-#include <QTextCodec>
-#include <QDateTime>
-#include <QString>
-#include <QtGlobal>
-#include <iostream>
+
+#include "gt_logging.h"
 
 using namespace gt;
 
-const int log::SizeRotationStrategy::MaxBackupCount = 10;
+const size_t log::SizeRotationStrategy::MAX_BACKUP_COUNT = 10;
 
-log::RotationStrategy::~RotationStrategy()
+log::SizeRotationStrategy::~SizeRotationStrategy() = default;
+
+log::SizeRotationStrategy::SizeRotationStrategy(FileSizeInBytes maxFileSize,
+                                                BackupCount maxBackups)
+    : m_maxFileSizeInBytes{maxFileSize}
+    , m_maxBackupsCount{maxBackups}
+{}
+
+void
+log::SizeRotationStrategy::setFileInfo(std::string const& filePath)
 {
+    m_fileName = filePath;
+    // check temp
+    std::ofstream temp(filePath, std::ofstream::ate | std::ofstream::binary);
+    auto res = std::max(std::ios::pos_type{0}, temp.tellp());
+    m_currentFileSizeInBytes = res;
 }
 
-log::SizeRotationStrategy::SizeRotationStrategy()
-    : mCurrentSizeInBytes(0)
-    , mMaxSizeInBytes(0)
-    , mBackupsCount(0)
+void
+log::SizeRotationStrategy::appendMessageSize(size_t size)
 {
+    m_currentFileSizeInBytes += size;
 }
 
-void log::SizeRotationStrategy::setInitialInfo(const QFile &file)
+bool
+log::SizeRotationStrategy::shouldRotate() const
 {
-    mFileName = file.fileName();
-    mCurrentSizeInBytes = file.size();
-}
-
-void log::SizeRotationStrategy::setInitialInfo(const QString &filePath, int fileSize)
-{
-    mFileName = filePath;
-    mCurrentSizeInBytes = fileSize;
-}
-
-void log::SizeRotationStrategy::includeMessageInCalculation(const QString &message)
-{
-    mCurrentSizeInBytes += message.toUtf8().size();
-}
-
-bool log::SizeRotationStrategy::shouldRotate()
-{
-    return mCurrentSizeInBytes > mMaxSizeInBytes;
+    return m_currentFileSizeInBytes >= m_maxFileSizeInBytes;
 }
 
 // Algorithm assumes backups will be named filename.X, where 1 <= X <= mBackupsCount.
 // All X's will be shifted up.
-void log::SizeRotationStrategy::rotate()
+void
+log::SizeRotationStrategy::rotate()
 {
-    if (!mBackupsCount) {
-        if (!removeFileAtPath(mFileName)) {
-            std::cerr << "GtLog: backup delete failed " << qPrintable(mFileName);
+    // one file only
+    if (!m_maxBackupsCount)
+    {
+        if (!removeFileAtPath(m_fileName))
+        {
+            std::cerr << "GtLog: backup delete failed "
+                      << m_fileName << '\n';
         }
         return;
     }
 
-     // 1. find the last existing backup than can be shifted up
-     const QString logNamePattern = mFileName + QString::fromUtf8(".%1");
-     int lastExistingBackupIndex = 0;
-     for (int i = 1;i <= mBackupsCount;++i) {
-         const QString backupFileName = logNamePattern.arg(i);
-         if (fileExistsAtPath(backupFileName)) {
-             lastExistingBackupIndex = qMin(i, mBackupsCount - 1);
-         }
-         else {
-             break;
+    const std::string logNamePattern{m_fileName + '.'};
+
+     // 1. find the last existing backup that can be shifted up
+     size_t lastExistingBackupIndex = 0;
+     size_t fileNameLength = logNamePattern.size() +
+                             m_maxBackupsCount / 10 + 1;
+
+     std::string backupFileName;
+     backupFileName.reserve(fileNameLength);
+
+     for (size_t i = 1; i <= m_maxBackupsCount; ++i)
+     {
+         backupFileName = logNamePattern + std::to_string(i);
+         if (fileExistsAtPath(backupFileName))
+         {
+             lastExistingBackupIndex = std::min(i, m_maxBackupsCount - 1);
          }
      }
 
      // 2. shift up
-     for (int i = lastExistingBackupIndex;i >= 1;--i) {
-         const QString oldName = logNamePattern.arg(i);
-         const QString newName = logNamePattern.arg(i + 1);
-         removeFileAtPath(newName);
-         const bool renamed = renameFileFromTo(oldName, newName);
-         if (!renamed) {
-             std::cerr << "GtLog: could not rename backup " << qPrintable(oldName)
-                       << " to " << qPrintable(newName);
+     std::string oldName;
+     oldName.reserve(fileNameLength);
+     std::string newName;
+     newName.reserve(fileNameLength);
+
+     for (size_t i = lastExistingBackupIndex; i >= 1; --i)
+     {
+         oldName = logNamePattern + std::to_string(i);
+         newName = logNamePattern + std::to_string(i + 1);
+
+         if (fileExistsAtPath(newName) && !removeFileAtPath(newName))
+         {
+             std::cerr << "GtLog: could not remove backup file " << newName
+                       << '\n';
+             continue;
+         }
+         if (!renameFileFromTo(oldName, newName))
+         {
+             std::cerr << "GtLog: could not rename backup file " << oldName
+                       << " to " << newName << '\n';
          }
      }
 
      // 3. rename current log file
-     const QString newName = logNamePattern.arg(1);
-     if (fileExistsAtPath(newName)) {
-         removeFileAtPath(newName);
+     newName = logNamePattern + std::to_string(1);
+     if (fileExistsAtPath(newName) && !removeFileAtPath(newName))
+     {
+         std::cerr << "GtLog: could not remove old log file "
+                   << newName << '\n';
+         return;
      }
-     if (!renameFileFromTo(mFileName, newName)) {
-         std::cerr << "GtLog: could not rename log " << qPrintable(mFileName)
-                   << " to " << qPrintable(newName);
+     if (!renameFileFromTo(m_fileName, newName))
+     {
+         std::cerr << "GtLog: could not rename log file " << m_fileName
+                   << " to " << newName << '\n';
      }
 }
 
-QIODevice::OpenMode log::SizeRotationStrategy::recommendedOpenModeFlag()
+void
+log::SizeRotationStrategy::setMaximumSizeInBytes(uint64_t size)
 {
-    return QIODevice::Append;
+    m_maxFileSizeInBytes = size;
 }
 
-void log::SizeRotationStrategy::setMaximumSizeInBytes(qint64 size)
+void
+log::SizeRotationStrategy::setBackupCount(size_t backups)
 {
-    Q_ASSERT(size >= 0);
-    mMaxSizeInBytes = size;
+    m_maxBackupsCount = std::min(backups, MAX_BACKUP_COUNT);
 }
 
-void log::SizeRotationStrategy::setBackupCount(int backups)
+bool
+log::SizeRotationStrategy::removeFileAtPath(const std::string& path)
 {
-    Q_ASSERT(backups >= 0);
-    mBackupsCount = qMin(backups, SizeRotationStrategy::MaxBackupCount);
+    return std::remove(path.c_str()) == 0;
 }
 
-bool log::SizeRotationStrategy::removeFileAtPath(const QString &path)
+bool
+log::SizeRotationStrategy::fileExistsAtPath(const std::string& path)
 {
-    return QFile::remove(path);
+    // try to open file to read
+    std::ofstream file;
+    file.open(path);
+    return file.is_open();
 }
 
-bool log::SizeRotationStrategy::fileExistsAtPath(const QString &path)
+bool
+log::SizeRotationStrategy::renameFileFromTo(const std::string& from,
+                                            const std::string& to)
 {
-    return QFile::exists(path);
+    return std::rename(from.c_str(), to.c_str()) == 0;
 }
 
-bool log::SizeRotationStrategy::renameFileFromTo(const QString &from, const QString &to)
-{
-    return QFile::rename(from, to);
-}
+log::FileDestination::~FileDestination() = default;
 
-const char* const log::FileDestination::Type = "file";
-
-log::FileDestination::FileDestination(const QString& filePath, RotationStrategyPtr rotationStrategy)
-    : mRotationStrategy(rotationStrategy)
+log::FileDestination::FileDestination(std::string filePath,
+                                      RotationStrategyPtr rotationStrategy)
+    : m_filePath{std::move(filePath)}
+    , m_rotationStrategy{std::move(rotationStrategy)}
 {
-    mFile.setFileName(filePath);
-    if (!mFile.open(QFile::WriteOnly | QFile::Text | mRotationStrategy->recommendedOpenModeFlag())) {
-        std::cerr << "GtLog: could not open log file " << qPrintable(filePath);
+    assert(m_rotationStrategy);
+
+    // open file
+    m_fstream.open(m_filePath,
+                        m_rotationStrategy->openMode());
+
+    if (!m_fstream.is_open())
+    {
+        std::cerr << "GtLog: could not open log file " << m_filePath << '\n';
     }
-    mOutputStream.setDevice(&mFile);
-    mOutputStream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-    mRotationStrategy->setInitialInfo(mFile);
+    // update file stats
+    m_rotationStrategy->setFileInfo(m_filePath);
 }
 
-void log::FileDestination::write(const QString& message, Level)
+void
+log::FileDestination::write(const std::string& message, Level level)
 {
-    mRotationStrategy->includeMessageInCalculation(message);
-    if (mRotationStrategy->shouldRotate()) {
-        mOutputStream.setDevice(NULL);
-        mFile.close();
-        mRotationStrategy->rotate();
-        if (!mFile.open(QFile::WriteOnly | QFile::Text | mRotationStrategy->recommendedOpenModeFlag())) {
-            std::cerr << "GtLog: could not reopen log file " << qPrintable(mFile.fileName());
+    std::string msg = gt::log::Logger::instance().levelToString(level)
+                      + ' ' + message + '\n';
+    m_rotationStrategy->appendMessageSize(msg.size());
+
+    if (m_rotationStrategy->shouldRotate())
+    {
+        // close and rotate
+        m_fstream.close();
+        m_rotationStrategy->rotate();
+
+        // open file
+        m_fstream.open(m_filePath,
+                            m_rotationStrategy->openMode());
+
+        if (!m_fstream.is_open())
+        {
+            std::cerr << "GtLog: could not reopen log file "
+                      << m_filePath << '\n';
+            return;
         }
-        mRotationStrategy->setInitialInfo(mFile);
-        mOutputStream.setDevice(&mFile);
-        mOutputStream.setCodec(QTextCodec::codecForName("UTF-8"));
+        // update file stats
+        m_rotationStrategy->setFileInfo(m_filePath);
     }
 
-    mOutputStream << message << '\n';
-    mOutputStream.flush();
+    m_fstream << msg.c_str();
+    m_fstream.flush();
 }
 
-bool log::FileDestination::isValid()
+bool
+log::FileDestination::isValid() const
 {
-    return mFile.isOpen();
+    return m_fstream.is_open();
 }
-
-QString log::FileDestination::type() const
-{
-    return QString::fromLatin1(Type);
-}
-
