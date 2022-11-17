@@ -4,40 +4,38 @@
 #include <gtest/gtest.h>
 #include "gt_logging.h"
 
+#include <QString>
+#include <QObject>
+
 // log helper
 class LogHelperTest : public testing::Test
 {
 public:
-    LogHelperTest() : logger(gt::log::Logger::instance())
-    {
-        dest = gt::log::DestinationFactory::MakeFunctorDestination(logToStr);
-        logger.addDestination(dest);
-    }
+    LogHelperTest() : logger(gt::log::Logger::instance()) { }
 
     void SetUp() override
     {
-        log.clear();
-        ASSERT_TRUE(log.isEmpty());
+        auto dest = gt::log::makeFunctorDestination([this](const std::string& msg, gt::log::Level) {
+            log.append(QString::fromStdString(msg));
+        });
+        ASSERT_TRUE(logger.addDestination("test", dest));
+
+        ASSERT_TRUE(logger.hasDestination(dest));
     }
 
     void TearDown() override
     {
-        qDebug() << log;
-        log.clear();
-        logger.removeDestination(dest);
+        logger.removeDestination("test");
+
+        ASSERT_FALSE(logger.hasDestination("test"));
     }
 
-    static void logToStr(const QString& msg, gt::log::Level)
-    {
-        log.append(msg);
-    }
 
-    gt::log::DestinationPtr dest;
     gt::log::Logger& logger;
-    static QString log;
+    QString log;
 };
 
-// QObject sample object (must apperently be in header for Q_OBJECT to work)
+// QObject sample object (must be in header for Q_OBJECT to work)
 class MyQObject : public QObject
 {
     Q_OBJECT
@@ -48,7 +46,7 @@ public:
     {
         FirstEntry = 0,
         SecondEntry,
-        ThirdENtry
+        ThirdEntry
     };
     Q_ENUM(TestEnum);
 
@@ -60,7 +58,7 @@ public:
     };
     Q_DECLARE_FLAGS(Flags, Flag)
 
-    MyQObject();
+    MyQObject() = default;
 };
 
 

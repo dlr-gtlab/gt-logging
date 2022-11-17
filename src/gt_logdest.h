@@ -26,88 +26,44 @@
 #ifndef GT_LOGDEST_H
 #define GT_LOGDEST_H
 
+#include "gt_logging_exports.h"
 #include "gt_loglevel.h"
-#include <QSharedPointer>
-#include <QtGlobal>
-class QString;
-class QObject;
 
-#ifdef GTLOG_IS_SHARED_LIBRARY
-#define GTLOG_SHARED_OBJECT Q_DECL_EXPORT
-#elif GTLOG_IS_SHARED_LIBRARY_IMPORT
-#define GTLOG_SHARED_OBJECT Q_DECL_IMPORT
-#else
-#define GTLOG_SHARED_OBJECT
-#endif
+#include <memory>
+#include <string>
 
 namespace gt
 {
 namespace log
 {
 
-class GTLOG_SHARED_OBJECT Destination
+class Destination
 {
 public:
-    typedef void (*LogFunction)(const QString &message, Level level);
 
-public:
-    virtual ~Destination();
-    virtual void write(const QString& message, Level level) = 0;
+    virtual ~Destination() = default;
+
+    virtual void write(std::string const& message, Level level) = 0;
+
     //!
     //! \brief isValid
     //! \return whether the destination was created correctly
     //!
-    virtual bool isValid() = 0;
+    virtual bool isValid() const { return true; }
+
     //!
     //! \brief type
     //! \return the type as a string e.g: console, file.
     //!         The returned value may change in different versions of GtLog, but two destinations
     //!         of the same type will return the same value.
     //!
-    virtual QString type() const = 0;
-};
-typedef QSharedPointer<Destination> DestinationPtr;
-
-
-// a series of "named" paramaters, to make the file destination creation more readable
-enum LogRotationOption
-{
-    DisableLogRotation = 0,
-    EnableLogRotation  = 1
+    virtual std::string type() const = 0;
 };
 
-struct GTLOG_SHARED_OBJECT MaxSizeBytes
-{
-    MaxSizeBytes() : size(0) {}
-    explicit MaxSizeBytes(qint64 size_) : size(size_) {}
-    qint64 size;
-};
-
-struct GTLOG_SHARED_OBJECT MaxOldLogCount
-{
-    MaxOldLogCount() : count(0) {}
-    explicit MaxOldLogCount(int count_) : count(count_) {}
-    int count;
-};
-
-
-//! Creates logging destinations/sinks. The caller shares ownership of the destinations with the logger.
-//! After being added to a logger, the caller can discard the pointers.
-class GTLOG_SHARED_OBJECT DestinationFactory
-{
-public:
-    static DestinationPtr MakeFileDestination(const QString& filePath,
-        LogRotationOption rotation = DisableLogRotation,
-        const MaxSizeBytes &sizeInBytesToRotateAfter = MaxSizeBytes(),
-        const MaxOldLogCount &oldLogsToKeep = MaxOldLogCount());
-    static DestinationPtr MakeDebugOutputDestination();
-    // takes a pointer to a function
-    static DestinationPtr MakeFunctorDestination(Destination::LogFunction f);
-    // takes a QObject + signal/slot
-    static DestinationPtr MakeFunctorDestination(QObject *receiver, const char *member);
-};
+using DestinationPtr = std::shared_ptr<Destination>;
 
 } // end namespace log
+
 } // end namespace gt
 
 #endif // GT_LOGDEST_H

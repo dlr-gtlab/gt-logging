@@ -9,15 +9,25 @@
 // log line number
 #define GT_LOG_LINE_NUMBERS
 
+#include "gt_logging_qt_bindings.h"
 #include "test_log_helper.h"
 
-class BasicLog : public LogHelperTest
+class LogLineNo : public LogHelperTest
 {};
 
-TEST_F(BasicLog, logLineNumbers)
+TEST_F(LogLineNo, logLineNumbers)
 {
     gtWarning() << QString{"Hello"} << QString{"World"};
     EXPECT_TRUE(log.contains("Hello World"));
     EXPECT_TRUE(log.contains(__FILE__));
-    EXPECT_TRUE(log.contains(QString::number(__LINE__-3)));
+    EXPECT_TRUE(log.contains(QString::number(__LINE__ - 3)));
+}
+
+// member methods should be callable as well
+TEST_F(LogLineNo, callMemberMethod)
+{
+    gtWarning().nospace() << "He" << "llo" << QString{"World"};
+    EXPECT_TRUE(log.contains("HelloWorld"));
+    EXPECT_TRUE(log.contains(__FILE__));
+    EXPECT_TRUE(log.contains(QString::number(__LINE__ - 3)));
 }

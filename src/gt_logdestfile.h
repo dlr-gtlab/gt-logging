@@ -27,88 +27,172 @@
 #define GT_LOGDESTFILE_H
 
 #include "gt_logdest.h"
-#include <QFile>
-#include <QTextStream>
-#include <QtGlobal>
-#include <QSharedPointer>
+
+#include <stdint.h>
+#include <fstream>
+#include <algorithm>
 
 namespace gt
 {
 namespace log
 {
-class RotationStrategy
-{
-public:
-    virtual ~RotationStrategy();
 
-    virtual void setInitialInfo(const QFile &file) = 0;
-    virtual void includeMessageInCalculation(const QString &message) = 0;
-    virtual bool shouldRotate() = 0;
+//! Rotation Option
+enum RotationOption
+{
+    DisableLogRotation = 0,
+    EnableLogRotation  = 1
+};
+
+//! Typesafe wrapper for file size in bytes
+struct FileSizeInBytes
+{
+    constexpr FileSizeInBytes() : value(0) {}
+    constexpr explicit FileSizeInBytes(uint64_t size_) : value(size_) {}
+
+    constexpr operator uint64_t() noexcept { return value; }
+
+    uint64_t value;
+};
+
+//! Typesafe wrapper for backups to keep
+struct BackupCount
+{
+    constexpr BackupCount() : value(0) {}
+    constexpr explicit BackupCount(size_t count_) : value(count_) {}
+
+    constexpr operator size_t() noexcept { return value; }
+
+    size_t value;
+};
+
+struct RotationStrategy
+{
+    virtual ~RotationStrategy() = default;
+
+    virtual void setFileInfo(std::string const& filePath) = 0;
+    virtual void appendMessageSize(size_t size) = 0;
+    virtual bool shouldRotate() const = 0;
     virtual void rotate() = 0;
-    virtual QIODevice::OpenMode recommendedOpenModeFlag() = 0;
+    virtual std::ios_base::openmode openMode() const = 0;
 };
 
 // Never rotates file, overwrites existing file.
-class NullRotationStrategy : public RotationStrategy
+struct NullRotationStrategy : public RotationStrategy
 {
-public:
-    void setInitialInfo(const QFile &) override {}
-    void includeMessageInCalculation(const QString &) override {}
-    bool shouldRotate() override { return false; }
+    void setFileInfo(std::string const&) override {}
+    void appendMessageSize(size_t) override {}
+    bool shouldRotate() const override { return false; }
     void rotate() override {}
-    QIODevice::OpenMode recommendedOpenModeFlag() override { return QIODevice::Truncate; }
+
+    std::ios_base::openmode openMode() const override
+    {
+        return std::ios::out | std::ios::trunc;
+    }
 };
 
-// Rotates after a size is reached, keeps a number of <= 10 backups, appends to existing file.
+//! Rotates after a size is reached, keeps a number of <= MAX_BACKUP_COUNT
+//! backups, appends to existing file.
 class SizeRotationStrategy : public RotationStrategy
 {
 public:
-    SizeRotationStrategy();
-    static const int MaxBackupCount;
+    static const size_t MAX_BACKUP_COUNT;
 
-    void setInitialInfo(const QFile &file) override;
-    void setInitialInfo(const QString& filePath, int fileSize);
-    void includeMessageInCalculation(const QString &message) override;
-    bool shouldRotate() override;
+    GT_LOGGING_EXPORT SizeRotationStrategy(FileSizeInBytes maxFileSize = {},
+                         BackupCount maxBackups = {});
+    GT_LOGGING_EXPORT ~SizeRotationStrategy();
+
+    GT_LOGGING_EXPORT
+    void setFileInfo(std::string const& filePath) override;
+
+    GT_LOGGING_EXPORT
+    void appendMessageSize(size_t size) override;
+
+    GT_LOGGING_EXPORT
+    bool shouldRotate() const override;
+
+    GT_LOGGING_EXPORT
     void rotate() override;
-    QIODevice::OpenMode recommendedOpenModeFlag() override;
 
-    void setMaximumSizeInBytes(qint64 size);
-    void setBackupCount(int backups);
+    std::ios_base::openmode openMode() const override
+    {
+        return std::ios::out | std::ios::app;
+    }
+
+    GT_LOGGING_EXPORT
+    void setMaximumSizeInBytes(uint64_t size);
+
+    GT_LOGGING_EXPORT
+    void setBackupCount(size_t backups);
 
 protected:
     // can be overridden for testing
-    virtual bool removeFileAtPath(const QString& path);
-    virtual bool fileExistsAtPath(const QString& path);
-    virtual bool renameFileFromTo(const QString& from, const QString& to);
+    static bool removeFileAtPath(const std::string&path);
+    static bool fileExistsAtPath(const std::string& path);
+    static bool renameFileFromTo(const std::string& from,
+                                 const std::string& to);
 
 private:
-    QString mFileName;
-    qint64 mCurrentSizeInBytes;
-    qint64 mMaxSizeInBytes;
-    int mBackupsCount;
+
+    std::string m_fileName;
+    uint64_t m_currentFileSizeInBytes{0};
+    uint64_t m_maxFileSizeInBytes{0};
+    size_t m_maxBackupsCount{0};
 };
 
-typedef QSharedPointer<RotationStrategy> RotationStrategyPtr;
+using RotationStrategyPtr = std::shared_ptr<RotationStrategy>;
 
-// file message sink
+inline RotationStrategyPtr
+makeSizeRotationStrategy(FileSizeInBytes maxFileSize = {},
+                         BackupCount maxBackups = {})
+{
+    return std::make_shared<SizeRotationStrategy>(maxFileSize, maxBackups);
+}
+
+//! File destination sink
 class FileDestination : public Destination
 {
 public:
-    static const char* const Type;
 
-    FileDestination(const QString& filePath, RotationStrategyPtr rotationStrategy);
-    void write(const QString& message, Level level) override;
-    bool isValid() override;
-    QString type() const override;
+    GT_LOGGING_EXPORT FileDestination(std::string filePath, RotationStrategyPtr rotationStrategy);
+    GT_LOGGING_EXPORT ~FileDestination();
+
+    GT_LOGGING_EXPORT
+    void write(std::string const& message, Level level) override;
+
+    GT_LOGGING_EXPORT
+    bool isValid() const override;
+
+    std::string type() const override { return "file"; }
 
 private:
-    QFile mFile;
-    QTextStream mOutputStream;
-    QSharedPointer<RotationStrategy> mRotationStrategy;
+
+    std::ofstream m_fstream;
+    std::string m_filePath;
+    RotationStrategyPtr m_rotationStrategy;
 };
 
+inline DestinationPtr
+makeFileDestination(std::string filePath)
+{
+    return std::make_shared<FileDestination>(
+                std::move(filePath), std::make_shared<NullRotationStrategy>());
+}
+
+inline DestinationPtr
+makeFileDestination(std::string filePath,
+                    std::shared_ptr<RotationStrategy> rotation)
+{
+    if (!rotation)
+    {
+        rotation = std::make_shared<NullRotationStrategy>();
+    }
+    return std::make_shared<FileDestination>(
+                std::move(filePath), std::move(rotation));
+}
+
 } // namespace log
+
 } // namespace gt
 
 #endif // GT_LOGDESTFILE_H

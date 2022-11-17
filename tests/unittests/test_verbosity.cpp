@@ -8,12 +8,6 @@ class Verbosity : public LogHelperTest
         logger.setVerbosity(gt::log::Silent);
         LogHelperTest::SetUp();
     }
-
-    void TearDown() override
-    {
-        logger.setVerbosity(gt::log::Silent);
-        LogHelperTest::SetUp();
-    }
 };
 
 TEST_F(Verbosity, logError)
@@ -38,8 +32,8 @@ TEST_F(Verbosity, logErrorVerboseHigh)
 
     logger.setVerbosity(gt::log::Everything);
 
-    gtError().verbose() << "This verbose error should must appear";
-    EXPECT_TRUE(log.contains("This verbose error should must appear"));
+    gtError().verbose() << "This verbose error must appear";
+    EXPECT_TRUE(log.contains("This verbose error must appear"));
 }
 
 TEST_F(Verbosity, logErrorVerboseMedium)
@@ -48,8 +42,8 @@ TEST_F(Verbosity, logErrorVerboseMedium)
 
     logger.setVerbosity(gt::log::Medium);
 
-    gtError().verbose() << "This verbose error should must not appear";
-    EXPECT_FALSE(log.contains("This verbose error should must not appear"));
+    gtError().verbose() << "This verbose error must not appear";
+    EXPECT_FALSE(log.contains("This verbose error must not appear"));
 }
 
 TEST_F(Verbosity, logErrorVerboseMediumSuccess)
@@ -61,7 +55,6 @@ TEST_F(Verbosity, logErrorVerboseMediumSuccess)
     gtError().verbose(gt::log::Medium) << "This verbose error should must still appear";
     EXPECT_TRUE(log.contains("This verbose error should must still appear"));
 }
-
 
 TEST_F(Verbosity, logErrorVerboseMediumSuccess2)
 {

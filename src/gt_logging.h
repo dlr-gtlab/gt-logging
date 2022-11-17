@@ -28,17 +28,17 @@
 #ifndef GTLOGGING_H
 #define GTLOGGING_H
 
-#include "gt_logging_exports.h"
-
 #include "gt_loglevel.h"
-#include "gt_logdest.h"
-#include <QDebug>
-#include <QString>
-#include <qglobal.h>
+#include "gt_logstream.h"
 
-#include <gt_logstream.h>
+#include "gt_logdestconsole.h"
+#include "gt_logdestfile.h"
+#include "gt_logdestfunctor.h"
 
-#include <iostream>
+// Qt support
+#ifdef GT_LOG_USE_QT_BINDINGS
+#include "gt_logbindings_qt.h"
+#endif
 
 // macros to convert an argument to string
 #define GT_LOG_TO_STR_HELPER(X) #X
@@ -55,76 +55,109 @@ namespace gt
 namespace log
 {
 
-class Destination;
-class LoggerImpl; // d pointer
-
-class GTLOG_SHARED_OBJECT Logger
+class Logger
 {
 public:
+    GT_LOGGING_EXPORT
     static Logger& instance();
-    static Level levelFromLogMessage(const QString& logMessage, bool* conversionSucceeded = 0);
-    static Level levelFromInt(const int lvl);
-    static QString levelToString(Level level);
 
+    GT_LOGGING_EXPORT
+    static Level levelFromString(const std::string& logMessage, bool* ok = {});
+
+    GT_LOGGING_EXPORT
+    static Level levelFromInt(const int lvl);
+
+    GT_LOGGING_EXPORT
+    static std::string levelToString(Level level);
+
+    GT_LOGGING_EXPORT
     ~Logger();
 
-    //! Adds a log message destination. Don't add null destinations.
-    void addDestination(DestinationPtr destination);
-    //! Removes a previously added destination. Does nothing if destination was not previously added.
-    void removeDestination(const DestinationPtr& destination);
-    //! Checks if a destination of a specific type has been added. Pass T::Type as parameter.
-    bool hasDestinationOfType(const char* type) const;
+    //! Adds a log message destination if its valid.
+    //! Will not skip duplicates.
+    GT_LOGGING_EXPORT
+    bool addDestination(DestinationPtr destination);
+
+    //! Adds a named log message destination if its valid. Dont use use
+    //! empty ids. Will skip duplicates (by name).
+    GT_LOGGING_EXPORT
+    bool addDestination(std::string id, DestinationPtr destination);
+
+    //! Removes a previously added destination. Returns true if a destination
+    //! was removed.
+    GT_LOGGING_EXPORT
+    bool removeDestination(const DestinationPtr& destination);
+
+    //! Removes a previously added destination by name.Returns true if a
+    //! destination was removed.
+    GT_LOGGING_EXPORT
+    bool removeDestination(const std::string& id);
+
+    //! Checks if a destination of a specific type has been added.
+    //! Pass T::type as parameter.
+    GT_LOGGING_EXPORT
+    bool hasDestinationOfType(const std::string& type) const;
+
+    //! Checks if the destination has been added.
+    GT_LOGGING_EXPORT
+    bool hasDestination(const DestinationPtr& destination);
+
+    //! Checks if the named destination has been added.
+    GT_LOGGING_EXPORT
+    bool hasDestination(const std::string& id);
+
     //! Logging at a level < 'newLevel' will be ignored
+    GT_LOGGING_EXPORT
     void setLoggingLevel(Level newLevel);
+
     //! The default level is INFO
+    GT_LOGGING_EXPORT
     Level loggingLevel() const;
 
     //! Sets the verbosity level of the logger (from 0 ... 9)
-    void setVerbosity(int);
+    GT_LOGGING_EXPORT
+    void setVerbosity(int verbosity);
 
     //! Gets the verbosity level of the logger (from 0 ... 9)
+    GT_LOGGING_EXPORT
     int verbosity() const;
 
     //! The helper forwards the streaming to QDebug and builds the final
     //! log message.
-    class GTLOG_SHARED_OBJECT Helper
+    class Helper
     {
     public:
-        explicit Helper(Level logLevel, QString logId = GT_MODULE_ID);
+        GT_LOGGING_EXPORT
+        explicit Helper(Level logLevel, std::string logId = GT_MODULE_ID);
+
+        GT_LOGGING_EXPORT
         ~Helper();
 
         gt::log::Stream& stream()
         {
-            return gtStream
-#ifndef GT_LOG_USE_QUOTE
-                .noquote()
-#endif
-#ifdef GT_LOG_USE_NOSPACE
-                .nospace()
-#endif
-                ;
+            return gtStream;
         }
 
     private:
+
         void writeToLog();
 
         Level level;
-        QString buffer;
+        std::string id;
         gt::log::Stream gtStream;
-        QString id;
     };
 
 private:
     Logger();
-    Logger(const Logger&);            // not available
-    Logger& operator=(const Logger&); // not available
+    Logger(Logger const&) = delete;
+    Logger(Logger&&) = delete;
+    Logger& operator=(Logger const&) = delete;
+    Logger& operator=(Logger&&) = delete;
 
-    void enqueueWrite(const QString& message, Level level);
-    void write(const QString& message, Level level);
+    void write(const std::string& message, Level level);
 
-    LoggerImpl* d;
-
-    friend class LogWriterRunnable;
+    struct Impl; // d pointer
+    std::unique_ptr<Impl> pimpl;
 };
 
 } // namespace log
@@ -132,60 +165,56 @@ private:
 } // namespace gt
 
 
-//lLogging line numbers
+// log line numbers
 #ifdef GT_LOG_LINE_NUMBERS
-// add extra space when logging line numbers
-#ifdef GT_LOG_USE_NOSPACE
-#define GT_LOG_IMPL_SPACE " "
-#else
-#define GT_LOG_IMPL_SPACE
-#endif
 // call operator explicitly to return stream object
-#define GT_LOG_IMPL_LINE_NUMBERS .operator<<( __FILE__ "@" GT_LOG_TO_STR(__LINE__) ":" GT_LOG_IMPL_SPACE)
+#define GT_LOG_IMPL_LINE_NUMBERS .operator<<( __FILE__ "@" GT_LOG_TO_STR(__LINE__) ":")
 #else
 #define GT_LOG_IMPL_LINE_NUMBERS
 #endif
 
-//! Logging macros: define GT_LOG_LINE_NUMBERS to get the file and line number
-//! in the log output.
-#define gtTrace() \
-if (gt::log::Logger::instance().loggingLevel() > gt::log::TraceLevel) {} \
-    else gt::log::Logger::Helper(gt::log::TraceLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtDebug() \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::DebugLevel) {} \
-    else gt::log::Logger::Helper(gt::log::DebugLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtInfo()  \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::InfoLevel) {} \
-    else gt::log::Logger::Helper(gt::log::InfoLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtWarning()  \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::WarnLevel) {} \
-    else gt::log::Logger::Helper(gt::log::WarnLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtError() \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::ErrorLevel) {} \
-    else gt::log::Logger::Helper(gt::log::ErrorLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtFatal() \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::FatalLevel) {} \
-    else gt::log::Logger::Helper(gt::log::FatalLevel).stream() GT_LOG_IMPL_LINE_NUMBERS
+#ifdef GT_LOG_QUOTE
+// enable quoting of string types
+#define GT_LOG_IMPL_QUOTE .quote()
+#else
+#define GT_LOG_IMPL_QUOTE
+#endif
 
-//! Logging macros with fixed logging id
-#define gtTraceId(ID) \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::TraceLevel) {} \
-    else gt::log::Logger::Helper(gt::log::TraceLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtDebugId(ID) \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::DebugLevel) {} \
-    else gt::log::Logger::Helper(gt::log::DebugLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtInfoId(ID)  \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::InfoLevel) {} \
-    else gt::log::Logger::Helper(gt::log::InfoLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtWarningId(ID)  \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::WarnLevel) {} \
-    else gt::log::Logger::Helper(gt::log::WarnLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtErrorId(ID) \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::ErrorLevel) {} \
-    else gt::log::Logger::Helper(gt::log::ErrorLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
-#define gtFatalId(ID) \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::FatalLevel) {} \
-    else gt::log::Logger::Helper(gt::log::FatalLevel, ID).stream() GT_LOG_IMPL_LINE_NUMBERS
+#ifdef GT_LOG_NOSPACE
+// disable logging of spaces
+#define GT_LOG_IMPL_NOSPACE .nospace()
+#else
+#define GT_LOG_IMPL_NOSPACE
+#endif
+
+#define GT_LOG_IMPL(LEVEL) \
+    if (gt::log::Logger::instance().loggingLevel() > gt::log::LEVEL) \
+    {} \
+    else gt::log::Logger::Helper(gt::log::LEVEL).stream() \
+    GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+
+#define GT_LOG_IMPL_ID(LEVEL, ID) \
+    if (gt::log::Logger::instance().loggingLevel() > gt::log::LEVEL) \
+    {} \
+    else gt::log::Logger::Helper(gt::log::LEVEL, ID).stream() \
+    GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+
+
+//! Default logging macros.
+#define gtTrace()       GT_LOG_IMPL(TraceLevel)
+#define gtDebug()       GT_LOG_IMPL(DebugLevel)
+#define gtInfo()        GT_LOG_IMPL(InfoLevel)
+#define gtWarning()     GT_LOG_IMPL(WarnLevel)
+#define gtError()       GT_LOG_IMPL(ErrorLevel)
+#define gtFatal()       GT_LOG_IMPL(FatalLevel)
+
+//! Logging macros with custom logging id
+#define gtTraceId(ID)   GT_LOG_IMPL_ID(TraceLevel, ID)
+#define gtDebugId(ID)   GT_LOG_IMPL_ID(DebugLevel, ID)
+#define gtInfoId(ID)    GT_LOG_IMPL_ID(InfoLevel , ID)
+#define gtWarningId(ID) GT_LOG_IMPL_ID(WarnLevel , ID)
+#define gtErrorId(ID)   GT_LOG_IMPL_ID(ErrorLevel, ID)
+#define gtFatalId(ID)   GT_LOG_IMPL_ID(FatalLevel, ID)
 
 #ifdef GT_LOG_DISABLE
 #include "gt_logdisablelogforfile.h"
