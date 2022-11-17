@@ -12,8 +12,8 @@
 #include "gt_loglevel.h"
 
 #include <array>
+#include <iomanip>
 #include <sstream>
-#include <ctime>
 
 namespace gt
 {
@@ -55,7 +55,7 @@ public:
     //! Default format
     static std::string const& defaultFormat()
     {
-        static const std::string format = "/L [/I] [/T] /M";
+        static const std::string format = "/L [/I] [%H:%M:%S] /M";
         return format;
     }
 
@@ -75,11 +75,13 @@ public:
                               std::string const& message,
                               std::tm const& time)
     {
-        std::string formatted = format;
-        // size +10 for good measure
-        formatted.reserve(format.size() + message.size() + id.size() + 10);
+        // format time
+        std::ostringstream s;
+        s << std::put_time(&time, format.c_str());
+        std::string formatted = s.str();
 
-        formatTime(formatted, time);
+        formatted.reserve(formatted.size() + message.size() + id.size());
+
         replace("/L", formatted, levelToString(level));
         replace("/I", formatted, id.empty() ? "-" : id);
         replace("/M", formatted, message);
@@ -108,7 +110,7 @@ private:
      * /L = Level
      * /I = Id
      * /M = Message
-     * /T = Day time (%H:%M:%S)
+     * /% = format like strftime (e.g. %H:%M:%S)
      */
     std::string m_format{defaultFormat()};
 
@@ -123,22 +125,6 @@ private:
         if (idx != std::string::npos)
         {
             string.replace(idx, ident.size(), r);
-        }
-    }
-
-    //! Replaces time ident if it exists with default time format
-    static void formatTime(std::string& string, tm const& time)
-    {
-        size_t idx = string.find("/T");
-        if (idx != std::string::npos)
-        {
-            // time format
-            static constexpr char timeFormat[] = "%H:%M:%S";
-            // time buffer
-            std::array<char, sizeof(timeFormat)> timestr;
-
-            std::strftime(timestr.data(), timestr.size(), timeFormat, &time);
-            string.replace(idx, 2, timestr.data());
         }
     }
 };
