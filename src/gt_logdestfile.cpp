@@ -172,8 +172,11 @@ log::SizeRotationStrategy::renameFileFromTo(const std::string& from,
 log::FileDestination::~FileDestination() = default;
 
 log::FileDestination::FileDestination(std::string filePath,
-                                      RotationStrategyPtr rotationStrategy)
-    : m_filePath{std::move(filePath)}
+                                      RotationStrategyPtr rotationStrategy,
+                                      Formatter formatter)
+
+    : FormattedDestination{std::move(formatter)}
+    , m_filePath{std::move(filePath)}
     , m_rotationStrategy{std::move(rotationStrategy)}
 {
     assert(m_rotationStrategy);
@@ -192,10 +195,9 @@ log::FileDestination::FileDestination(std::string filePath,
 }
 
 void
-log::FileDestination::write(const std::string& message, Level level)
+log::FileDestination::write(std::string const& message, Level /*level*/)
 {
-    std::string msg = gt::log::Logger::instance().levelToString(level)
-                      + ' ' + message + '\n';
+    std::string msg = message;
     m_rotationStrategy->appendMessageSize(msg.size());
 
     if (m_rotationStrategy->shouldRotate())
@@ -220,6 +222,12 @@ log::FileDestination::write(const std::string& message, Level level)
 
     m_fstream << msg.c_str();
     m_fstream.flush();
+}
+
+void
+log::FileDestination::writeInformative(const std::string& message)
+{
+    write(message, gt::log::InfoLevel);
 }
 
 bool

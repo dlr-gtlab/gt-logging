@@ -66,15 +66,15 @@ TEST_F(LogFileDest, noRotation)
 
     // check warning message:
     // level
-    EXPECT_TRUE(data.contains(gt::log::Logger::levelToString(gt::log::WarnLevel).c_str()));
+    EXPECT_TRUE(data.contains(gt::log::levelToString(gt::log::WarnLevel).c_str()));
     // message
-    EXPECT_TRUE("m y boring warning!");
+    EXPECT_TRUE(data.contains("m y boring warning!"));
 
     // check error message:
     // level
-    EXPECT_TRUE(data.contains(gt::log::Logger::levelToString(gt::log::ErrorLevel).c_str()));
+    EXPECT_TRUE(data.contains(gt::log::levelToString(gt::log::ErrorLevel).c_str()));
     // message
-    EXPECT_TRUE("my not-so-fancy error no 42");
+    EXPECT_TRUE(data.contains("my not-so-fancy error no 42"));
 }
 
 TEST_F(LogFileDest, withRotation)

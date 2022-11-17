@@ -33,7 +33,10 @@ TEST_F(DestTest, nulldest)
 TEST_F(DestTest, namedDestination)
 {
     auto dest = gt::log::makeFunctorDestination(
-                    [](std::string const&, gt::log::Level /*l*/){
+                    [](gt::log::Level /*l*/,
+                    std::string const& /*id*/,
+                    std::string const& /*m*/,
+                    tm /*time*/){
         // nothing to do here
     });
 
@@ -59,7 +62,10 @@ TEST_F(DestTest, namedDestination)
 TEST_F(DestTest, unnamedDestination)
 {
     auto dest = gt::log::makeFunctorDestination(
-                    [](std::string const&, gt::log::Level){
+                    [](gt::log::Level /*l*/,
+                    std::string const& /*id*/,
+                    std::string const& /*m*/,
+                    tm /*time*/){
         // nothing to do here
     });
 

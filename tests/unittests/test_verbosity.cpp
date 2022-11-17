@@ -65,4 +65,3 @@ TEST_F(Verbosity, logErrorVerboseMediumSuccess2)
     gtError().medium() << "This verbose error should must still appear";
     EXPECT_TRUE(log.contains("This verbose error should must still appear"));
 }
-

@@ -30,7 +30,6 @@
 
 #include <stdint.h>
 #include <fstream>
-#include <algorithm>
 
 namespace gt
 {
@@ -150,19 +149,31 @@ makeSizeRotationStrategy(FileSizeInBytes maxFileSize = {},
 }
 
 //! File destination sink
-class FileDestination : public Destination
+class FileDestination : public FormattedDestination
 {
 public:
 
-    GT_LOGGING_EXPORT FileDestination(std::string filePath, RotationStrategyPtr rotationStrategy);
+    //! ctor
+    GT_LOGGING_EXPORT FileDestination(std::string filePath,
+                                      RotationStrategyPtr rotationStrategy,
+                                      Formatter formatter = {});
+
+    //! dtor
     GT_LOGGING_EXPORT ~FileDestination();
 
+    //! Logs formatted text
     GT_LOGGING_EXPORT
     void write(std::string const& message, Level level) override;
 
+    //! Logs informative text to the user
+    GT_LOGGING_EXPORT
+    void writeInformative(std::string const& message) override;
+
+    //! is valid
     GT_LOGGING_EXPORT
     bool isValid() const override;
 
+    //! type
     std::string type() const override { return "file"; }
 
 private:
@@ -172,14 +183,14 @@ private:
     RotationStrategyPtr m_rotationStrategy;
 };
 
-inline DestinationPtr
+inline auto
 makeFileDestination(std::string filePath)
 {
     return std::make_shared<FileDestination>(
                 std::move(filePath), std::make_shared<NullRotationStrategy>());
 }
 
-inline DestinationPtr
+inline auto
 makeFileDestination(std::string filePath,
                     std::shared_ptr<RotationStrategy> rotation)
 {

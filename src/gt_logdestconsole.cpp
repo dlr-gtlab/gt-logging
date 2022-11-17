@@ -26,23 +26,12 @@
 #include "gt_logdestconsole.h"
 #include "gt_logging.h"
 
-using namespace gt;
-
-namespace
-{
-
-void output(std::string const& message, log::Level level);
-
-} // namespace
-
 #if !defined(_WIN32) || (defined(_WIN32) && defined(GT_LOG_WIN_PRINTF_CONSOLE))
 
 #include <cstdio>
 
-namespace
-{
-
-void output(std::string const& message, log::Level level)
+void
+gt::log::DebugOutputDestination::output(std::string const& message, Level level)
 {
     auto stream = level >= gt::log::WarnLevel ? stderr : stdout;
 
@@ -50,28 +39,16 @@ void output(std::string const& message, log::Level level)
     fflush(stream);
 }
 
-} // namespace
-
 #else
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-namespace
-{
-
-void output(std::string const& message, log::Level)
+void
+gt::log::DebugOutputDestination::output(std::string const& message, Level level)
 {
    OutputDebugStringA(message.c_str());
    OutputDebugStringA("\n");
 }
 
-} // namespace
-
 #endif
-
-void
-log::DebugOutputDestination::write(std::string const& message, Level level)
-{
-    output(log::Logger::levelToString(level) + " " + message, level);
-}

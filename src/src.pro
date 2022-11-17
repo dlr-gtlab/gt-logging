@@ -53,6 +53,7 @@ HEADERS += \
     gt_logdestfile.h \
     gt_logdestfunctor.h \
     gt_logdisablelogforfile.h \
+    gt_logformatter.h \
     gt_logging_exports.h \
     gt_logging.h \
     gt_logging_qt_bindings.h \
@@ -62,7 +63,8 @@ HEADERS += \
 SOURCES += \
     gt_logdestconsole.cpp \
     gt_logdestfile.cpp \
-    gt_logging.cpp
+    gt_logging.cpp \
+    gt_loglevel.cpp
 
 unix {
     QMAKE_CXXFLAGS += -std=c++14

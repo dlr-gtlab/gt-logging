@@ -27,48 +27,15 @@
 
 #include <chrono>
 #include <mutex>
-#include <array>
 #include <vector>
+#include <algorithm>
 
 namespace gt
 {
 namespace log
 {
 
-static const char TraceString[] = "TRACE";
-static const char DebugString[] = "DEBUG";
-static const char InfoString[]  = "INFO ";
-static const char WarnString[]  = "WARN ";
-static const char ErrorString[] = "ERROR";
-static const char FatalString[] = "FATAL";
-
-static const size_t DEFAULT_BUFFER_SIZE = 60;
-
 using MutexLocker = const std::lock_guard<std::mutex>;
-
-static const char* LevelToText(Level theLevel)
-{
-    switch (theLevel) {
-        case TraceLevel:
-            return TraceString;
-        case DebugLevel:
-            return DebugString;
-        case InfoLevel:
-            return InfoString;
-        case WarnLevel:
-            return WarnString;
-        case ErrorLevel:
-            return ErrorString;
-        case FatalLevel:
-            return FatalString;
-        case OffLevel:
-            return "";
-        default: {
-            assert(!"bad log level");
-            return InfoString;
-        }
-    }
-}
 
 struct DestinationEntry
 {
@@ -97,49 +64,6 @@ Logger::instance()
 {
     static Logger instance;
     return instance;
-}
-
-// tries to extract the level from a string log message. If available, conversionSucceeded will
-// contain the conversion result.
-Level
-Logger::levelFromString(const std::string& logMessage, bool* ok)
-{
-    if (ok)
-    {
-        *ok = true;
-    }
-
-    if (logMessage == TraceString)
-        return TraceLevel;
-    if (logMessage == DebugString)
-        return DebugLevel;
-    if (logMessage == InfoString)
-        return InfoLevel;
-    if (logMessage == WarnString)
-        return WarnLevel;
-    if (logMessage == ErrorString)
-        return ErrorLevel;
-    if (logMessage == FatalString)
-        return FatalLevel;
-
-    if (ok)
-    {
-        *ok = false;
-    }
-
-    return OffLevel;
-}
-
-Level
-Logger::levelFromInt(const int lvl)
-{
-    return static_cast<Level>(lvl);
-}
-
-std::string
-Logger::levelToString(Level level)
-{
-    return LevelToText(level);
 }
 
 Logger::~Logger() = default;
@@ -210,26 +134,6 @@ inline bool
 any_of(std::vector<DestinationEntry> const& destinations, Op op)
 {
     return std::any_of(destinations.begin(), destinations.end(), op);
-}
-
-template <size_t N>
-inline void
-setCurrentTime(std::array<char, N>& buffer, const char* format)
-{
-    // get time
-    struct tm timebuf;
-    auto timep = std::chrono::system_clock::now();
-    auto time  = std::chrono::system_clock::to_time_t(timep);
-
-    // https://en.cppreference.com/w/c/chrono/localtime
-#ifdef _WIN32
-    tm* t = &timebuf;
-    localtime_s(&timebuf, &time);
-#else
-    tm* t = localtime_r(&time, &timebuf);
-#endif
-
-    strftime(buffer.data(), N, format, t);
 }
 
 } // namespace
@@ -311,58 +215,49 @@ Logger::verbosity() const
 void
 Logger::Helper::writeToLog()
 {
-    auto buffer = gtStream.str();
-    if (buffer.empty())
+    auto message = gtStream.str();
+    if (message.empty())
     {
         return;
     }
 
-    // string buffer
-    std::string streambuf;
-    streambuf.reserve(DEFAULT_BUFFER_SIZE);
-    std::ostringstream ostream(streambuf);
+    // get time
+    std::tm timebuf;
+    std::time_t rawtime;
+    std::time(&rawtime);
 
-    // make id string
-    if (!id.empty())
-    {
-        ostream << '[' << id << "] ";
-    }
+    // https://en.cppreference.com/w/c/chrono/localtime
+#ifdef _WIN32
+    std::tm* time = &timebuf;
+    localtime_s(&timebuf, &rawtime);
+#else
+    tm* time = localtime_r(&rawtime, &timebuf);
+#endif
 
-    // time format
-    static constexpr char timeFormat[] = "[%H:%M:%S] ";
-    // time buffer
-    std::array<char, sizeof(timeFormat)> time;
-
-    // convert time to string
-    setCurrentTime(time, timeFormat);
-
-    ostream << time.data();
-    ostream << std::move(buffer);
-
-    // write
-    Logger::instance().write(ostream.str(), level);
+    Logger::instance().write(level, id, message, *time);
 }
 
-Logger::Helper::Helper(Level logLevel, std::string logId) :
-    level{logLevel},
-    id{std::move(logId)}
-{}
-
-Logger::Helper::~Helper()
+void
+Logger::InformativeHelper::writeToLog()
 {
-    writeToLog();
+    auto message = gtStream.str();
+
+    Logger::instance().write(gt::log::InfoLevel, {}, message, tm{});
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case
 //! it's useful for processing in the destination.
 void
-Logger::write(std::string const& message, Level level)
+Logger::write(gt::log::Level level,
+              std::string const& id,
+              std::string const& message,
+              std::tm time)
 {
     MutexLocker lock(pimpl->logMutex);
 
     std::for_each(pimpl->destinations.begin(), pimpl->destinations.end(),
-                  [&message, level](DestinationEntry const& dest){
-        dest.ptr->write(message, level);
+                  [level, &id, &message, time](DestinationEntry const& dest){
+        dest.ptr->write(level, id, message, time);
     });
 }
 

@@ -15,8 +15,14 @@ public:
 
     void SetUp() override
     {
-        auto dest = gt::log::makeFunctorDestination([this](const std::string& msg, gt::log::Level) {
-            log.append(QString::fromStdString(msg));
+        auto dest = gt::log::makeFunctorDestination(
+                        [this](gt::log::Level level,
+                               std::string const& id,
+                               std::string const& msg,
+                               tm time){
+            log.append(QString::fromStdString(
+                gt::log::Formatter().format(level, id, msg, time)
+            ));
         });
         ASSERT_TRUE(logger.addDestination("test", dest));
 
@@ -60,6 +66,5 @@ public:
 
     MyQObject() = default;
 };
-
 
 #endif // TEST_LOG_HELPER_H

@@ -20,7 +20,8 @@ public:
     gt::log::Logger& logger;
 };
 
-void myLogFunction(std::string const& /*s*/, gt::log::Level /*l*/)
+void
+myLogFunction(gt::log::Level, std::string const&, std::string const&, std::tm)
 {
     // nothing to do here
 }
@@ -46,9 +47,10 @@ TEST_F(LogFunctor, function_ptr)
 TEST_F(LogFunctor, function_lambda)
 {
     std::string destid = "functor_lambda";
-    dest = gt::log::makeFunctorDestination([](
-                                           std::string  const&,
-                                           gt::log::Level){});
+    dest = gt::log::makeFunctorDestination([](gt::log::Level,
+                                           std::string const&,
+                                           std::string const&,
+                                           std::tm){});
 
     EXPECT_TRUE(dest->isValid());
     EXPECT_FALSE(logger.hasDestination(dest));
