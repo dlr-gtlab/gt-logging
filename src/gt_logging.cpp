@@ -248,7 +248,7 @@ void
 Logger::write(gt::log::Level level,
               std::string const& id,
               std::string const& message,
-              std::tm time)
+              tm const& time)
 {
     MutexLocker lock(pimpl->logMutex);
 

@@ -170,7 +170,7 @@ private:
     void write(gt::log::Level level,
                std::string const& id,
                std::string const& message,
-               std::tm time);
+               std::tm const& time);
 
     void writeInfromative(std::string const& message);
 

@@ -13,6 +13,7 @@
 
 #include <array>
 #include <sstream>
+#include <ctime>
 
 namespace gt
 {
@@ -62,7 +63,7 @@ public:
     static std::string formatDefault(gt::log::Level level,
                                      std::string const& id,
                                      std::string const& message,
-                                     std::tm time)
+                                     std::tm const& time)
     {
         return format(defaultFormat(), level, id, message, time);
     }
@@ -72,7 +73,7 @@ public:
                               gt::log::Level level,
                               std::string const& id,
                               std::string const& message,
-                              std::tm time)
+                              std::tm const& time)
     {
         std::string formatted = format;
         // size +10 for good measure
@@ -90,7 +91,7 @@ public:
     std::string format(gt::log::Level level,
                        std::string const& id,
                        std::string const& message,
-                       std::tm time) const
+                       std::tm const& time) const
     {
         return format(m_format, level, id, message, time);
     }
@@ -126,7 +127,7 @@ private:
     }
 
     //! Replaces time ident if it exists with default time format
-    static void formatTime(std::string& string, tm& time)
+    static void formatTime(std::string& string, tm const& time)
     {
         size_t idx = string.find("/T");
         if (idx != std::string::npos)

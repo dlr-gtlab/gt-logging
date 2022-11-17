@@ -50,7 +50,7 @@ public:
     virtual void write(Level /*level*/,
                        std::string const& /*id*/,
                        std::string const& /*message*/,
-                       std::tm /*time*/) {};
+                       std::tm const& /*time*/) {};
 
     //! Write method for logging simply informative text to the user
     //! (i.e. best without any formatting)
@@ -74,7 +74,7 @@ public:
     void write(Level level,
                std::string const& id,
                std::string const& message,
-               std::tm time) final
+               std::tm const& time) final
     {
         // check if level should be logged
         if (m_formatter.filter(level))

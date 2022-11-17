@@ -50,7 +50,7 @@ public:
             std::function<void(Level level,
                                std::string const& id,
                                std::string const& message,
-                               std::tm time)>;
+                               std::tm const& time)>;
 
     //! ctor
     explicit FunctorDestination(Functor detail)
@@ -63,7 +63,7 @@ public:
     void write(Level level,
                std::string const& id,
                std::string const& message,
-               std::tm time) override
+               std::tm const& time) override
     {
         m_functor(level, id, message, time);
     }
