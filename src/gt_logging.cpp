@@ -211,7 +211,6 @@ Logger::verbosity() const
     return pimpl->verbosity;
 }
 
-//! creates the complete log message and passes it to the logger
 void
 Logger::Helper::writeToLog()
 {
@@ -240,9 +239,7 @@ Logger::Helper::writeToLog()
 void
 Logger::InformativeHelper::writeToLog()
 {
-    auto message = gtStream.str();
-
-    Logger::instance().write(gt::log::InfoLevel, {}, message, tm{});
+    Logger::instance().writeInfromative(gtStream.str());
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case
@@ -258,6 +255,17 @@ Logger::write(gt::log::Level level,
     std::for_each(pimpl->destinations.begin(), pimpl->destinations.end(),
                   [level, &id, &message, time](DestinationEntry const& dest){
         dest.ptr->write(level, id, message, time);
+    });
+}
+
+void
+Logger::writeInfromative(const std::string& message)
+{
+    MutexLocker lock(pimpl->logMutex);
+
+    std::for_each(pimpl->destinations.begin(), pimpl->destinations.end(),
+                  [&message](DestinationEntry const& dest){
+        dest.ptr->writeInformative(message);
     });
 }
 

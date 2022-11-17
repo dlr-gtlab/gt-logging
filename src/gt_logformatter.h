@@ -27,7 +27,7 @@ public:
     //! Default ctor
     Formatter() = default;
 
-    //! Ctor accepting format and filter
+    //! ctor accepting a custom format and level filter
     explicit Formatter(std::string format, int filter = -1)
         : m_format(std::move(format))
         , m_filter(filter)
@@ -74,12 +74,6 @@ public:
                               std::string const& message,
                               std::tm time)
     {
-        // unformatted
-        if (level == InfoLevel && time.tm_mday == 0 && time.tm_sec == 0)
-        {
-            return message;
-        }
-
         std::string formatted = format;
         // size +10 for good measure
         formatted.reserve(format.size() + message.size() + id.size() + 10);
@@ -110,10 +104,10 @@ public:
 private:
 
     /**
-     * L = Level
-     * I = Id
-     * M = Message
-     * T = Day time (%H:%M:%S)
+     * /L = Level
+     * /I = Id
+     * /M = Message
+     * /T = Day time (%H:%M:%S)
      */
     std::string m_format{defaultFormat()};
 

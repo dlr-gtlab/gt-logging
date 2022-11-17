@@ -46,17 +46,17 @@ class FunctorDestination : public Destination
 public:
 
     /// Logging funcion for detailed messages
-    using DetailFunctor =
+    using Functor =
             std::function<void(Level level,
                                std::string const& id,
                                std::string const& message,
                                std::tm time)>;
 
     //! ctor
-    explicit FunctorDestination(DetailFunctor detail)
-        : m_detail(std::move(detail))
+    explicit FunctorDestination(Functor detail)
+        : m_functor(std::move(detail))
     {
-        assert(m_detail);
+        assert(m_functor);
     }
 
     //! Calls lambda to log formatted text
@@ -65,7 +65,7 @@ public:
                std::string const& message,
                std::tm time) override
     {
-        m_detail(level, id, message, time);
+        m_functor(level, id, message, time);
     }
 
     //! type
@@ -74,13 +74,13 @@ public:
 private:
 
     /// Functor
-    DetailFunctor m_detail;
+    Functor m_functor;
 };
 
 inline auto
-makeFunctorDestination(FunctorDestination::DetailFunctor detail)
+makeFunctorDestination(FunctorDestination::Functor functor)
 {
-    return std::make_shared<FunctorDestination>(std::move(detail));
+    return std::make_shared<FunctorDestination>(std::move(functor));
 }
 
 } // namespace log

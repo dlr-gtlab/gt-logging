@@ -52,7 +52,7 @@ public:
                        std::string const& /*message*/,
                        std::tm /*time*/) {};
 
-    //! Write method for logging simply informative text to the use
+    //! Write method for logging simply informative text to the user
     //! (i.e. best without any formatting)
     virtual void writeInformative(std::string const& /*message*/) {};
 
@@ -70,7 +70,7 @@ class FormattedDestination : public Destination
 {
 public:
 
-    //! Will filter and format the message
+    //! Will filter and format the message accordingly
     void write(Level level,
                std::string const& id,
                std::string const& message,
@@ -96,6 +96,7 @@ public:
 
 protected:
 
+    //! ctor
     FormattedDestination(Formatter formatter = {})
         : m_formatter{std::move(formatter)}
     { }
@@ -105,6 +106,7 @@ protected:
 
 private:
 
+    /// formatter
     Formatter m_formatter;
 };
 

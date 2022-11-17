@@ -21,7 +21,7 @@ public:
                                std::string const& msg,
                                tm time){
             log.append(QString::fromStdString(
-                gt::log::Formatter().format(level, id, msg, time)
+                gt::log::Formatter::formatDefault(level, id, msg, time)
             ));
         });
         ASSERT_TRUE(logger.addDestination("test", dest));

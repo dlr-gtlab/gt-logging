@@ -172,6 +172,8 @@ private:
                std::string const& message,
                std::tm time);
 
+    void writeInfromative(std::string const& message);
+
     struct Impl; // d pointer
     std::unique_ptr<Impl> pimpl;
 };
