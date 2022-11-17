@@ -55,8 +55,8 @@ public:
     //! Default format
     static std::string const& defaultFormat()
     {
-        static const std::string format = "/L [/I] [%H:%M:%S] /M";
-        return format;
+        static const std::string dformat = "/L [/I] [%H:%M:%S] /M";
+        return dformat;
     }
 
     //! Formats the arguments into a single string acording to the default format.
@@ -82,9 +82,9 @@ public:
 
         formatted.reserve(formatted.size() + message.size() + id.size());
 
-        replace("/L", formatted, levelToString(level));
-        replace("/I", formatted, id.empty() ? "-" : id);
-        replace("/M", formatted, message);
+        replace(formatted, "/L", levelToString(level));
+        replace(formatted, "/I", id.empty() ? "-" : id);
+        replace(formatted, "/M", message);
 
         return formatted;
     }
@@ -117,8 +117,8 @@ private:
     int m_filter{-1};
 
     //! Replaces ident if it exists
-    static void replace(std::string ident,
-                        std::string& string,
+    static void replace(std::string& string,
+                        std::string const& ident,
                         std::string const& r)
     {
         size_t idx = string.find(ident);
