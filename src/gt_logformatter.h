@@ -35,9 +35,10 @@ public:
     { }
 
     //! Setter for the format
-    void setFormat(std::string format)
+    Formatter& setFormat(std::string format)
     {
         m_format = std::move(format);
+        return *this;
     }
 
     //! Returns whether this level should be logged
@@ -47,9 +48,20 @@ public:
     }
 
     //! Sets the filter level
-    void filterLevel(gt::log::Level level, bool include = true)
+    Formatter& filterLevel(gt::log::Level level, bool include = true)
     {
-        m_filter &= include ? levelToInt(level) : ~levelToInt(level);
+        if (include)
+            m_filter |=  levelToInt(level);
+        else
+            m_filter &= ~levelToInt(level);
+        return *this;
+    }
+
+    //! Whether to include all levels (if true) else excludes all levels
+    Formatter& filterAll(bool include = true)
+    {
+        m_filter &= include ? -1 : 0;
+        return *this;
     }
 
     //! Default format
@@ -80,7 +92,8 @@ public:
         s << std::put_time(&time, format.c_str());
         std::string formatted = s.str();
 
-        formatted.reserve(formatted.size() + message.size() + id.size());
+        // +10 for good measure
+        formatted.reserve(formatted.size() + message.size() + id.size() + 10);
 
         replace(formatted, "/L", levelToString(level));
         replace(formatted, "/I", id.empty() ? "-" : id);
@@ -110,10 +123,11 @@ private:
      * /L = Level
      * /I = Id
      * /M = Message
-     * /% = format like strftime (e.g. %H:%M:%S)
+     *  % = Time format of std::put_time (e.g. %H:%M:%S)
      */
     std::string m_format{defaultFormat()};
 
+    /// Bitfield to filter out only certain levels (by default all levels)
     int m_filter{-1};
 
     //! Replaces ident if it exists
@@ -121,10 +135,25 @@ private:
                         std::string const& ident,
                         std::string const& r)
     {
-        size_t idx = string.find(ident);
-        if (idx != std::string::npos)
+        size_t off = 0;
+        size_t idx = string.find(ident, off);
+
+        // loop over all occurrences
+        while (idx != std::string::npos)
         {
-            string.replace(idx, ident.size(), r);
+            // check for escapement of /
+            if (idx > 0 && string[idx - 1] == '/')
+            {
+                // rmeove escapement
+                string.replace(idx, 1, std::string{});
+            }
+            else
+            {
+                string.replace(idx, ident.size(), r);
+            }
+
+            off = idx;
+            idx = string.find(ident, off);
         }
     }
 };

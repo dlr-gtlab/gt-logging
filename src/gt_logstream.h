@@ -87,11 +87,14 @@ public:
     inline Stream& operator<<(std::nullptr_t) { return doLog("(nullptr)"); }
     inline Stream& operator<<(void const* t)
     {
-        // format pointers
-        StreamStateSaver s{*this};
-        return nospace().
-                doLog(std::hex).
-                doLog("0x").doLog(reinterpret_cast<std::uint64_t>(t));
+        { // block for state saver
+            StreamStateSaver s{*this};
+            // format pointers
+            nospace().doLog(std::hex)
+                     .doLog("0x")
+                     .doLog(reinterpret_cast<std::uintptr_t>(t));
+        }
+        return doLogSpace();
     }
 
     inline Stream& operator<<(bool t) { return doLog(t); }
@@ -134,6 +137,13 @@ public:
     inline Stream& operator<<(const char* t) { return doLog(t); }
     inline Stream& operator<<(std::string const& t) { return doLog(t); }
 
+    // ios flags
+    inline Stream& operator<<(std::ios_base&(*t)(std::ios_base&))
+    {
+        m_stream << t;
+        return *this;
+    }
+
     //! Default logging method
     template <typename T>
     inline Stream& doLog(T const& t)
@@ -141,7 +151,7 @@ public:
         if (mayLog())
         {
             m_stream << t;
-            logSpace();
+            doLogSpace();
         }
         return *this;
     }
@@ -152,9 +162,9 @@ public:
     {
         if (mayLog())
         {
-            logQuote();
+            doLogQuote();
             m_stream << t;
-            logQuote().logSpace();
+            doLogQuote().doLogSpace();
         }
         return *this;
     }
@@ -169,14 +179,14 @@ private:
     std::ostringstream m_stream;
 
     //! Helper function to log ' '
-    inline Stream& logSpace() noexcept
+    inline Stream& doLogSpace() noexcept
     {
         if (mayLogSpace()) m_stream << ' ';
         return *this;
     };
 
     //! Helper function to log '"'
-    inline Stream& logQuote() noexcept
+    inline Stream& doLogQuote() noexcept
     {
         if (mayLogQuote()) m_stream << '"';
         return *this;

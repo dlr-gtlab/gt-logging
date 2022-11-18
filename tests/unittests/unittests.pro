@@ -44,7 +44,8 @@ INCLUDEPATH += $${PWD}/../../src
 HEADERS += $$files(*.h) \
 
 #### SOURCES
-SOURCES += $$files(*.cpp)
+SOURCES += $$files(*.cpp) \
+    test_types_qt.cpp
 
 ####################################################
 

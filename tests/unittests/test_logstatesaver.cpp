@@ -21,9 +21,11 @@ TEST_F(LogStateSaver, stateSaver)
     gt::log::Stream stream;
 
     stream.space() << "A" << "B" << "C";
+    stream << 10;
     {
         gt::log::StreamStateSaver saver{stream};
         // change flags
+        stream << std::hex << 10;
         stream.nospace() << "D" << "E" << "F";
         stream.quote()   << QString{"quotes"};
         // change verbosity
@@ -31,7 +33,8 @@ TEST_F(LogStateSaver, stateSaver)
         stream << "this wont too";
     }
     // state restored
-    stream << "but" << "this" << "will";
+    stream << "but" << "this" << "will" << 24;
 
-    EXPECT_EQ(stream.str(), std::string("A B C DEF\"quotes\"but this will "));
+    EXPECT_EQ(stream.str(),
+              std::string("A B C 10 a DEF\"quotes\"but this will 24 "));
 }
