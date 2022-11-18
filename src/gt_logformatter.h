@@ -14,6 +14,7 @@
 #include <array>
 #include <iomanip>
 #include <sstream>
+#include <iostream>
 
 namespace gt
 {
@@ -33,13 +34,6 @@ public:
         : m_format(std::move(format))
         , m_filter(filter)
     { }
-
-    //! Setter for the format
-    Formatter& setFormat(std::string format)
-    {
-        m_format = std::move(format);
-        return *this;
-    }
 
     //! Returns whether this level should be logged
     bool filter(gt::log::Level level)
@@ -61,6 +55,13 @@ public:
     Formatter& filterAll(bool include = true)
     {
         m_filter &= include ? -1 : 0;
+        return *this;
+    }
+
+    //! Setter for the format
+    Formatter& setFormat(std::string format)
+    {
+        m_format = std::move(format);
         return *this;
     }
 
@@ -90,11 +91,12 @@ public:
         // format time
         std::ostringstream s;
         s << std::put_time(&time, format.c_str());
-        std::string formatted = s.str();
 
-        // +10 for good measure
-        formatted.reserve(formatted.size() + message.size() + id.size() + 10);
+        // make formatted string
+        std::string formatted{s.str()};
+        formatted.reserve(formatted.size() + message.size() + id.size());
 
+        // replace idents
         replace(formatted, "/L", levelToString(level));
         replace(formatted, "/I", id.empty() ? "-" : id);
         replace(formatted, "/M", message);
@@ -116,6 +118,7 @@ public:
     {
         return m_format;
     }
+
 
 private:
 
@@ -141,18 +144,9 @@ private:
         // loop over all occurrences
         while (idx != std::string::npos)
         {
-            // check for escapement of /
-            if (idx > 0 && string[idx - 1] == '/')
-            {
-                // rmeove escapement
-                string.replace(idx, 1, std::string{});
-            }
-            else
-            {
-                string.replace(idx, ident.size(), r);
-            }
-
-            off = idx;
+            // replace ident
+            string.replace(idx, ident.size(), r);
+            off = idx + 1;
             idx = string.find(ident, off);
         }
     }

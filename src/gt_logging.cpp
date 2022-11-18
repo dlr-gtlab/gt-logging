@@ -239,7 +239,7 @@ Logger::Helper::writeToLog()
 void
 Logger::InformativeHelper::writeToLog()
 {
-    Logger::instance().writeInfromative(gtStream.str());
+    Logger::instance().writeInformative(gtStream.str());
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case
@@ -259,7 +259,7 @@ Logger::write(gt::log::Level level,
 }
 
 void
-Logger::writeInfromative(const std::string& message)
+Logger::writeInformative(const std::string& message)
 {
     MutexLocker lock(pimpl->logMutex);
 

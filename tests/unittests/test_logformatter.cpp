@@ -115,17 +115,6 @@ TEST_F(LogFormatter, format_2)
     EXPECT_EQ(res, "my_message [FATAL / [00:00:00] / my_id]");
 }
 
-TEST_F(LogFormatter, format_escaped)
-{
-    auto res = gt::log::Formatter::format("/M (//Level: /L)",  // format
-                                          gt::log::FatalLevel, // level
-                                          std::string{"my_id"},// id
-                                          "my_message",        // message
-                                          std::tm{});          // time
-
-    EXPECT_EQ(res, "my_message (/Level: FATAL)");
-}
-
 TEST_F(LogFormatter, format_time)
 {
     std::tm time;
@@ -148,4 +137,3 @@ TEST_F(LogFormatter, format_time)
 
     EXPECT_EQ(res, "2022 December (42/59/12)");
 }
-
