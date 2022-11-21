@@ -47,10 +47,7 @@ public:
 
     //! Default write method to implement. Use a formatter to more easily
     //! format the output message.
-    virtual void write(Level /*level*/,
-                       std::string const& /*id*/,
-                       std::string const& /*message*/,
-                       std::tm const& /*time*/) {};
+    virtual void write(std::string const& /*message*/, Level /*level*/, Details const& /*details*/) {};
 
     //! Write method for logging simply informative text to the user
     //! (i.e. best without any formatting)
@@ -71,16 +68,13 @@ class FormattedDestination : public Destination
 public:
 
     //! Will filter and format the message accordingly
-    void write(Level level,
-               std::string const& id,
-               std::string const& message,
-               std::tm const& time) final
+    void write(std::string const& message, Level level, Details const& details) final
     {
         // check if level should be logged
         if (m_formatter.filter(level))
         {
             // format message
-            write(m_formatter.format(level, id, message, time), level);
+            write(m_formatter.format(message, level, details), level);
         }
     }
 

@@ -16,13 +16,16 @@ public:
     void SetUp() override
     {
         auto dest = gt::log::makeFunctorDestination(
-                        [this](gt::log::Level level,
-                               std::string const& id,
-                               std::string const& msg,
-                               tm time){
-            log.append(QString::fromStdString(
-                gt::log::Formatter::formatDefault(level, id, msg, time)
-            ));
+                        [this](std::string const& msg,
+                        gt::log::Level level,
+                        gt::log::Details details){
+            log.append(
+                QStringLiteral("%1 [%2] [%3] %4")
+                        .arg(level)
+                        .arg(details.id.c_str(),
+                             gt::log::formatTime(details.time).c_str(),
+                             msg.c_str())
+            );
         });
         ASSERT_TRUE(logger.addDestination("test", dest));
 

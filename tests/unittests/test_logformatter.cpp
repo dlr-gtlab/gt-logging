@@ -7,6 +7,7 @@
  */
 
 
+#include "qdebug.h"
 #include "test_log_helper.h"
 
 #include <QDateTime>
@@ -23,6 +24,7 @@ TEST_F(LogFormatter, date)
     // This may fail rarely if the logging and the time feching happens
     // in between two seconds
     EXPECT_TRUE(log.contains(time));
+    qDebug() << time;
 }
 
 TEST_F(LogFormatter, filterDefault)
@@ -85,55 +87,68 @@ TEST_F(LogFormatter, format_empty)
     gt::log::Formatter formatter;
     formatter.setFormat("");
 
-    auto res = formatter.format(gt::log::InfoLevel,   // level
-                                std::string{"my_id"}, // id
-                                "Hello",              // message
-                                std::tm{});           // time
+    auto res = formatter.format(
+       "Hello",              // message
+       gt::log::InfoLevel,   // level
+       gt::log::Details
+       {
+           std::string{"my_id"}, // id
+           std::tm{}             // time
+       }
+    );
 
     EXPECT_TRUE(res.empty());
 }
 
-TEST_F(LogFormatter, format_1)
+TEST_F(LogFormatter, format)
 {
-    auto res = gt::log::Formatter::format("/L \"/M\"",          // format
-                                          gt::log::InfoLevel,   // level
-                                          std::string{"my_id"}, // id
-                                          "Hello",              // message
-                                          std::tm{});           // time
+    gt::log::Formatter formatter;
+    formatter.setFormat("[%4 | %2] %3: %1");
+
+    auto res = formatter.format(
+       "Hello",              // message
+       gt::log::WarnLevel,   // level
+       gt::log::Details
+       {
+           std::string{"my_id"}, // id
+           std::tm{}             // time
+       }
+    );
+
+    EXPECT_EQ(res, "[00:00:00 | WARN ] my_id: Hello");
+}
+
+TEST_F(LogFormatter, standalone_format_1)
+{
+    auto res = gt::log::format("%1 \"%2\"", gt::log::InfoLevel, "Hello");
 
     EXPECT_EQ(res, "INFO  \"Hello\"");
 }
 
-TEST_F(LogFormatter, format_2)
+TEST_F(LogFormatter, standalone_format_2)
 {
-    auto res = gt::log::Formatter::format("/M [/L / [%H:%S:%M] / /I]",// format
-                                          gt::log::FatalLevel,        // level
-                                          std::string{"my_id"},       // id
-                                          "my_message",               // message
-                                          std::tm{});                 // time
+    auto res = gt::log::format("%1 [%2 / %4 / %3]",
+                               "my_message",
+                               gt::log::FatalLevel,
+                               "my_id",
+                               std::tm{});
 
-    EXPECT_EQ(res, "my_message [FATAL / [00:00:00] / my_id]");
+    EXPECT_EQ(res, "my_message [FATAL / 00:00:00 / my_id]");
 }
 
-TEST_F(LogFormatter, format_time)
+TEST_F(LogFormatter, standalone_time_format)
 {
-    std::tm time;
+    std::tm time{};
     time.tm_hour = 12;
     time.tm_min  = 59;
     time.tm_sec  = 42;
     time.tm_year = 2022 - 1900; // 1900 start time of year
     time.tm_mon  = 11;          // month = december
 
-    gt::log::Formatter formatter;
-
-    formatter.setFormat("%Y "          // year
-                        "%B "          // month name
-                        "(%S/%M/%H)"); // sec, min, hour
-
-    auto res = formatter.format(gt::log::DebugLevel,  // level
-                                std::string{"my_id"}, // id
-                                "my_message",         // message
-                                time);                // time
+    auto res = gt::log::formatTime(time,
+                                   "%Y "          // year
+                                   "%B "          // month name
+                                   "(%S/%M/%H)"); // day time
 
     EXPECT_EQ(res, "2022 December (42/59/12)");
 }

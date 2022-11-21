@@ -47,10 +47,7 @@ public:
 
     /// Logging funcion for detailed messages
     using Functor =
-            std::function<void(Level level,
-                               std::string const& id,
-                               std::string const& message,
-                               std::tm const& time)>;
+            std::function<void(std::string const&, Level, Details const&)>;
 
     //! ctor
     explicit FunctorDestination(Functor detail)
@@ -60,12 +57,9 @@ public:
     }
 
     //! Calls lambda to log formatted text
-    void write(Level level,
-               std::string const& id,
-               std::string const& message,
-               std::tm const& time) override
+    void write(std::string const& message, Level level, Details const& details) override
     {
-        m_functor(level, id, message, time);
+        m_functor(message, level, details);
     }
 
     //! type

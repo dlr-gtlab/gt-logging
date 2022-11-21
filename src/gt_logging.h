@@ -161,16 +161,14 @@ public:
     };
 
 private:
+
     Logger();
     Logger(Logger const&) = delete;
     Logger(Logger&&) = delete;
     Logger& operator=(Logger const&) = delete;
     Logger& operator=(Logger&&) = delete;
 
-    void write(gt::log::Level level,
-               std::string const& id,
-               std::string const& message,
-               std::tm const& time);
+    void write(std::string const& message, Level level, Details details);
 
     void writeInformative(std::string const& message);
 
