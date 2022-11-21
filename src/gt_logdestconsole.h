@@ -51,12 +51,6 @@ public:
         output(message, level);
     }
 
-    //! Logs informative text to the user
-    void writeInformative(std::string const& message) override
-    {
-        output(message, gt::log::InfoLevel);
-    }
-
     //! type
     std::string type() const override { return "console"; }
 

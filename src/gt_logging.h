@@ -137,29 +137,6 @@ public:
         GT_LOGGING_EXPORT void writeToLog();
     };
 
-    class InformativeHelper
-    {
-    public:
-
-        explicit InformativeHelper(Level logLevel = InfoLevel)
-        {
-            (void)logLevel; // unused
-        }
-
-        ~InformativeHelper() { writeToLog(); }
-
-        gt::log::Stream& stream()
-        {
-            return gtStream;
-        }
-
-    private:
-
-        gt::log::Stream gtStream;
-
-        GT_LOGGING_EXPORT void writeToLog();
-    };
-
 private:
 
     Logger();
@@ -169,8 +146,6 @@ private:
     Logger& operator=(Logger&&) = delete;
 
     void write(std::string const& message, Level level, Details details);
-
-    void writeInformative(std::string const& message);
 
     struct Impl; // d pointer
     std::unique_ptr<Impl> pimpl;
@@ -203,38 +178,34 @@ private:
 #define GT_LOG_IMPL_NOSPACE
 #endif
 
-#define GT_LOG_IMPL(CLASS, LEVEL) \
+#define GT_LOG_IMPL(LEVEL) \
     if (gt::log::Logger::instance().loggingLevel() > gt::log::LEVEL) \
     {} \
-    else gt::log::Logger::CLASS(gt::log::LEVEL).stream() \
+    else gt::log::Logger::Helper(gt::log::LEVEL).stream() \
     GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
 
-#define GT_LOG_IMPL_ID(CLASS, LEVEL, ID) \
+#define GT_LOG_IMPL_ID(LEVEL, ID) \
     if (gt::log::Logger::instance().loggingLevel() > gt::log::LEVEL) \
     {} \
-    else gt::log::Logger::CLASS(gt::log::LEVEL, ID).stream() \
+    else gt::log::Logger::Helper(gt::log::LEVEL, ID).stream() \
     GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
 
 
 //! Default logging macros.
-#define gtTrace()       GT_LOG_IMPL(Helper, TraceLevel)
-#define gtDebug()       GT_LOG_IMPL(Helper, DebugLevel)
-#define gtInfo()        GT_LOG_IMPL(Helper, InfoLevel)
-#define gtWarning()     GT_LOG_IMPL(Helper, WarnLevel)
-#define gtError()       GT_LOG_IMPL(Helper, ErrorLevel)
-#define gtFatal()       GT_LOG_IMPL(Helper, FatalLevel)
+#define gtTrace()       GT_LOG_IMPL(TraceLevel)
+#define gtDebug()       GT_LOG_IMPL(DebugLevel)
+#define gtInfo()        GT_LOG_IMPL(InfoLevel)
+#define gtWarning()     GT_LOG_IMPL(WarnLevel)
+#define gtError()       GT_LOG_IMPL(ErrorLevel)
+#define gtFatal()       GT_LOG_IMPL(FatalLevel)
 
 //! Logging macros with custom logging id
-#define gtTraceId(ID)   GT_LOG_IMPL_ID(Helper, TraceLevel, ID)
-#define gtDebugId(ID)   GT_LOG_IMPL_ID(Helper, DebugLevel, ID)
-#define gtInfoId(ID)    GT_LOG_IMPL_ID(Helper, InfoLevel , ID)
-#define gtWarningId(ID) GT_LOG_IMPL_ID(Helper, WarnLevel , ID)
-#define gtErrorId(ID)   GT_LOG_IMPL_ID(Helper, ErrorLevel, ID)
-#define gtFatalId(ID)   GT_LOG_IMPL_ID(Helper, FatalLevel, ID)
-
-//! Informative/unformatted logging macros
-#define gtInformative()       GT_LOG_IMPL(InformativeHelper, InfoLevel)
-#define gtInformativeId(ID)   GT_LOG_IMPL_ID(InformativeHelper, InfoLevel, ID)
+#define gtTraceId(ID)   GT_LOG_IMPL_ID(TraceLevel, ID)
+#define gtDebugId(ID)   GT_LOG_IMPL_ID(DebugLevel, ID)
+#define gtInfoId(ID)    GT_LOG_IMPL_ID(InfoLevel , ID)
+#define gtWarningId(ID) GT_LOG_IMPL_ID(WarnLevel , ID)
+#define gtErrorId(ID)   GT_LOG_IMPL_ID(ErrorLevel, ID)
+#define gtFatalId(ID)   GT_LOG_IMPL_ID(FatalLevel, ID)
 
 #ifdef GT_LOG_DISABLE
 #include "gt_logdisablelogforfile.h"

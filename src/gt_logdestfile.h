@@ -165,10 +165,6 @@ public:
     GT_LOGGING_EXPORT
     void write(std::string const& message, Level level) override;
 
-    //! Logs informative text to the user
-    GT_LOGGING_EXPORT
-    void writeInformative(std::string const& message) override;
-
     //! is valid
     GT_LOGGING_EXPORT
     bool isValid() const override;

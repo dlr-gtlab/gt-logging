@@ -82,42 +82,6 @@ TEST_F(LogFormatter, filterSelected)
     EXPECT_FALSE(formatter.filter(gt::log::FatalLevel));
 }
 
-TEST_F(LogFormatter, format_empty)
-{
-    gt::log::Formatter formatter;
-    formatter.setFormat("");
-
-    auto res = formatter.format(
-       "Hello",              // message
-       gt::log::InfoLevel,   // level
-       gt::log::Details
-       {
-           std::string{"my_id"}, // id
-           std::tm{}             // time
-       }
-    );
-
-    EXPECT_TRUE(res.empty());
-}
-
-TEST_F(LogFormatter, format)
-{
-    gt::log::Formatter formatter;
-    formatter.setFormat("[%4 | %2] %3: %1");
-
-    auto res = formatter.format(
-       "Hello",              // message
-       gt::log::WarnLevel,   // level
-       gt::log::Details
-       {
-           std::string{"my_id"}, // id
-           std::tm{}             // time
-       }
-    );
-
-    EXPECT_EQ(res, "[00:00:00 | WARN ] my_id: Hello");
-}
-
 TEST_F(LogFormatter, standalone_format_1)
 {
     auto res = gt::log::format("%1 \"%2\"", gt::log::InfoLevel, "Hello");
@@ -151,4 +115,54 @@ TEST_F(LogFormatter, standalone_time_format)
                                    "(%S/%M/%H)"); // day time
 
     EXPECT_EQ(res, "2022 December (42/59/12)");
+}
+
+TEST_F(LogFormatter, format_empty)
+{
+    gt::log::Formatter formatter([](std::string const&,
+                                 gt::log::Level,
+                                 gt::log::Details const&){
+        return std::string{};
+    });
+
+    auto res = formatter.format(
+       "Hello",              // message
+       gt::log::InfoLevel,   // level
+       gt::log::Details
+       {
+           std::string{"my_id"}, // id
+           std::tm{}             // time
+       }
+    );
+
+    EXPECT_TRUE(res.empty());
+}
+
+TEST_F(LogFormatter, format)
+{
+    std::tm time{};
+    time.tm_hour = 12;
+    time.tm_min  = 59;
+    time.tm_sec  = 42;
+    time.tm_year = 2077 - 1900; // 1900 start time of year
+    time.tm_mon  = 0;           // month = january
+
+    gt::log::Formatter formatter([](std::string const& msg,
+                                 gt::log::Level lvl,
+                                 gt::log::Details const& dts){
+        using gt::log::formatTime;
+        return gt::log::format("[%1 | %2] %3: %4", formatTime(dts.time, "%B - %Y"), lvl, dts.id, msg);
+    });
+
+    auto res = formatter.format(
+       "Hello",                  // message
+       gt::log::TraceLevel,      // level
+       gt::log::Details
+       {
+           std::string{"my_id"}, // id
+           time                  // time
+       }
+    );
+
+    EXPECT_EQ(res, "[January - 2077 | TRACE] my_id: Hello");
 }

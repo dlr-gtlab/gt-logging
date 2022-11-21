@@ -30,8 +30,6 @@
 #include "gt_loglevel.h"
 
 #include <memory>
-#include <string>
-#include <chrono>
 
 namespace gt
 {
@@ -47,11 +45,7 @@ public:
 
     //! Default write method to implement. Use a formatter to more easily
     //! format the output message.
-    virtual void write(std::string const& /*message*/, Level /*level*/, Details const& /*details*/) {};
-
-    //! Write method for logging simply informative text to the user
-    //! (i.e. best without any formatting)
-    virtual void writeInformative(std::string const& /*message*/) {};
+    virtual void write(std::string const& message, Level level, Details const& details) = 0;
 
     //! Returns whether the destination was created correctly
     virtual bool isValid() const { return true; }

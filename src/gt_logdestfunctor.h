@@ -29,9 +29,6 @@
 
 #include "gt_logdest.h"
 
-#include <cassert>
-#include <functional>
-
 namespace gt
 {
 

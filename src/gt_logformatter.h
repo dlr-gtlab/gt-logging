@@ -11,11 +11,11 @@
 
 #include "gt_loglevel.h"
 
+#include <functional>
 #include <algorithm>
-#include <array>
 #include <iomanip>
 #include <sstream>
-#include <iostream>
+#include <cassert>
 
 namespace gt
 {
@@ -58,9 +58,9 @@ inline std::string toString(Level level) { return levelToString(level); }
 inline std::string toString(std::tm time) { return formatTime(time); }
 
 //! No more args to format
-template <typename FormatIterA>
+template <typename Iter>
 inline std::string
-formatImpl(size_t /*idx*/, FormatIterA begin, FormatIterA end)
+formatImpl(size_t /*idx*/, Iter begin, Iter end)
 {
     // nothing to do here
     return std::string{begin, end};
@@ -127,17 +127,26 @@ class Formatter
 {
 public:
 
+    /// Logging funcion for detailed messages
+    using Functor =
+            std::function<std::string(std::string const&, Level, Details const&)>;
+
+    /// Default formatter functor
+    struct Default
+    {
+        std::string operator() (std::string const& msg, Level lvl, Details const& dts) const noexcept;
+    };
+
     //! Default ctor
     Formatter() = default;
 
     //! ctor accepting a custom format and level filter
-    explicit Formatter(std::string format,
-                       int filter = -1,
-                       std::string timeFormat = defaultTimeFormat())
-        : m_format(std::move(format))
-        , m_timeFormat(std::move(timeFormat))
+    explicit Formatter(Functor functor, int filter = -1)
+        : m_functor(std::move(functor))
         , m_filter(filter)
-    { }
+    {
+        assert(m_functor);
+    }
 
     //! Returns whether this level should be logged
     bool filter(gt::log::Level level)
@@ -166,57 +175,41 @@ public:
         return *this;
     }
 
-    //! Setter for the format
-    Formatter& setFormat(std::string format)
-    {
-        m_format = std::move(format);
-        return *this;
-    }
-
-    //! Default format
-    static std::string const& defaultFormat()
-    {
-        static const std::string fmt = "%2 [%3] [%4] %1";
-        return fmt;
-    }
-
-    //! Default format
-    static std::string const& defaultTimeFormat()
-    {
-        static const std::string fmt = "%H:%M:%S";
-        return fmt;
-    }
-
     //! Formats the arguments into a single string acording to the format.
     std::string format(std::string const& message,
                        Level level,
                        Details const& details) const
     {
-        return gt::log::format(m_format, message, level, details.id,
-                               formatTime(details.time, m_timeFormat.c_str()));
+        return m_functor(message, level, details);
     }
 
-    //! Getter for format string
-    std::string const& format() const
+    void setFormatFunctor(Functor functor)
     {
-        return m_format;
+        assert(functor);
+        m_functor = std::move(functor);
     }
 
 private:
 
-    /**
-     * %1 = Message
-     * %2 = Level
-     * %3 = Id
-     * %4 = Time
-     */
-    std::string m_format{defaultFormat()};
-
-    std::string m_timeFormat{defaultTimeFormat()};
+    Functor m_functor{Default()};
 
     /// Bitfield to filter out only certain levels (by default all levels)
     int m_filter{-1};
 };
+
+/// Default formatter functor
+inline std::string
+Formatter::Default::operator()(std::string const& msg,
+                               Level lvl,
+                               Details const& dts) const noexcept
+{
+    if (dts.id.empty())
+    {
+        return gt::log::format("%1 [%2] %3", lvl, dts.time, msg);
+    }
+
+    return gt::log::format("%1 [%2] [%3] %4", lvl, dts.id, dts.time, msg);
+}
 
 } // end namespace log
 

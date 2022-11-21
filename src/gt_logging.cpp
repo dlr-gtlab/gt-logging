@@ -236,12 +236,6 @@ Logger::Helper::writeToLog()
     Logger::instance().write(message, level, Details{id, *time});
 }
 
-void
-Logger::InformativeHelper::writeToLog()
-{
-    Logger::instance().writeInformative(gtStream.str());
-}
-
 //! Sends the message to all the destinations. The level for this message is passed in case
 //! it's useful for processing in the destination.
 void
@@ -252,17 +246,6 @@ Logger::write(std::string const& message, Level level, Details details)
     std::for_each(pimpl->destinations.begin(), pimpl->destinations.end(),
                   [&](DestinationEntry const& dest){
         dest.ptr->write(message, level, details);
-    });
-}
-
-void
-Logger::writeInformative(const std::string& message)
-{
-    MutexLocker lock(pimpl->logMutex);
-
-    std::for_each(pimpl->destinations.begin(), pimpl->destinations.end(),
-                  [&message](DestinationEntry const& dest){
-        dest.ptr->writeInformative(message);
     });
 }
 

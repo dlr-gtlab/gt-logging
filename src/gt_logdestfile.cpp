@@ -198,7 +198,6 @@ void
 log::FileDestination::write(std::string const& message, Level /*level*/)
 {
     std::string msg = message;
-    m_rotationStrategy->appendMessageSize(msg.size());
 
     if (m_rotationStrategy->shouldRotate())
     {
@@ -220,14 +219,10 @@ log::FileDestination::write(std::string const& message, Level /*level*/)
         m_rotationStrategy->setFileInfo(m_filePath);
     }
 
-    m_fstream << msg.c_str();
-    m_fstream.flush();
-}
+    m_rotationStrategy->appendMessageSize(msg.size());
 
-void
-log::FileDestination::writeInformative(const std::string& message)
-{
-    write(message, gt::log::InfoLevel);
+    m_fstream << std::move(msg);
+    m_fstream.flush();
 }
 
 bool

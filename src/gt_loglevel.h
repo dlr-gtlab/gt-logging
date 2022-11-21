@@ -27,6 +27,7 @@
 #define GT_LOGLEVEL_H
 
 #include "gt_logging_exports.h"
+
 #include <string>
 
 namespace gt
