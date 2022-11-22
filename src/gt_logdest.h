@@ -49,11 +49,6 @@ public:
 
     //! Returns whether the destination was created correctly
     virtual bool isValid() const { return true; }
-
-    //! Returns the type as a string e.g: console, file.
-    //! The returned value may change in different versions of GtLog,
-    //! but two destinations of the same type will return the same value.
-    virtual std::string type() const = 0;
 };
 
 //! Abstract class for a formatted logging destination

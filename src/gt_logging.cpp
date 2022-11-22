@@ -160,16 +160,6 @@ Logger::removeDestination(const std::string& id)
 }
 
 bool
-Logger::hasDestinationOfType(std::string const& type) const
-{
-    MutexLocker lock(pimpl->logMutex);
-
-    return any_of(pimpl->destinations, [&](DestinationEntry const& dest){
-        return dest.ptr->type() == type;
-    });
-}
-
-bool
 Logger::hasDestination(const DestinationPtr& destination)
 {
     MutexLocker lock(pimpl->logMutex);

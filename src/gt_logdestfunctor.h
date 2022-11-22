@@ -59,9 +59,6 @@ public:
         m_functor(message, level, details);
     }
 
-    //! type
-    std::string type() const override { return "functor"; }
-
 private:
 
     /// Functor

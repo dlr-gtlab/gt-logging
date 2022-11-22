@@ -169,8 +169,6 @@ public:
     GT_LOGGING_EXPORT
     bool isValid() const override;
 
-    //! type
-    std::string type() const override { return "file"; }
 
 private:
 

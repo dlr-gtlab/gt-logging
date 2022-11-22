@@ -51,9 +51,6 @@ public:
         output(message, level);
     }
 
-    //! type
-    std::string type() const override { return "console"; }
-
 private:
 
     //! Helper method for logging to console

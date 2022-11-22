@@ -79,11 +79,6 @@ public:
     GT_LOGGING_EXPORT
     bool removeDestination(const std::string& id);
 
-    //! Checks if a destination of a specific type has been added.
-    //! Pass T::type as parameter.
-    GT_LOGGING_EXPORT
-    bool hasDestinationOfType(const std::string& type) const;
-
     //! Checks if the destination has been added.
     GT_LOGGING_EXPORT
     bool hasDestination(const DestinationPtr& destination);
