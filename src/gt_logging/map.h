@@ -39,7 +39,7 @@ inline Stream& operator<<(Stream& s, std::unordered_map<T, U, R...> const& t)
 template <typename T, typename U, typename... R>
 inline Stream& operator<<(Stream& s, std::unordered_multimap<T, U, R...> const& t)
 {
-    return s.doLogIter(t.begin(), t.end(), "U_multimap{", "}");
+    return s.doLogIter(t.begin(), t.end(), "u_multimap{", "}");
 }
 
 } // namespace log

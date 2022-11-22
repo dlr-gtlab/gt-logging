@@ -6,6 +6,14 @@
 #include <algorithm>
 #include <sstream>
 
+#ifdef __has_cpp_attribute
+  #if __has_cpp_attribute(nodiscard)
+    #define GT_LOG_NODISCARD [[nodiscard]]
+  #endif
+#else
+  #define GT_LOG_NODISCARD
+#endif
+
 namespace gt
 {
 
@@ -79,9 +87,9 @@ public:
     std::string str() { return m_stream.str(); }
 
     GT_LOGGING_EXPORT static bool mayLog(int level);
-    [[nodiscard]] bool mayLog() const { return mayLog(m_vlevel); }
-    [[nodiscard]] bool mayLogSpace() const { return m_flags & LogSpace; }
-    [[nodiscard]] bool mayLogQuote() const { return m_flags & LogQuote; }
+    GT_LOG_NODISCARD bool mayLog() const { return mayLog(m_vlevel); }
+    GT_LOG_NODISCARD bool mayLogSpace() const { return m_flags & LogSpace; }
+    GT_LOG_NODISCARD bool mayLogQuote() const { return m_flags & LogQuote; }
 
     // pod
     inline Stream& operator<<(std::nullptr_t) { return doLog("(nullptr)"); }
