@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <memory>
 
 namespace gt
 {

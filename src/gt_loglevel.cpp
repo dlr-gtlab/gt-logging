@@ -52,17 +52,17 @@ log::levelFromString(std::string const& logMessage, bool* ok)
         *ok = true;
     }
 
-    if (logMessage == TraceString)
+    if (logMessage.find(TraceString) != std::string::npos)
         return TraceLevel;
-    if (logMessage == DebugString)
+    if (logMessage.find(DebugString) != std::string::npos)
         return DebugLevel;
-    if (logMessage == InfoString)
+    if (logMessage.find(InfoString) != std::string::npos)
         return InfoLevel;
-    if (logMessage == WarnString)
+    if (logMessage.find(WarnString) != std::string::npos)
         return WarnLevel;
-    if (logMessage == ErrorString)
+    if (logMessage.find(ErrorString) != std::string::npos)
         return ErrorLevel;
-    if (logMessage == FatalString)
+    if (logMessage.find(FatalString) != std::string::npos)
         return FatalLevel;
 
     if (ok)

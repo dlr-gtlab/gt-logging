@@ -29,7 +29,7 @@ TEST_F(LogFormatter, date)
 
 struct DummyDestination : public gt::log::FormattedDestination
 {
-    void write(std::string const&, gt::log::Level);
+    void write(std::string const&, gt::log::Level) {}
     std::string type() const { return "dummy"; }
 };
 

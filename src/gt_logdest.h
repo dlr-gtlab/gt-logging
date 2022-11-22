@@ -83,13 +83,13 @@ public:
     }
 
     //! Returns whether this level should be logged
-    bool filter(gt::log::Level level)
+    bool filter(Level level)
     {
         return m_filter & levelToInt(level);
     }
 
     //! Sets the filter level
-    FormattedDestination& filterLevel(gt::log::Level level, bool include = true)
+    FormattedDestination& filterLevel(Level level, bool include = true)
     {
         if (include)
         {
