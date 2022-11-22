@@ -45,7 +45,6 @@ HEADERS += $$files(*.h) \
 
 #### SOURCES
 SOURCES += $$files(*.cpp) \
-    test_types_qt.cpp
 
 ####################################################
 
