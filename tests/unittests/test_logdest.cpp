@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 #include "gt_logging.h"
+#include<QString>
 
 class DestTest : public testing::Test
 {

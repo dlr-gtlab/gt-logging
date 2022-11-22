@@ -16,7 +16,7 @@ struct LogLevel : public testing::Test
         using namespace gt::log;
         // print current iteration
         static int i = 0;
-        std::cout << i++ << ": Level:" << level;
+        std::cout << i++ << ": Level: " << level << '\n';
 
         auto levelStr = levelToString(level);
         EXPECT_FALSE(levelStr.empty());

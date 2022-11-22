@@ -9,8 +9,8 @@
 // log line number
 #define GT_LOG_LINE_NUMBERS
 
-#include "gt_logging_qt_bindings.h"
 #include "test_log_helper.h"
+#include "gt_logging/qt_bindings.h"
 
 class LogLineNo : public LogHelperTest
 {};

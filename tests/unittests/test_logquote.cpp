@@ -9,8 +9,8 @@
 // log with quote
 #define GT_LOG_QUOTE
 
-#include "gt_logging_qt_bindings.h"
 #include "test_log_helper.h"
+#include "gt_logging/qt_bindings.h"
 
 class LogQuote : public LogHelperTest
 {};

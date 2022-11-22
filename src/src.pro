@@ -54,9 +54,16 @@ HEADERS += \
     gt_logdestfunctor.h \
     gt_logdisablelogforfile.h \
     gt_logformatter.h \
+    gt_logging/array.h \
+    gt_logging/list.h \
+    gt_logging/map.h \
+    gt_logging/memory.h \
+    gt_logging/qt_bindings.h \
+    gt_logging/set.h \
+    gt_logging/stl_bindings.h \
+    gt_logging/vector.h \
     gt_logging_exports.h \
     gt_logging.h \
-    gt_logging_qt_bindings.h \
     gt_loglevel.h \
     gt_logstream.h
 
@@ -78,6 +85,9 @@ unix:{
 }
 
 ######################################################################
+
+KEEP_INCLUDEPATHS += \
+    gt_logging
 
 copyHeaders($$HEADERS)
 copyToEnvironmentPath()

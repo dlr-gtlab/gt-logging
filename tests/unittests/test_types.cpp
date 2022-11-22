@@ -1,5 +1,6 @@
 
 #include "test_log_helper.h"
+#include "gt_logging/stl_bindings.h"
 
 // test fixture
 class Types : public LogHelperTest {};
@@ -51,7 +52,6 @@ TEST_F(Types, memory_shared)
     EXPECT_TRUE(log.contains(QString::number((size_t)s.get(), 16)));
 };
 
-#if 0
 TEST_F(Types, std_vector)
 {
     auto vec = std::vector<double>{14, 43, 15};
@@ -61,11 +61,8 @@ TEST_F(Types, std_vector)
 
 TEST_F(Types, std_list)
 {
-    // this doesnt work because we defined the operator<< only for gt::log::Stream
-//    gtWarning() << std::list<MyDebugObject>{};
-
-    gtWarning() << std::list<float>{};
-    EXPECT_TRUE(log.contains("()"));
+    gtWarning() << std::list<float>{0.1f, 0.2f, 0.3f};
+    EXPECT_TRUE(log.contains("(0.1, 0.2, 0.3)"));
 }
 
 TEST_F(Types, std_map)
@@ -74,7 +71,7 @@ TEST_F(Types, std_map)
     map.insert({41.2, "ABC"});
 
     gtWarning() << map;
-    EXPECT_TRUE(log.contains("((41.2, ABC))"));
+    EXPECT_TRUE(log.contains("map{(41.2, \"ABC\")}"));
 }
 
 TEST_F(Types, std_multimap)
@@ -84,9 +81,10 @@ TEST_F(Types, std_multimap)
     map.insert({41.2, "Test"});
 
     gtWarning() << map;
-    EXPECT_TRUE(log.contains("("));
-    EXPECT_TRUE(log.contains("(41.1, ABC)"));
-    EXPECT_TRUE(log.contains("(41.2, Test)"));
+    EXPECT_TRUE(log.contains("multimap{("));
+    EXPECT_TRUE(log.contains("(41.1, \"ABC\")"));
+    EXPECT_TRUE(log.contains("(41.2, \"Test\")"));
+    EXPECT_TRUE(log.contains("}"));
 }
 
 TEST_F(Types, std_array)
@@ -96,16 +94,15 @@ TEST_F(Types, std_array)
     };
 
     gtWarning() << array;
-    EXPECT_TRUE(log.contains("(ABC, DEF, TEST, 1234, )"));
+    EXPECT_TRUE(log.contains(R"(["ABC", "DEF", "TEST", "1234", ""])"));
 }
 
 TEST_F(Types, std_pair)
 {
     std::pair<std::string, int> pair{"test", 42};
     gtWarning() << pair;
-    EXPECT_TRUE(log.contains("(test, 42)"));
+    EXPECT_TRUE(log.contains("(\"test\", 42)"));
 }
-#endif
 
 TEST_F(Types, POD_other)
 {

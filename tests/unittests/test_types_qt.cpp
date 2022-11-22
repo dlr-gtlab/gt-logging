@@ -7,7 +7,8 @@
  */
 
 #include "test_log_helper.h"
-#include "gt_logging_qt_bindings.h"
+#include "gt_logging/stl_bindings.h"
+#include "gt_logging/qt_bindings.h"
 
 #include <QVector2D>
 #include <QVector3D>
@@ -41,45 +42,46 @@ inline QDebug& operator<<(QDebug& d, MyDebugObject const& /*obj*/)
 TEST_F(TypesQt, std_vector)
 {
     gtWarning() << std::vector<double>{14, 43, 15};
-    EXPECT_TRUE(log.contains("std::vector(14, 43, 15)"));
+    EXPECT_TRUE(log.contains("(14, 43, 15)"));
 }
 
 TEST_F(TypesQt, std_list)
 {
     // this doesnt work because we defined the operator<< only for gt::log::Stream
-//    gtWarning() << std::list<MyDebugObject>{};
+    gtWarning() << std::list<MyDebugObject>{{}};
+    EXPECT_TRUE(log.contains("(MyDebugObject)"));
 
-    gtWarning() << std::list<float>{};
-    EXPECT_TRUE(log.contains("std::list()"));
+    gtWarning() << std::list<float>{0.1, 0.2, 0.3};
+    EXPECT_TRUE(log.contains("(0.1, 0.2, 0.3)"));
 }
 
 TEST_F(TypesQt, std_map)
 {
     std::map<float, QString> map;
-    map.insert({41.1, "ABC"});
+    map.insert({41.2, "ABC"});
 
     gtWarning() << map;
-    EXPECT_TRUE(log.contains("std::map("));
-    EXPECT_TRUE(log.contains("std::pair(41.1,ABC)"));
+    EXPECT_TRUE(log.contains("map{(41.2, \"ABC\")}"));
 }
 
 TEST_F(TypesQt, std_multimap)
 {
     std::multimap<float, QString> map;
     map.insert({41.1, "ABC"});
-    map.insert({41.1, "Test"});
+    map.insert({41.2, "Test"});
 
     gtWarning() << map;
-    EXPECT_TRUE(log.contains("std::multimap("));
-    EXPECT_TRUE(log.contains("std::pair(41.1,ABC)"));
-    EXPECT_TRUE(log.contains("std::pair(41.1,Test)"));
+    EXPECT_TRUE(log.contains("multimap{("));
+    EXPECT_TRUE(log.contains("(41.1, \"ABC\")"));
+    EXPECT_TRUE(log.contains("(41.2, \"Test\")"));
+    EXPECT_TRUE(log.contains("}"));
 }
 
 TEST_F(TypesQt, std_pair)
 {
     std::pair<QString, int> pair{"test", 42};
     gtWarning() << pair;
-    EXPECT_TRUE(log.contains("std::pair(test,42)"));
+    EXPECT_TRUE(log.contains("(\"test\", 42)"));
 }
 
 TEST_F(TypesQt, QStringList)
@@ -142,28 +144,28 @@ TEST_F(TypesQt, QSet)
     EXPECT_TRUE(log.contains("33"));
 }
 
-//TEST_F(TypesQt, QPair)
-//{
-//    QPair<QString, int> pair{"test", 42};
-//    gtWarning() << pair;
-//    EXPECT_TRUE(log.contains("QPair(test,42)"));
-//}
+TEST_F(TypesQt, QPair)
+{
+    QPair<QString, int> pair{"test", 42};
+    gtWarning() << pair;
+    EXPECT_TRUE(log.contains("QPair(test,42)"));
+}
 
-//TEST_F(TypesQt, QSharedPointer)
-//{
-//    QSharedPointer<int> ptr{new int{42}};
+TEST_F(TypesQt, QSharedPointer)
+{
+    QSharedPointer<int> ptr{new int{42}};
 
-//    gtWarning() << ptr;
-//    EXPECT_TRUE(log.contains("QSharedPointer("));
-//    EXPECT_TRUE(log.contains(QString::number((size_t)ptr.data(), 16)));
-//}
-//TEST_F(TypesQt, QContiguousCache)
-//{
-//    QContiguousCache<int> cache;
+    gtWarning() << ptr;
+    EXPECT_TRUE(log.contains("QSharedPointer("));
+    EXPECT_TRUE(log.contains(QString::number((size_t)ptr.data(), 16)));
+}
+TEST_F(TypesQt, QContiguousCache)
+{
+    QContiguousCache<int> cache;
 
-//    gtWarning() << cache;
-//    EXPECT_TRUE(log.contains("QContiguousCache()"));
-//}
+    gtWarning() << cache;
+    EXPECT_TRUE(log.contains("QContiguousCache()"));
+}
 
 TEST_F(TypesQt, QVariant)
 {

@@ -8,8 +8,7 @@
 
 
 #include "test_log_helper.h"
-
-#include "gt_logging_qt_bindings.h"
+#include "gt_logging/qt_bindings.h"
 
 class LogStateSaver : public LogHelperTest
 {};
