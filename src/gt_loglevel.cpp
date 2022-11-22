@@ -11,12 +11,12 @@
 #include <cassert>
 using namespace gt;
 
-static const char TraceString[] = "TRACE";
-static const char DebugString[] = "DEBUG";
-static const char InfoString[]  = "INFO ";
-static const char WarnString[]  = "WARN ";
-static const char ErrorString[] = "ERROR";
-static const char FatalString[] = "FATAL";
+static constexpr char TraceString[] = "TRACE";
+static constexpr char DebugString[] = "DEBUG";
+static constexpr char InfoString[]  = "INFO ";
+static constexpr char WarnString[]  = "WARN ";
+static constexpr char ErrorString[] = "ERROR";
+static constexpr char FatalString[] = "FATAL";
 
 static const char* LevelToText(log::Level theLevel)
 {

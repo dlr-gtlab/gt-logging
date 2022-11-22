@@ -68,7 +68,7 @@ private:
     Functor m_functor;
 };
 
-inline auto
+inline std::shared_ptr<FunctorDestination>
 makeFunctorDestination(FunctorDestination::Functor functor)
 {
     return std::make_shared<FunctorDestination>(std::move(functor));

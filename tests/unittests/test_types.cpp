@@ -35,6 +35,78 @@ TEST_F(Types, QFlags)
     EXPECT_TRUE(log.contains("5"));
 };
 
+TEST_F(Types, memory_unique)
+{
+    auto u = std::make_unique<int>(42);
+
+    gtError() << u;
+    EXPECT_TRUE(log.contains(QString::number((size_t)u.get(), 16)));
+};
+
+TEST_F(Types, memory_shared)
+{
+    auto s = std::make_shared<int>(42);
+
+    gtError() << s;
+    EXPECT_TRUE(log.contains(QString::number((size_t)s.get(), 16)));
+};
+
+#if 0
+TEST_F(Types, std_vector)
+{
+    auto vec = std::vector<double>{14, 43, 15};
+    gtDebug() << vec;
+    EXPECT_TRUE(log.contains("(14, 43, 15)"));
+}
+
+TEST_F(Types, std_list)
+{
+    // this doesnt work because we defined the operator<< only for gt::log::Stream
+//    gtWarning() << std::list<MyDebugObject>{};
+
+    gtWarning() << std::list<float>{};
+    EXPECT_TRUE(log.contains("()"));
+}
+
+TEST_F(Types, std_map)
+{
+    std::map<float, std::string> map;
+    map.insert({41.2, "ABC"});
+
+    gtWarning() << map;
+    EXPECT_TRUE(log.contains("((41.2, ABC))"));
+}
+
+TEST_F(Types, std_multimap)
+{
+    std::multimap<float, std::string> map;
+    map.insert({41.1, "ABC"});
+    map.insert({41.2, "Test"});
+
+    gtWarning() << map;
+    EXPECT_TRUE(log.contains("("));
+    EXPECT_TRUE(log.contains("(41.1, ABC)"));
+    EXPECT_TRUE(log.contains("(41.2, Test)"));
+}
+
+TEST_F(Types, std_array)
+{
+    std::array<std::string, 5> array{
+        "ABC", "DEF", "TEST", "1234", ""
+    };
+
+    gtWarning() << array;
+    EXPECT_TRUE(log.contains("(ABC, DEF, TEST, 1234, )"));
+}
+
+TEST_F(Types, std_pair)
+{
+    std::pair<std::string, int> pair{"test", 42};
+    gtWarning() << pair;
+    EXPECT_TRUE(log.contains("(test, 42)"));
+}
+#endif
+
 TEST_F(Types, POD_other)
 {
     void* v = (void*)12345;

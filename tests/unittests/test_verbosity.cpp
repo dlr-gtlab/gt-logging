@@ -69,20 +69,3 @@ TEST_F(Verbosity, logErrorVerboseMediumSuccess2)
     EXPECT_TRUE(log.contains("This verbose error should still appear"));
 }
 
-TEST_F(Verbosity, test)
-{
-    std::tm time{};
-    time.tm_hour = 12;
-    time.tm_min  = 59;
-    time.tm_sec  = 42;
-    time.tm_year = 2022 - 1900; // 1900 start time of year
-    time.tm_mon  = 11;          // month = december
-
-    std::string id = "my_id";
-
-    std::string msg = "Hello World";
-
-    gt::log::Level lvl = gt::log::InfoLevel;
-
-    std::cout << gt::log::format("%1 [%3] [%2] %4 %5", lvl, id, time, msg, "(test)") << std::endl;
-}

@@ -179,14 +179,14 @@ private:
     RotationStrategyPtr m_rotationStrategy;
 };
 
-inline auto
+inline std::shared_ptr<FileDestination>
 makeFileDestination(std::string filePath)
 {
     return std::make_shared<FileDestination>(
                 std::move(filePath), std::make_shared<NullRotationStrategy>());
 }
 
-inline auto
+inline std::shared_ptr<FileDestination>
 makeFileDestination(std::string filePath,
                     std::shared_ptr<RotationStrategy> rotation)
 {

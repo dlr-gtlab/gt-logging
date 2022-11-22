@@ -6,7 +6,6 @@
  *  E-Mail: marius.broecker@dlr.de
  */
 
-
 #include "test_log_helper.h"
 #include "gt_logging_qt_bindings.h"
 
@@ -17,7 +16,6 @@
 
 #include <QWidget>
 #include <QJsonValue>
-
 
 // test fixture
 class TypesQt : public LogHelperTest {};
@@ -96,6 +94,12 @@ TEST_F(TypesQt, QList)
     EXPECT_TRUE(log.contains("(14, 43, 15)"));
 }
 
+TEST_F(TypesQt, QVector)
+{
+    gtWarning() << QVector<char>{'A', 'B', 'C'};
+    EXPECT_TRUE(log.contains("(A, B, C)"));
+}
+
 TEST_F(TypesQt, QHash)
 {
     QHash<QString, int> hash;
@@ -138,28 +142,28 @@ TEST_F(TypesQt, QSet)
     EXPECT_TRUE(log.contains("33"));
 }
 
-TEST_F(TypesQt, QPair)
-{
-    QPair<QString, int> pair{"test", 42};
-    gtWarning() << pair;
-    EXPECT_TRUE(log.contains("QPair(test,42)"));
-}
+//TEST_F(TypesQt, QPair)
+//{
+//    QPair<QString, int> pair{"test", 42};
+//    gtWarning() << pair;
+//    EXPECT_TRUE(log.contains("QPair(test,42)"));
+//}
 
-TEST_F(TypesQt, QSharedPointer)
-{
-    QSharedPointer<int> ptr{new int{42}};
+//TEST_F(TypesQt, QSharedPointer)
+//{
+//    QSharedPointer<int> ptr{new int{42}};
 
-    gtWarning() << ptr;
-    EXPECT_TRUE(log.contains("QSharedPointer("));
-    EXPECT_TRUE(log.contains(QString::number((size_t)ptr.data(), 16)));
-}
-TEST_F(TypesQt, QContiguousCache)
-{
-    QContiguousCache<int> cache;
+//    gtWarning() << ptr;
+//    EXPECT_TRUE(log.contains("QSharedPointer("));
+//    EXPECT_TRUE(log.contains(QString::number((size_t)ptr.data(), 16)));
+//}
+//TEST_F(TypesQt, QContiguousCache)
+//{
+//    QContiguousCache<int> cache;
 
-    gtWarning() << cache;
-    EXPECT_TRUE(log.contains("QContiguousCache()"));
-}
+//    gtWarning() << cache;
+//    EXPECT_TRUE(log.contains("QContiguousCache()"));
+//}
 
 TEST_F(TypesQt, QVariant)
 {

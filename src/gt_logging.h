@@ -35,11 +35,6 @@
 #include "gt_logdestfile.h"
 #include "gt_logdestfunctor.h"
 
-// Qt support
-#ifdef GT_LOG_USE_QT_BINDINGS
-#include "gt_logbindings_qt.h"
-#endif
-
 // macros to convert an argument to string
 #define GT_LOG_TO_STR_HELPER(X) #X
 #define GT_LOG_TO_STR(X) GT_LOG_TO_STR_HELPER(X)

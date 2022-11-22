@@ -3,8 +3,8 @@
 
 #include "gt_logging_exports.h"
 
+#include <algorithm>
 #include <sstream>
-#include <iostream>
 
 namespace gt
 {
@@ -19,6 +19,7 @@ enum Verbosity
     Medium = 5,
     Everything = 9
 };
+
 
 //! Enum for setting certain flags of a stream
 enum StreamFlag
@@ -137,12 +138,46 @@ public:
     inline Stream& operator<<(const char* t) { return doLog(t); }
     inline Stream& operator<<(std::string const& t) { return doLog(t); }
 
+    // memory
+    template <typename T, typename U>
+    inline Stream& operator<<(std::unique_ptr<T, U> const& t) { return operator<<(t.get()); }
+    template <typename T>
+    inline Stream& operator<<(std::shared_ptr<T> const& t) { return operator<<(t.get()); }
+
     // ios flags
     inline Stream& operator<<(std::ios_base&(*t)(std::ios_base&))
     {
         m_stream << t;
         return *this;
     }
+
+#if 0
+    template <typename Vec,
+              typename Iter = decltype(std::begin(std::declval<Vec const&>()))>
+    inline Stream& operator<<(Vec const& t)
+    {
+        return doLogIter(std::begin(t), std::end(t));
+    }
+
+    template <typename T, typename U>
+    inline Stream& operator<<(std::pair<T, U> const& t)
+    {
+        if (mayLog())
+        {
+            m_stream << '(';
+            {
+                StreamStateSaver s{*this};
+                nospace();
+                *this << t.first;
+                m_stream << ", ";
+                *this << t.second;
+            }
+            m_stream << ')';
+            mayLogSpace();
+        }
+        return *this;
+    }
+#endif
 
     //! Default logging method
     template <typename T>
@@ -168,6 +203,33 @@ public:
         }
         return *this;
     }
+
+#if 0
+    template <typename Iter>
+    inline Stream& doLogIter(Iter a, Iter b) noexcept
+    {
+        if (mayLog())
+        {
+            m_stream << '(';
+            if (a != b)
+            {
+                StreamStateSaver s{*this};
+                nospace();
+                Iter llast = --b;
+                // log until nth - 1 element
+                std::for_each(a, llast, [this](auto const& val){
+                    *this << val;
+                    m_stream << ", ";
+                });
+                // log last lement
+                *this << *b;
+            }
+            m_stream << ')';
+            mayLogSpace();
+        }
+        return *this;
+    };
+#endif
 
 private:
 
@@ -210,5 +272,17 @@ inline gt::log::StreamStateSaver::~StreamStateSaver()
     stream->m_flags = flags;
     stream->m_vlevel = vlevel;
 }
+
+//template <typename Vec,
+//          typename Iter = decltype(std::begin(std::declval<Vec const&>()))>
+//inline Stream& operator<<(Vec const& t)
+//{
+//    return doLogIter(std::begin(t), std::end(t));
+//}
+
+// Qt support
+#ifdef GT_LOG_USE_QT_BINDINGS
+#include "gt_logbindings_qt.h"
+#endif
 
 #endif // GT_LOGSTREAM_H

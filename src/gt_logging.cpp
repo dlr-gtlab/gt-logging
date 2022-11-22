@@ -25,6 +25,7 @@
 
 #include "gt_logging.h"
 
+#include <iostream>
 #include <chrono>
 #include <mutex>
 #include <vector>

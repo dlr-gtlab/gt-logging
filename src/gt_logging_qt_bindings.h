@@ -26,8 +26,8 @@ namespace log
 namespace detail
 {
 
-/// Maps all types to void
-template<class... _Ts>
+/// Maps all type to void
+template <typename... Ts>
 using void_t = void;
 
 /// Uses SFINAE to check for a QDebug operator<<(T)
@@ -71,7 +71,6 @@ using if_not_integral_and_pointer =
         std::enable_if_t<
                 !std::is_pointer<T>::value &&
                 !std::is_integral<T>::value, bool>;
-
 
 template <typename T>
 using if_base_of_qobject =

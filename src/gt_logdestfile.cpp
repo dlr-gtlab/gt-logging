@@ -27,6 +27,8 @@
 
 #include "gt_logging.h"
 
+#include <iostream>
+
 using namespace gt;
 
 const size_t log::SizeRotationStrategy::MAX_BACKUP_COUNT = 10;

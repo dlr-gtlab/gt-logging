@@ -61,7 +61,7 @@ private:
     void output(std::string const& message, Level level);
 };
 
-inline auto
+inline std::shared_ptr<DebugOutputDestination>
 makeDebugOutputDestination(Formatter formatter = {})
 {
     return std::make_shared<DebugOutputDestination>(std::move(formatter));
