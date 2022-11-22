@@ -23,17 +23,17 @@ class TypesQt : public LogHelperTest {};
 // custom struct
 struct MyDebugObject {};
 
-gt::log::Stream& operator<<(gt::log::Stream& d, MyDebugObject const& /*obj*/)
+inline gt::log::Stream& operator<<(gt::log::Stream& d, MyDebugObject const& /*obj*/)
 {
     return d << "MyDebugObject";
 }
 
-std::ostream& operator<<(std::ostream& d, MyDebugObject const& /*obj*/)
+inline std::ostream& operator<<(std::ostream& d, MyDebugObject const& /*obj*/)
 {
     return d << "this_wont_be_used";
 }
 
-QDebug& operator<<(QDebug& d, MyDebugObject const& /*obj*/)
+inline QDebug& operator<<(QDebug& d, MyDebugObject const& /*obj*/)
 {
     return d << "this_wont_be_used_either";
 }
