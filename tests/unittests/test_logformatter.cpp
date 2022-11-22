@@ -27,59 +27,65 @@ TEST_F(LogFormatter, date)
     qDebug() << time;
 }
 
+struct DummyDestination : public gt::log::FormattedDestination
+{
+    void write(std::string const&, gt::log::Level);
+    std::string type() const { return "dummy"; }
+};
+
 TEST_F(LogFormatter, filterDefault)
 {
-    gt::log::Formatter formatter;
+    DummyDestination formattedDest;
 
     // by default all levels should be included
-    EXPECT_TRUE(formatter.filter(gt::log::TraceLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::DebugLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::InfoLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::WarnLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::ErrorLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::FatalLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::TraceLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::DebugLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::InfoLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::ErrorLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::FatalLevel));
 }
 
 TEST_F(LogFormatter, filterNone)
 {
-    gt::log::Formatter formatter;
-    formatter.filterAll(false);
+    DummyDestination formattedDest;
+    formattedDest.filterAll(false);
 
     // all levels should be excluded
-    EXPECT_FALSE(formatter.filter(gt::log::TraceLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::DebugLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::InfoLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::WarnLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::ErrorLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::FatalLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::TraceLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::DebugLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::InfoLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::ErrorLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::FatalLevel));
 }
 
 TEST_F(LogFormatter, filterSelected)
 {
-    gt::log::Formatter formatter;
-    formatter.filterAll(false)
+    DummyDestination formattedDest;
+    formattedDest.filterAll(false)
             .filterLevel(gt::log::InfoLevel, true)
             .filterLevel(gt::log::ErrorLevel, true)
             .filterLevel(gt::log::TraceLevel, true);
 
     // only selected levels should be filtered
-    EXPECT_TRUE(formatter.filter(gt::log::TraceLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::DebugLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::InfoLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::WarnLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::ErrorLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::FatalLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::TraceLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::DebugLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::InfoLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::ErrorLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::FatalLevel));
 
     // now exclude error level but include debug
-    formatter.filterLevel(gt::log::ErrorLevel, false)
+    formattedDest.filterLevel(gt::log::ErrorLevel, false)
             .filterLevel(gt::log::DebugLevel, true);
 
-    EXPECT_TRUE(formatter.filter(gt::log::TraceLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::DebugLevel));
-    EXPECT_TRUE(formatter.filter(gt::log::InfoLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::WarnLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::ErrorLevel));
-    EXPECT_FALSE(formatter.filter(gt::log::FatalLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::TraceLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::DebugLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::InfoLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::ErrorLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::FatalLevel));
 }
 
 TEST_F(LogFormatter, standalone_format_1)

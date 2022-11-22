@@ -65,7 +65,7 @@ public:
     void write(std::string const& message, Level level, Details const& details) final
     {
         // check if level should be logged
-        if (m_formatter.filter(level))
+        if (filter(level))
         {
             // format message
             write(m_formatter.format(message, level, details), level);
@@ -82,6 +82,33 @@ public:
         m_formatter = std::move(formatter);
     }
 
+    //! Returns whether this level should be logged
+    bool filter(gt::log::Level level)
+    {
+        return m_filter & levelToInt(level);
+    }
+
+    //! Sets the filter level
+    FormattedDestination& filterLevel(gt::log::Level level, bool include = true)
+    {
+        if (include)
+        {
+            m_filter |=  levelToInt(level);
+        }
+        else
+        {
+            m_filter &= ~levelToInt(level);
+        }
+        return *this;
+    }
+
+    //! Whether to include all levels (if true) else excludes all levels
+    FormattedDestination& filterAll(bool include = true)
+    {
+        m_filter &= include ? -1 : 0;
+        return *this;
+    }
+
 protected:
 
     //! ctor
@@ -96,6 +123,9 @@ private:
 
     /// formatter
     Formatter m_formatter;
+
+    /// Bitfield to filter out only certain levels (by default all levels)
+    int m_filter{-1};
 };
 
 using DestinationPtr = std::shared_ptr<Destination>;

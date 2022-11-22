@@ -134,45 +134,17 @@ public:
     /// Default formatter functor
     struct Default
     {
-        std::string operator() (std::string const& msg, Level lvl, Details const& dts) const noexcept;
+        std::string operator()(std::string const& msg, Level lvl, Details const& dts) const noexcept;
     };
 
     //! Default ctor
     Formatter() = default;
 
     //! ctor accepting a custom format and level filter
-    explicit Formatter(Functor functor, int filter = -1)
+    explicit Formatter(Functor functor)
         : m_functor(std::move(functor))
-        , m_filter(filter)
     {
         assert(m_functor);
-    }
-
-    //! Returns whether this level should be logged
-    bool filter(gt::log::Level level)
-    {
-        return m_filter & levelToInt(level);
-    }
-
-    //! Sets the filter level
-    Formatter& filterLevel(gt::log::Level level, bool include = true)
-    {
-        if (include)
-        {
-            m_filter |=  levelToInt(level);
-        }
-        else
-        {
-            m_filter &= ~levelToInt(level);
-        }
-        return *this;
-    }
-
-    //! Whether to include all levels (if true) else excludes all levels
-    Formatter& filterAll(bool include = true)
-    {
-        m_filter &= include ? -1 : 0;
-        return *this;
     }
 
     //! Formats the arguments into a single string acording to the format.
@@ -183,18 +155,25 @@ public:
         return m_functor(message, level, details);
     }
 
-    void setFormatFunctor(Functor functor)
+    //! Setter for the format functor
+    void setFormat(Functor functor)
     {
         assert(functor);
         m_functor = std::move(functor);
+    }
+
+    //! operator()
+    std::string operator()(std::string const& message,
+                           Level level,
+                           Details const& details) const
+    {
+        return format(message, level, details);
     }
 
 private:
 
     Functor m_functor{Default()};
 
-    /// Bitfield to filter out only certain levels (by default all levels)
-    int m_filter{-1};
 };
 
 /// Default formatter functor
@@ -203,6 +182,7 @@ Formatter::Default::operator()(std::string const& msg,
                                Level lvl,
                                Details const& dts) const noexcept
 {
+    // skip id if its empty
     if (dts.id.empty())
     {
         return gt::log::format("%1 [%2] %3", lvl, dts.time, msg);
