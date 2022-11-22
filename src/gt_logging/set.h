@@ -6,8 +6,8 @@
  *  E-Mail: marius.broecker@dlr.de
  */
 
-#ifndef SET_H
-#define SET_H
+#ifndef GT_LOGGING_SET_H
+#define GT_LOGGING_SET_H
 
 #include <set>
 #include <unordered_set>
@@ -45,4 +45,5 @@ inline Stream& operator<<(Stream& s, std::unordered_multiset<T, U, R...> const& 
 } // namespace log
 
 } // namespace gt
-#endif // SET_H
+
+#endif // GT_LOGGING_SET_H

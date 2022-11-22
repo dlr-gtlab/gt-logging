@@ -6,8 +6,8 @@
  *  E-Mail: marius.broecker@dlr.de
  */
 
-#ifndef ARRAY_H
-#define ARRAY_H
+#ifndef GT_LOGGING_ARRAY_H
+#define GT_LOGGING_ARRAY_H
 
 #include <array>
 

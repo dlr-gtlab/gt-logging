@@ -6,8 +6,8 @@
  *  E-Mail: marius.broecker@dlr.de
  */
 
-#ifndef STL_BINDINGS_H
-#define STL_BINDINGS_H
+#ifndef GT_LOGGING_STL_BINDINGS_H
+#define GT_LOGGING_STL_BINDINGS_H
 
 #include "gt_logging/memory.h"
 #include "gt_logging/array.h"
@@ -17,4 +17,4 @@
 #include "gt_logging/set.h"
 
 
-#endif // STL_BINDINGS_H
+#endif // GT_LOGGING_STL_BINDINGS_H

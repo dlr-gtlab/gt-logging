@@ -46,5 +46,4 @@ inline Stream& operator<<(Stream& s, std::unordered_multimap<T, U, R...> const& 
 
 } // namespace gt
 
-
 #endif // GT_LOGGING_MAP_H

@@ -6,8 +6,8 @@
  *  E-Mail: marius.broecker@dlr.de
  */
 
-#ifndef LIST_H
-#define LIST_H
+#ifndef GT_LOGGING_LIST_H
+#define GT_LOGGING_LIST_H
 
 #include <list>
 #include <deque>
@@ -44,4 +44,4 @@ inline Stream& operator<<(Stream& s, std::stack<T, U> const& t)
 
 } // namespace gt
 
-#endif // LIST_H
+#endif // GT_LOGGING_LIST_H
