@@ -51,7 +51,7 @@ TEST_F(TypesQt, std_list)
     gtWarning() << std::list<MyDebugObject>{{}};
     EXPECT_TRUE(log.contains("(MyDebugObject)"));
 
-    gtWarning() << std::list<float>{0.1, 0.2, 0.3};
+    gtWarning() << std::list<float>{0.1f, 0.2f, 0.3f};
     EXPECT_TRUE(log.contains("(0.1, 0.2, 0.3)"));
 }
 
