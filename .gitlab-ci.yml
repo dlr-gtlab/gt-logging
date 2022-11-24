@@ -22,7 +22,8 @@
 # Variables that are defined globally for the pipeline
 variables:
   PIPELINEVERSION: "2.1.0"
-  GIT_SUBMODULE_STRATEGY: none
+  GIT_SUBMODULE_STRATEGY: "recursive"
+  GIT_STRATEGY: "clone"
   
   # Regulare expression pattern
   # enclose the branch name with ^ and $

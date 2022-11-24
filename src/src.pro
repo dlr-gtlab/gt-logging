@@ -21,13 +21,18 @@ TARGET = GTlabLogging
 
 QT -= core
 TEMPLATE = lib
-CONFIG += plugin
 CONFIG += silent
 CONFIG += c++14
 
 win32 {
     DEFINES += GT_LOGGING_DLL
     DEFINES += GT_LOG_WIN_PRINTF_CONSOLE
+}
+
+# We only add the version number of unixoid systems,
+# as this does not change the library name
+unix {
+     VERSION = 4.0.0
 }
 
 CONFIG(debug, debug|release){
