@@ -13,6 +13,8 @@
 #include <deque>
 #include <stack>
 
+#include "gt_logging.h"
+
 namespace gt
 {
 

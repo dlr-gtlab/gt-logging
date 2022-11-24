@@ -191,4 +191,14 @@ private:
 #include "gt_logdisablelogforfile.h"
 #endif
 
+// Additional stl bindings
+#ifdef GT_LOG_USE_EXTENDED_STL_BINDINGS
+#include "gt_logging/stl_bindings.h"
+#endif
+
+// Qt support
+#ifdef GT_LOG_USE_QT_BINDINGS
+#include "gt_logging/qt_bindings.h"
+#endif
+
 #endif // GTLOGGING_H

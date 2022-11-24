@@ -8,11 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Fixed
 ### Changed
-- Removed Qt dependencies. Optional Qt bindings may be renabled using `GT_LOG_USE_QT_BINDINGS` - #33
-
 ### Deprecated
 ### Removed
 ### Security 
+
+## [4.0.0] - 2022-11-24 
+
+### Changed
+- __Highlight__: GtLogging does not require Qt anymore. Optional Qt bindings may still be renabled using `GT_LOG_USE_QT_BINDINGS` - #33
+- `DestinationPtr` is now a `std::unique_ptr`. Destionations must be added/removed using an destionation id - #34
+- Changed `Destination::write` function signature . Now accepts another parameter containing details of the logged message. The message is now unformatted. - #34
+- Functor Destination to accepts all function-like objects (using `std::function`) - #33
+
+### Added
+- a `format` function and a `Fromatter` helper class for indivdual formatting - #34
 
 ## [3.0.0 ] - 2022-11-03
 ### Changed

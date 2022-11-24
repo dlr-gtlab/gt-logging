@@ -9,6 +9,8 @@
 #ifndef GT_LOGGING_MEMORY_H
 #define GT_LOGGING_MEMORY_H
 
+#include "gt_logging.h"
+
 #include <memory>
 
 namespace gt

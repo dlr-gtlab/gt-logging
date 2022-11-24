@@ -9,6 +9,8 @@
 #ifndef GT_LOGGING_STL_BINDINGS_H
 #define GT_LOGGING_STL_BINDINGS_H
 
+#include "gt_logging.h"
+
 #include "gt_logging/memory.h"
 #include "gt_logging/array.h"
 #include "gt_logging/vector.h"

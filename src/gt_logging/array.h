@@ -9,6 +9,8 @@
 #ifndef GT_LOGGING_ARRAY_H
 #define GT_LOGGING_ARRAY_H
 
+#include "gt_logging.h"
+
 #include <array>
 
 namespace gt
