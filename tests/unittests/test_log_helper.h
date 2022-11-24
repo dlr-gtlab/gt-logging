@@ -27,19 +27,19 @@ public:
                              msg.c_str())
             );
         });
-        ASSERT_TRUE(logger.addDestination("test", dest));
 
-        ASSERT_TRUE(logger.hasDestination(dest));
+        ASSERT_TRUE(logger.addDestination(destid, std::move(dest)));
+        ASSERT_TRUE(logger.hasDestination(destid));
     }
 
     void TearDown() override
     {
-        logger.removeDestination("test");
+        logger.removeDestination(destid);
 
-        ASSERT_FALSE(logger.hasDestination("test"));
+        ASSERT_FALSE(logger.hasDestination(destid));
     }
 
-
+    std::string destid = "LogHelperTest";
     gt::log::Logger& logger;
     QString log;
 };

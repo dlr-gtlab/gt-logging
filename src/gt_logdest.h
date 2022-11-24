@@ -123,7 +123,7 @@ private:
     int m_filter{-1};
 };
 
-using DestinationPtr = std::shared_ptr<Destination>;
+using DestinationPtr = std::unique_ptr<Destination>;
 
 } // end namespace log
 

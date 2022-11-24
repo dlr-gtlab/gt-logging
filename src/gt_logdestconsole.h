@@ -58,10 +58,10 @@ private:
     void output(std::string const& message, Level level);
 };
 
-inline std::shared_ptr<DebugOutputDestination>
+inline std::unique_ptr<DebugOutputDestination>
 makeDebugOutputDestination(Formatter formatter = {})
 {
-    return std::make_shared<DebugOutputDestination>(std::move(formatter));
+    return std::make_unique<DebugOutputDestination>(std::move(formatter));
 }
 
 

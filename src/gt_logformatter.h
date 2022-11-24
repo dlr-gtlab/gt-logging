@@ -188,7 +188,7 @@ Formatter::Default::operator()(std::string const& msg,
         return gt::log::format("%1 [%2] %3", lvl, dts.time, msg);
     }
 
-    return gt::log::format("%1 [%2] [%3] %4", lvl, dts.id, dts.time, msg);
+    return gt::log::format("%1 [%2] [%3] %4", lvl, dts.time, dts.id, msg);
 }
 
 } // end namespace log

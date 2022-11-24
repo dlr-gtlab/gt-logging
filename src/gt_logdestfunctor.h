@@ -65,10 +65,10 @@ private:
     Functor m_functor;
 };
 
-inline std::shared_ptr<FunctorDestination>
+inline std::unique_ptr<FunctorDestination>
 makeFunctorDestination(FunctorDestination::Functor functor)
 {
-    return std::make_shared<FunctorDestination>(std::move(functor));
+    return std::make_unique<FunctorDestination>(std::move(functor));
 }
 
 } // namespace log

@@ -51,7 +51,7 @@ TEST_F(LogFileDest, noRotation)
 
     // register destination
     ASSERT_FALSE(logger.hasDestination(noRotId));
-    EXPECT_TRUE(logger.addDestination(noRotId, dest));
+    EXPECT_TRUE(logger.addDestination(noRotId, std::move(dest)));
     EXPECT_TRUE(logger.hasDestination(noRotId));
 
     // log messages
@@ -102,7 +102,7 @@ TEST_F(LogFileDest, withRotation)
 
     // register destination
     ASSERT_FALSE(logger.hasDestination(rotId));
-    EXPECT_TRUE(logger.addDestination(rotId, dest));
+    EXPECT_TRUE(logger.addDestination(rotId, std::move(dest)));
     EXPECT_TRUE(logger.hasDestination(rotId));
 
     QFileInfo fileInfo{qFilePath};

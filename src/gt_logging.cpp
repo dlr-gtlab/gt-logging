@@ -70,39 +70,25 @@ Logger::instance()
 Logger::~Logger() = default;
 
 bool
-Logger::addDestination(DestinationPtr destination)
-{
-    if (!destination || !destination->isValid())
-    {
-        std::cerr << "GtLog: Invalid destination!\n";
-        return false;
-    }
-
-    MutexLocker lock(pimpl->logMutex);
-    pimpl->destinations.push_back({ std::string{}, std::move(destination) });
-    return true;
-}
-
-bool
 Logger::addDestination(std::string id, DestinationPtr destination)
 {
     if (!destination || !destination->isValid())
     {
-        std::cerr << "GtLog: Invalid destination!\n";
+        std::cerr << "GtLogging: Invalid destination!\n";
         return false;
     }
 
     if (id.empty())
     {
-        std::cerr << "GtLog: Invalid destination id!\n";
+        std::cerr << "GtLogging: Invalid destination id!\n";
         return false;
     }
 
     // mutex is already locked here
     if (hasDestination(id))
     {
-        std::cerr << "GtLog: The destination named '" << id
-                  << "' does already exsits and wont be added!\n";
+        std::cerr << "GtLogging: A destination named '" << id
+                  << "' already exsits!\n";
         return false;
     }
 
@@ -140,32 +126,12 @@ any_of(std::vector<DestinationEntry> const& destinations, Op op)
 } // namespace
 
 bool
-Logger::removeDestination(const DestinationPtr& destination)
-{
-    MutexLocker lock(pimpl->logMutex);
-
-    return erase(pimpl->destinations, [&](DestinationEntry const& dest){
-        return dest.ptr.get() == destination.get();
-    });
-}
-
-bool
 Logger::removeDestination(const std::string& id)
 {
     if (id.empty()) return false;
 
     return erase(pimpl->destinations, [&](DestinationEntry const& dest){
         return dest.id == id;
-    });
-}
-
-bool
-Logger::hasDestination(const DestinationPtr& destination)
-{
-    MutexLocker lock(pimpl->logMutex);
-
-    return any_of(pimpl->destinations, [&](DestinationEntry const& dest){
-        return dest.ptr.get() == destination.get();
     });
 }
 
@@ -177,6 +143,22 @@ Logger::hasDestination(const std::string& id)
     return any_of(pimpl->destinations, [&](DestinationEntry const& dest){
         return dest.id == id;
     });
+}
+
+Destination*
+Logger::destination(const std::string& id) const
+{
+    auto iter = std::find_if(pimpl->destinations.begin(),
+                             pimpl->destinations.end(),
+                             [&](DestinationEntry const& dest){
+        return dest.id == id;
+    });
+
+    if (iter != std::cend(pimpl->destinations))
+    {
+        return iter->ptr.get();
+    }
+    return {};
 }
 
 void

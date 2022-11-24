@@ -59,33 +59,23 @@ public:
     GT_LOGGING_EXPORT
     ~Logger();
 
-    //! Adds a log message destination if its valid.
-    //! Will not skip duplicates.
-    GT_LOGGING_EXPORT
-    bool addDestination(DestinationPtr destination);
-
     //! Adds a named log message destination if its valid. Dont use use
     //! empty ids. Will skip duplicates (by name).
     GT_LOGGING_EXPORT
     bool addDestination(std::string id, DestinationPtr destination);
-
-    //! Removes a previously added destination. Returns true if a destination
-    //! was removed.
-    GT_LOGGING_EXPORT
-    bool removeDestination(const DestinationPtr& destination);
 
     //! Removes a previously added destination by name.Returns true if a
     //! destination was removed.
     GT_LOGGING_EXPORT
     bool removeDestination(const std::string& id);
 
-    //! Checks if the destination has been added.
-    GT_LOGGING_EXPORT
-    bool hasDestination(const DestinationPtr& destination);
-
     //! Checks if the named destination has been added.
     GT_LOGGING_EXPORT
     bool hasDestination(const std::string& id);
+
+    //! Checks if the named destination has been added.
+    GT_LOGGING_EXPORT
+    Destination* destination(const std::string& id) const;
 
     //! Logging at a level < 'newLevel' will be ignored
     GT_LOGGING_EXPORT

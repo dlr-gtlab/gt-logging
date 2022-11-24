@@ -73,7 +73,7 @@ log::SizeRotationStrategy::rotate()
     {
         if (!removeFileAtPath(m_fileName))
         {
-            std::cerr << "GtLog: backup delete failed "
+            std::cerr << "GtLogging: backup delete failed "
                       << m_fileName << '\n';
         }
         return;
@@ -111,13 +111,13 @@ log::SizeRotationStrategy::rotate()
 
          if (fileExistsAtPath(newName) && !removeFileAtPath(newName))
          {
-             std::cerr << "GtLog: could not remove backup file " << newName
+             std::cerr << "GtLogging: could not remove backup file " << newName
                        << '\n';
              continue;
          }
          if (!renameFileFromTo(oldName, newName))
          {
-             std::cerr << "GtLog: could not rename backup file " << oldName
+             std::cerr << "GtLogging: could not rename backup file " << oldName
                        << " to " << newName << '\n';
          }
      }
@@ -126,13 +126,13 @@ log::SizeRotationStrategy::rotate()
      newName = logNamePattern + std::to_string(1);
      if (fileExistsAtPath(newName) && !removeFileAtPath(newName))
      {
-         std::cerr << "GtLog: could not remove old log file "
+         std::cerr << "GtLogging: could not remove old log file "
                    << newName << '\n';
          return;
      }
      if (!renameFileFromTo(m_fileName, newName))
      {
-         std::cerr << "GtLog: could not rename log file " << m_fileName
+         std::cerr << "GtLogging: could not rename log file " << m_fileName
                    << " to " << newName << '\n';
      }
 }
@@ -189,7 +189,7 @@ log::FileDestination::FileDestination(std::string filePath,
 
     if (!m_fstream.is_open())
     {
-        std::cerr << "GtLog: could not open log file " << m_filePath << '\n';
+        std::cerr << "GtLogging: could not open log file " << m_filePath << '\n';
     }
 
     // update file stats
@@ -213,7 +213,7 @@ log::FileDestination::write(std::string const& message, Level /*level*/)
 
         if (!m_fstream.is_open())
         {
-            std::cerr << "GtLog: could not reopen log file "
+            std::cerr << "GtLogging: could not reopen log file "
                       << m_filePath << '\n';
             return;
         }

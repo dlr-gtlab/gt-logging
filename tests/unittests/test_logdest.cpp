@@ -23,11 +23,10 @@ public:
 TEST_F(DestTest, nulldest)
 {
     gt::log::DestinationPtr dest{};
-    EXPECT_FALSE(logger.hasDestination(dest));
-    EXPECT_FALSE(logger.hasDestination(destid));
 
-    // fail if null
-    EXPECT_FALSE(logger.addDestination(dest));
+    logger.addDestination(destid, std::move(dest));
+    EXPECT_FALSE(logger.hasDestination(destid));
+    EXPECT_EQ(logger.destination(destid), nullptr);
 }
 
 TEST_F(DestTest, namedDestination)
@@ -39,46 +38,20 @@ TEST_F(DestTest, namedDestination)
         // nothing to do here
     });
 
-    ASSERT_FALSE(logger.hasDestination(dest));
+    auto* ptr = dest.get();
+
     ASSERT_FALSE(logger.hasDestination(destid));
 
     // add by id
-    EXPECT_TRUE(logger.addDestination(destid, dest));
+    EXPECT_TRUE(logger.addDestination(destid, std::move(dest)));
 
-    EXPECT_TRUE(logger.hasDestination(dest));
     EXPECT_TRUE(logger.hasDestination(destid));
+    EXPECT_EQ(logger.destination(destid), ptr);
 
     // remove by id
     ASSERT_TRUE(logger.removeDestination(destid));
 
-    EXPECT_FALSE(logger.hasDestination(dest));
-    EXPECT_FALSE(logger.hasDestination(destid));
-}
-
-TEST_F(DestTest, unnamedDestination)
-{
-    auto dest = gt::log::makeFunctorDestination(
-                    [](std::string const& /*msg*/,
-                    gt::log::Level /*lvl*/,
-                    gt::log::Details /*details*/){
-        // nothing to do here
-    });
-
-    ASSERT_FALSE(logger.hasDestination(dest));
-    ASSERT_FALSE(logger.hasDestination(destid));
-
-    // add by ptr only
-    EXPECT_TRUE(logger.addDestination(dest));
-    EXPECT_TRUE(logger.hasDestination(dest));
     EXPECT_FALSE(logger.hasDestination(destid));
 
-    // remove by id -> will fail
-    EXPECT_FALSE(logger.removeDestination(destid));
-    EXPECT_TRUE(logger.hasDestination(dest));
-    EXPECT_FALSE(logger.hasDestination(destid));
-
-    // remove dest by ptr
-    EXPECT_TRUE(logger.removeDestination(dest));
-    EXPECT_FALSE(logger.hasDestination(dest));
-    EXPECT_FALSE(logger.hasDestination(destid));
+    EXPECT_EQ(logger.destination(destid), nullptr);
 }

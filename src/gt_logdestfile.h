@@ -177,24 +177,24 @@ private:
     RotationStrategyPtr m_rotationStrategy;
 };
 
-inline std::shared_ptr<FileDestination>
+inline std::unique_ptr<FileDestination>
 makeFileDestination(std::string filePath, Formatter formatter = {})
 {
-    return std::make_shared<FileDestination>(
+    return std::make_unique<FileDestination>(
                 std::move(filePath), std::make_shared<NullRotationStrategy>(),
                 std::move(formatter));
 }
 
-inline std::shared_ptr<FileDestination>
+inline std::unique_ptr<FileDestination>
 makeFileDestination(std::string filePath,
                     std::shared_ptr<RotationStrategy> rotation,
                     Formatter formatter = {})
 {
     if (!rotation)
     {
-        rotation = std::make_shared<NullRotationStrategy>();
+        rotation = std::make_unique<NullRotationStrategy>();
     }
-    return std::make_shared<FileDestination>(
+    return std::make_unique<FileDestination>(
                 std::move(filePath), std::move(rotation), std::move(formatter));
 }
 
