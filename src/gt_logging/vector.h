@@ -9,6 +9,8 @@
 #ifndef GT_LOGGING_VECTOR_H
 #define GT_LOGGING_VECTOR_H
 
+#include "gt_logging.h"
+
 #include <vector>
 
 namespace gt

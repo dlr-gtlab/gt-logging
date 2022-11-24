@@ -9,6 +9,8 @@
 #ifndef GT_LOGGING_MAP_H
 #define GT_LOGGING_MAP_H
 
+#include "gt_logging.h"
+
 #include <map>
 #include <unordered_map>
 

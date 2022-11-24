@@ -9,6 +9,8 @@
 #ifndef GT_LOGGING_QT_BINDINGS_H
 #define GT_LOGGING_QT_BINDINGS_H
 
+#include "gt_logging.h"
+
 #include <QDebug>
 #include <QtGlobal>
 #include <QObject>

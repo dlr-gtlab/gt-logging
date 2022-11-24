@@ -9,6 +9,8 @@
 #ifndef GT_LOGGING_SET_H
 #define GT_LOGGING_SET_H
 
+#include "gt_logging.h"
+
 #include <set>
 #include <unordered_set>
 
