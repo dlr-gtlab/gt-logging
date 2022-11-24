@@ -27,6 +27,8 @@
 
 #include "gt_logging.h"
 
+#include <iostream>
+
 using namespace gt;
 
 const size_t log::SizeRotationStrategy::MAX_BACKUP_COUNT = 10;
@@ -71,7 +73,7 @@ log::SizeRotationStrategy::rotate()
     {
         if (!removeFileAtPath(m_fileName))
         {
-            std::cerr << "GtLog: backup delete failed "
+            std::cerr << "GtLogging: backup delete failed "
                       << m_fileName << '\n';
         }
         return;
@@ -109,13 +111,13 @@ log::SizeRotationStrategy::rotate()
 
          if (fileExistsAtPath(newName) && !removeFileAtPath(newName))
          {
-             std::cerr << "GtLog: could not remove backup file " << newName
+             std::cerr << "GtLogging: could not remove backup file " << newName
                        << '\n';
              continue;
          }
          if (!renameFileFromTo(oldName, newName))
          {
-             std::cerr << "GtLog: could not rename backup file " << oldName
+             std::cerr << "GtLogging: could not rename backup file " << oldName
                        << " to " << newName << '\n';
          }
      }
@@ -124,13 +126,13 @@ log::SizeRotationStrategy::rotate()
      newName = logNamePattern + std::to_string(1);
      if (fileExistsAtPath(newName) && !removeFileAtPath(newName))
      {
-         std::cerr << "GtLog: could not remove old log file "
+         std::cerr << "GtLogging: could not remove old log file "
                    << newName << '\n';
          return;
      }
      if (!renameFileFromTo(m_fileName, newName))
      {
-         std::cerr << "GtLog: could not rename log file " << m_fileName
+         std::cerr << "GtLogging: could not rename log file " << m_fileName
                    << " to " << newName << '\n';
      }
 }
@@ -172,8 +174,11 @@ log::SizeRotationStrategy::renameFileFromTo(const std::string& from,
 log::FileDestination::~FileDestination() = default;
 
 log::FileDestination::FileDestination(std::string filePath,
-                                      RotationStrategyPtr rotationStrategy)
-    : m_filePath{std::move(filePath)}
+                                      RotationStrategyPtr rotationStrategy,
+                                      Formatter formatter)
+
+    : FormattedDestination{std::move(formatter)}
+    , m_filePath{std::move(filePath)}
     , m_rotationStrategy{std::move(rotationStrategy)}
 {
     assert(m_rotationStrategy);
@@ -184,7 +189,7 @@ log::FileDestination::FileDestination(std::string filePath,
 
     if (!m_fstream.is_open())
     {
-        std::cerr << "GtLog: could not open log file " << m_filePath << '\n';
+        std::cerr << "GtLogging: could not open log file " << m_filePath << '\n';
     }
 
     // update file stats
@@ -192,11 +197,9 @@ log::FileDestination::FileDestination(std::string filePath,
 }
 
 void
-log::FileDestination::write(const std::string& message, Level level)
+log::FileDestination::write(std::string const& message, Level /*level*/)
 {
-    std::string msg = gt::log::Logger::instance().levelToString(level)
-                      + ' ' + message + '\n';
-    m_rotationStrategy->appendMessageSize(msg.size());
+    std::string msg = message;
 
     if (m_rotationStrategy->shouldRotate())
     {
@@ -210,7 +213,7 @@ log::FileDestination::write(const std::string& message, Level level)
 
         if (!m_fstream.is_open())
         {
-            std::cerr << "GtLog: could not reopen log file "
+            std::cerr << "GtLogging: could not reopen log file "
                       << m_filePath << '\n';
             return;
         }
@@ -218,7 +221,9 @@ log::FileDestination::write(const std::string& message, Level level)
         m_rotationStrategy->setFileInfo(m_filePath);
     }
 
-    m_fstream << msg.c_str();
+    m_rotationStrategy->appendMessageSize(msg.size());
+
+    m_fstream << std::move(msg);
     m_fstream.flush();
 }
 

@@ -15,22 +15,31 @@ public:
 
     void SetUp() override
     {
-        auto dest = gt::log::makeFunctorDestination([this](const std::string& msg, gt::log::Level) {
-            log.append(QString::fromStdString(msg));
+        auto dest = gt::log::makeFunctorDestination(
+                        [this](std::string const& msg,
+                        gt::log::Level level,
+                        gt::log::Details details){
+            log.append(
+                QStringLiteral("%1 [%2] [%3] %4")
+                        .arg(level)
+                        .arg(details.id.c_str(),
+                             gt::log::formatTime(details.time).c_str(),
+                             msg.c_str())
+            );
         });
-        ASSERT_TRUE(logger.addDestination("test", dest));
 
-        ASSERT_TRUE(logger.hasDestination(dest));
+        ASSERT_TRUE(logger.addDestination(destid, std::move(dest)));
+        ASSERT_TRUE(logger.hasDestination(destid));
     }
 
     void TearDown() override
     {
-        logger.removeDestination("test");
+        logger.removeDestination(destid);
 
-        ASSERT_FALSE(logger.hasDestination("test"));
+        ASSERT_FALSE(logger.hasDestination(destid));
     }
 
-
+    std::string destid = "LogHelperTest";
     gt::log::Logger& logger;
     QString log;
 };
@@ -60,6 +69,5 @@ public:
 
     MyQObject() = default;
 };
-
 
 #endif // TEST_LOG_HELPER_H

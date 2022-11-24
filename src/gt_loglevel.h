@@ -26,22 +26,43 @@
 #ifndef GT_LOGLEVEL_H
 #define GT_LOGLEVEL_H
 
+#include "gt_logging_exports.h"
+
+#include <string>
+
 namespace gt
 {
 
 namespace log
 {
 
-enum Level
+//! Log levels
+enum Level : int
 {
-    TraceLevel = 0,
-    DebugLevel,
-    InfoLevel,
-    WarnLevel,
-    ErrorLevel,
-    FatalLevel,
-    OffLevel
+    TraceLevel =  1,
+    DebugLevel =  2,
+    InfoLevel  =  4,
+    WarnLevel  =  8,
+    ErrorLevel = 16,
+    FatalLevel = 32,
+    OffLevel   =  0
 };
+
+GT_LOGGING_EXPORT
+Level levelFromString(std::string const& logMessage, bool* ok = {});
+
+GT_LOGGING_EXPORT
+std::string levelToString(Level level);
+
+inline Level levelFromInt(int level)
+{
+    return static_cast<Level>(level);
+}
+
+inline int levelToInt(Level level)
+{
+    return static_cast<int>(level);
+}
 
 } // namespace log
 

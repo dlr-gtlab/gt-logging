@@ -1,187 +1,9 @@
 
 #include "test_log_helper.h"
-#include "gt_logging_qt_bindings.h"
-
-#include <QVector2D>
-#include <QVector3D>
-#include <QVector4D>
-#include <QModelIndex>
-
-#include <QWidget>
-#include <QJsonValue>
-
+#include "gt_logging/stl_bindings.h"
 
 // test fixture
 class Types : public LogHelperTest {};
-
-// custom struct
-struct MyDebugObject {};
-
-gt::log::Stream& operator<<(gt::log::Stream& d, MyDebugObject const& /*obj*/)
-{
-    return d << "MyDebugObject";
-}
-
-std::ostream& operator<<(std::ostream& d, MyDebugObject const& /*obj*/)
-{
-    return d << "this_wont_be_used";
-}
-
-QDebug& operator<<(QDebug& d, MyDebugObject const& /*obj*/)
-{
-    return d << "this_wont_be_used_either";
-}
-
-TEST_F(Types, QStringList)
-{
-    gtWarning() << QStringList{"Hallo", "Welt"};
-    EXPECT_TRUE(log.contains("(Hallo, Welt)"));
-}
-
-TEST_F(Types, QList)
-{
-    gtWarning() << QList<int>{14, 43, 15};
-    EXPECT_TRUE(log.contains("(14, 43, 15)"));
-}
-
-TEST_F(Types, QHash)
-{
-    QHash<QString, int> hash;
-    hash.insert("a", 1);
-    hash.insert("b", 2);
-
-    gtError() << hash;
-
-    // note, the order of args is random
-    EXPECT_TRUE(log.contains("QHash("));
-    EXPECT_TRUE(log.contains("(a, 1)"));
-    EXPECT_TRUE(log.contains("(b, 2)"));
-}
-
-TEST_F(Types, QMap)
-{
-    QMap<QString, int> map;
-    map.insert("a", 11);
-    map.insert("b", 22);
-
-    gtError() << map;
-    // note, the order of args is random
-    EXPECT_TRUE(log.contains("QMap("));
-    EXPECT_TRUE(log.contains("(a, 11)"));
-    EXPECT_TRUE(log.contains("(b, 22)"));
-}
-
-TEST_F(Types, QSet)
-{
-    QSet<int> set;
-    set.insert(1);
-    set.insert(2);
-    set.insert(33);
-
-    gtError() << set;
-    // note, the order of args is random
-    EXPECT_TRUE(log.contains("QSet("));
-    EXPECT_TRUE(log.contains("1"));
-    EXPECT_TRUE(log.contains("2"));
-    EXPECT_TRUE(log.contains("33"));
-}
-
-TEST_F(Types, QPair)
-{
-    QPair<QString, int> pair{"test", 42};
-    gtWarning() << pair;
-    EXPECT_TRUE(log.contains("QPair(test,42)"));
-}
-
-TEST_F(Types, std_vector)
-{
-    gtWarning() << std::vector<double>{14, 43, 15};
-    EXPECT_TRUE(log.contains("std::vector(14, 43, 15)"));
-}
-
-TEST_F(Types, std_list)
-{
-    // this doesnt work because we defined the operator<< only for gt::log::Stream
-//    gtWarning() << std::list<MyDebugObject>{};
-
-    gtWarning() << std::list<float>{};
-    EXPECT_TRUE(log.contains("std::list()"));
-}
-
-TEST_F(Types, std_map)
-{
-    std::map<float, QString> map;
-    map.insert({41.1, "ABC"});
-
-    gtWarning() << map;
-    EXPECT_TRUE(log.contains("std::map("));
-    EXPECT_TRUE(log.contains("std::pair(41.1,ABC)"));
-}
-
-TEST_F(Types, std_multimap)
-{
-    std::multimap<float, QString> map;
-    map.insert({41.1, "ABC"});
-    map.insert({41.1, "Test"});
-
-    gtWarning() << map;
-    EXPECT_TRUE(log.contains("std::multimap("));
-    EXPECT_TRUE(log.contains("std::pair(41.1,ABC)"));
-    EXPECT_TRUE(log.contains("std::pair(41.1,Test)"));
-}
-
-TEST_F(Types, std_pair)
-{
-    std::pair<QString, int> pair{"test", 42};
-    gtWarning() << pair;
-    EXPECT_TRUE(log.contains("std::pair(test,42)"));
-}
-
-TEST_F(Types, QSharedPointer)
-{
-    QSharedPointer<int> ptr{new int{42}};
-
-    gtWarning() << ptr;
-    EXPECT_TRUE(log.contains("QSharedPointer("));
-    EXPECT_TRUE(log.contains(QString::number((size_t)ptr.data(), 16)));
-}
-TEST_F(Types, QContiguousCache)
-{
-    QContiguousCache<int> cache;
-
-    gtWarning() << cache;
-    EXPECT_TRUE(log.contains("QContiguousCache()"));
-}
-
-TEST_F(Types, QVariant)
-{
-    gtError() << QVariant("A_Variant");
-    EXPECT_TRUE(log.contains("QVariant(QString, A_Variant)"));
-
-    gtError() << QVariant(42);
-    EXPECT_TRUE(log.contains("QVariant(int, 42)"));
-}
-
-TEST_F(Types, QObject)
-{
-    MyQObject obj;
-    obj.setObjectName("MyObjectName");
-
-    gtError() << &obj;
-
-    EXPECT_TRUE(log.contains("MyObjectName"));
-    EXPECT_TRUE(log.contains(QString::number((size_t)&obj, 16), Qt::CaseInsensitive));
-}
-
-TEST_F(Types, MyDebugObject)
-{
-    MyDebugObject obj;
-    gtError() << obj;
-    gtError() << &obj;
-
-    EXPECT_TRUE(log.contains("MyDebugObject"));
-    EXPECT_TRUE(log.contains(QString::number((size_t)&obj, 16), Qt::CaseInsensitive));
-}
 
 TEST_F(Types, Enum)
 {
@@ -203,7 +25,7 @@ TEST_F(Types, QEnum)
     auto e = MyQObject::FirstEntry;
 
     gtError() << e;
-    EXPECT_TRUE(log.contains("MyQObject::FirstEntry"));
+    EXPECT_TRUE(log.contains("0"));
 };
 
 TEST_F(Types, QFlags)
@@ -211,8 +33,76 @@ TEST_F(Types, QFlags)
     MyQObject::Flags f = {MyQObject::A | MyQObject::C};
 
     gtError() << f;
-    EXPECT_TRUE(log.contains("QFlags(0x1|0x4)"));
+    EXPECT_TRUE(log.contains("5"));
 };
+
+TEST_F(Types, memory_unique)
+{
+    auto u = std::make_unique<int>(42);
+
+    gtError() << u;
+    EXPECT_TRUE(log.contains(QString::number((size_t)u.get(), 16)));
+};
+
+TEST_F(Types, memory_shared)
+{
+    auto s = std::make_shared<int>(42);
+
+    gtError() << s;
+    EXPECT_TRUE(log.contains(QString::number((size_t)s.get(), 16)));
+};
+
+TEST_F(Types, std_vector)
+{
+    auto vec = std::vector<double>{14, 43, 15};
+    gtDebug() << vec;
+    EXPECT_TRUE(log.contains("(14, 43, 15)"));
+}
+
+TEST_F(Types, std_list)
+{
+    gtWarning() << std::list<float>{0.1f, 0.2f, 0.3f};
+    EXPECT_TRUE(log.contains("(0.1, 0.2, 0.3)"));
+}
+
+TEST_F(Types, std_map)
+{
+    std::map<float, std::string> map;
+    map.insert({41.2, "ABC"});
+
+    gtWarning() << map;
+    EXPECT_TRUE(log.contains("map{(41.2, \"ABC\")}"));
+}
+
+TEST_F(Types, std_multimap)
+{
+    std::multimap<float, std::string> map;
+    map.insert({41.1, "ABC"});
+    map.insert({41.2, "Test"});
+
+    gtWarning() << map;
+    EXPECT_TRUE(log.contains("multimap{("));
+    EXPECT_TRUE(log.contains("(41.1, \"ABC\")"));
+    EXPECT_TRUE(log.contains("(41.2, \"Test\")"));
+    EXPECT_TRUE(log.contains("}"));
+}
+
+TEST_F(Types, std_array)
+{
+    std::array<std::string, 5> array{
+        "ABC", "DEF", "TEST", "1234", ""
+    };
+
+    gtWarning() << array;
+    EXPECT_TRUE(log.contains(R"(["ABC", "DEF", "TEST", "1234", ""])"));
+}
+
+TEST_F(Types, std_pair)
+{
+    std::pair<std::string, int> pair{"test", 42};
+    gtWarning() << pair;
+    EXPECT_TRUE(log.contains("(\"test\", 42)"));
+}
 
 TEST_F(Types, POD_other)
 {
@@ -237,7 +127,6 @@ TEST_F(Types, POD_chars)
     const char* cs = "Hello";
     char16_t wc = 'W';
     char32_t wc32 = 'L';
-    QChar qc = 'Q';
 
     gtInfo() << c;
     EXPECT_TRUE(log.contains(c));
@@ -247,8 +136,6 @@ TEST_F(Types, POD_chars)
     EXPECT_TRUE(log.contains("u'" + QString::number(wc)));
     gtInfo() << wc32;
     EXPECT_TRUE(log.contains("U'" + QString::number(wc32)));
-    gtInfo() << qc;
-    EXPECT_TRUE(log.contains(qc));
 }
 
 TEST_F(Types, POD_ints)
@@ -293,81 +180,9 @@ TEST_F(Types, POD_float)
 
 TEST_F(Types, Strings)
 {
-    QString qstr = "MyFancyString";
-    QByteArray qba = "MyPreciousBytes";
-    QLatin1String qlt1{"MyLatinString"};
     std::string s = "MyStdString";
 
     // also test for const
-    gtError() << qstr << qAsConst(qstr);
-    EXPECT_TRUE(log.contains(qstr));
-    gtError() << qba << qAsConst(qba);
-    EXPECT_TRUE(log.contains(qba));
-    gtError() << qlt1 << qAsConst(qlt1);
-    EXPECT_TRUE(log.contains(qlt1));
     gtError() << s << qAsConst(s);
     EXPECT_TRUE(log.contains(s.c_str()));
-    gtDebug() << QObject::tr("Test");
-    EXPECT_TRUE(log.contains("Test"));
 }
-
-TEST_F(Types, QStringRef)
-{
-    QString qstr = "MyFancyString";
-    QStringRef qstrr = &qstr;
-
-    gtError() << qstrr;
-    EXPECT_TRUE(log.contains(qstr));
-}
-
-TEST_F(Types, StringViews)
-{
-    QTextStreamFunction qstrf{};
-    gtError() << qstrf;
-    EXPECT_TRUE(log.isEmpty());
-
-    QString qstr = "MyFancyString";
-    QStringView qstrv{qstr};
-
-    auto myStrFunc = [](QTextStream& stream) -> QTextStream&{
-        return stream << "Test";
-    };
-    QTextStreamFunction qstrf2{myStrFunc};
-
-    gtError() << qstrv;
-    EXPECT_TRUE(log.contains(qstr));
-    gtError() << qstrf2;
-    EXPECT_TRUE(log.contains("Test"));
-}
-
-TEST_F(Types, QPoints)
-{
-    QModelIndex idx;
-    QPoint pt{10, 11};
-    QPointF ptf{12.1, 13.2};
-    QVector2D v2d{14.1f, 15};
-    QVector3D v3d{16.1f, 17, 18};
-    QVector4D v4d{19.1f, 20, 21, 22};
-
-    gtError() << idx;
-    EXPECT_TRUE(log.contains("QModelIndex(-1,-1,0x0,QObject(0x0))"));
-    gtError() << pt;
-    EXPECT_TRUE(log.contains("QPoint(10,11)"));
-    gtError() << ptf;
-    EXPECT_TRUE(log.contains("QPointF(12.1,13.2)"));
-    gtError() << v2d;
-    EXPECT_TRUE(log.contains("QVector2D(14.1, 15)"));
-    gtError() << v3d;
-    EXPECT_TRUE(log.contains("QVector3D(16.1, 17, 18)"));
-    gtError() << v4d;
-    EXPECT_TRUE(log.contains("QVector4D(19.1, 20, 21, 22)"));
-}
-
-TEST_F(Types, QWidget)
-{
-    QWidget const* w{};
-    gtError() << w;
-    EXPECT_TRUE(log.contains("QWidget(0x0)") ||
-                log.contains("QObject(0x0)"));
-}
-

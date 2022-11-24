@@ -9,26 +9,26 @@
 // log with quote
 #define GT_LOG_QUOTE
 
-#include "gt_logging_qt_bindings.h"
 #include "test_log_helper.h"
+#include "gt_logging/qt_bindings.h"
 
-class LoQuote : public LogHelperTest
+class LogQuote : public LogHelperTest
 {};
 
-TEST_F(LoQuote, logQString)
+TEST_F(LogQuote, logQString)
 {
     gtWarning() << "Hello" << QString{"World"};
     EXPECT_TRUE(log.contains("Hello \"World\""));
 }
 
-TEST_F(LoQuote, logQChar)
+TEST_F(LogQuote, logQChar)
 {
     gtWarning() << 'T' << QChar{'E'} << 'S' << QChar{'T'};
     EXPECT_TRUE(log.contains("T \"E\" S \"T\""));
 }
 
 // member methods should be callable as well
-TEST_F(LoQuote, callMemberMethod)
+TEST_F(LogQuote, callMemberMethod)
 {
     gtWarning().nospace() << 'T' << QChar{'E'} << 'S' << QLatin1String{"T"};
     EXPECT_TRUE(log.contains("T\"E\"S\"T\""));

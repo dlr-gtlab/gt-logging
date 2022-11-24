@@ -29,9 +29,6 @@
 
 #include "gt_logdest.h"
 
-#include <cassert>
-#include <functional>
-
 namespace gt
 {
 
@@ -45,29 +42,33 @@ class FunctorDestination : public Destination
 {
 public:
 
-    using Functor = std::function<void(std::string const&, Level)>;
+    /// Logging funcion for detailed messages
+    using Functor =
+            std::function<void(std::string const&, Level, Details const&)>;
 
-    explicit FunctorDestination(Functor f)
-        : m_functor(std::move(f))
+    //! ctor
+    explicit FunctorDestination(Functor detail)
+        : m_functor(std::move(detail))
     {
         assert(m_functor);
     }
 
-    void write(std::string const& message, Level level) override
+    //! Calls lambda to log formatted text
+    void write(std::string const& message, Level level, Details const& details) override
     {
-        m_functor(message, level);
+        m_functor(message, level, details);
     }
-
-    std::string type() const override { return "functor"; }
 
 private:
 
+    /// Functor
     Functor m_functor;
 };
 
-inline DestinationPtr makeFunctorDestination(FunctorDestination::Functor f)
+inline std::unique_ptr<FunctorDestination>
+makeFunctorDestination(FunctorDestination::Functor functor)
 {
-    return std::make_shared<FunctorDestination>(std::move(f));
+    return std::make_unique<FunctorDestination>(std::move(functor));
 }
 
 } // namespace log

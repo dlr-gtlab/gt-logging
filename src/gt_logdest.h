@@ -26,41 +26,104 @@
 #ifndef GT_LOGDEST_H
 #define GT_LOGDEST_H
 
-#include "gt_logging_exports.h"
+#include "gt_logformatter.h"
 #include "gt_loglevel.h"
 
 #include <memory>
-#include <string>
 
 namespace gt
 {
 namespace log
 {
 
+//! Base class for a logging destination
 class Destination
 {
 public:
 
     virtual ~Destination() = default;
 
-    virtual void write(std::string const& message, Level level) = 0;
+    //! Default write method to implement. Use a formatter to more easily
+    //! format the output message.
+    virtual void write(std::string const& message, Level level, Details const& details) = 0;
 
-    //!
-    //! \brief isValid
-    //! \return whether the destination was created correctly
-    //!
+    //! Returns whether the destination was created correctly
     virtual bool isValid() const { return true; }
-
-    //!
-    //! \brief type
-    //! \return the type as a string e.g: console, file.
-    //!         The returned value may change in different versions of GtLog, but two destinations
-    //!         of the same type will return the same value.
-    //!
-    virtual std::string type() const = 0;
 };
 
-using DestinationPtr = std::shared_ptr<Destination>;
+//! Abstract class for a formatted logging destination
+class FormattedDestination : public Destination
+{
+public:
+
+    //! Will filter and format the message accordingly
+    void write(std::string const& message, Level level, Details const& details) final
+    {
+        // check if level should be logged
+        if (filter(level))
+        {
+            // format message
+            write(m_formatter.format(message, level, details), level);
+        }
+    }
+
+    //! Getter for the current formatter
+    Formatter& formatter() { return m_formatter; }
+    Formatter const& formatter() const { return m_formatter; }
+
+    //! Setter for the current formatter
+    void setFormatter(Formatter formatter)
+    {
+        m_formatter = std::move(formatter);
+    }
+
+    //! Returns whether this level should be logged
+    bool filter(Level level)
+    {
+        return m_filter & levelToInt(level);
+    }
+
+    //! Sets the filter level
+    FormattedDestination& filterLevel(Level level, bool include = true)
+    {
+        if (include)
+        {
+            m_filter |=  levelToInt(level);
+        }
+        else
+        {
+            m_filter &= ~levelToInt(level);
+        }
+        return *this;
+    }
+
+    //! Whether to include all levels (if true) else excludes all levels
+    FormattedDestination& filterAll(bool include = true)
+    {
+        m_filter &= include ? -1 : 0;
+        return *this;
+    }
+
+protected:
+
+    //! ctor
+    FormattedDestination(Formatter formatter = {})
+        : m_formatter{std::move(formatter)}
+    { }
+
+    //! write method to implement by sub classes
+    virtual void write(std::string const& message, Level level) = 0;
+
+private:
+
+    /// formatter
+    Formatter m_formatter;
+
+    /// Bitfield to filter out only certain levels (by default all levels)
+    int m_filter{-1};
+};
+
+using DestinationPtr = std::unique_ptr<Destination>;
 
 } // end namespace log
 

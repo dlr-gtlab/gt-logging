@@ -27,6 +27,7 @@
 #define GT_LOGDESTCONSOLE_H
 
 #include "gt_logdest.h"
+#include "gt_logformatter.h"
 
 namespace gt
 {
@@ -35,19 +36,32 @@ namespace log
 {
 
 // debugger sink
-class DebugOutputDestination : public Destination
+class DebugOutputDestination : public FormattedDestination
 {
 public:
 
-    GT_LOGGING_EXPORT
-    void write(std::string const& message, Level level) override;
+    //! ctor
+    explicit DebugOutputDestination(Formatter formatter = {})
+        : FormattedDestination{std::move(formatter)}
+    { }
 
-    std::string type() const override { return "console"; }
+    //! Logs formatted text
+    void write(std::string const& message, Level level) override
+    {
+        output(message, level);
+    }
+
+private:
+
+    //! Helper method for logging to console
+    GT_LOGGING_EXPORT
+    void output(std::string const& message, Level level);
 };
 
-inline DestinationPtr makeDebugOutputDestination()
+inline std::unique_ptr<DebugOutputDestination>
+makeDebugOutputDestination(Formatter formatter = {})
 {
-    return std::make_shared<DebugOutputDestination>();
+    return std::make_unique<DebugOutputDestination>(std::move(formatter));
 }
 
 

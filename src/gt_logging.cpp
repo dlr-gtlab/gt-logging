@@ -25,50 +25,18 @@
 
 #include "gt_logging.h"
 
+#include <iostream>
 #include <chrono>
 #include <mutex>
-#include <array>
 #include <vector>
+#include <algorithm>
 
 namespace gt
 {
 namespace log
 {
 
-static const char TraceString[] = "TRACE";
-static const char DebugString[] = "DEBUG";
-static const char InfoString[]  = "INFO ";
-static const char WarnString[]  = "WARN ";
-static const char ErrorString[] = "ERROR";
-static const char FatalString[] = "FATAL";
-
-static const size_t DEFAULT_BUFFER_SIZE = 60;
-
 using MutexLocker = const std::lock_guard<std::mutex>;
-
-static const char* LevelToText(Level theLevel)
-{
-    switch (theLevel) {
-        case TraceLevel:
-            return TraceString;
-        case DebugLevel:
-            return DebugString;
-        case InfoLevel:
-            return InfoString;
-        case WarnLevel:
-            return WarnString;
-        case ErrorLevel:
-            return ErrorString;
-        case FatalLevel:
-            return FatalString;
-        case OffLevel:
-            return "";
-        default: {
-            assert(!"bad log level");
-            return InfoString;
-        }
-    }
-}
 
 struct DestinationEntry
 {
@@ -99,85 +67,28 @@ Logger::instance()
     return instance;
 }
 
-// tries to extract the level from a string log message. If available, conversionSucceeded will
-// contain the conversion result.
-Level
-Logger::levelFromString(const std::string& logMessage, bool* ok)
-{
-    if (ok)
-    {
-        *ok = true;
-    }
-
-    if (logMessage == TraceString)
-        return TraceLevel;
-    if (logMessage == DebugString)
-        return DebugLevel;
-    if (logMessage == InfoString)
-        return InfoLevel;
-    if (logMessage == WarnString)
-        return WarnLevel;
-    if (logMessage == ErrorString)
-        return ErrorLevel;
-    if (logMessage == FatalString)
-        return FatalLevel;
-
-    if (ok)
-    {
-        *ok = false;
-    }
-
-    return OffLevel;
-}
-
-Level
-Logger::levelFromInt(const int lvl)
-{
-    return static_cast<Level>(lvl);
-}
-
-std::string
-Logger::levelToString(Level level)
-{
-    return LevelToText(level);
-}
-
 Logger::~Logger() = default;
-
-bool
-Logger::addDestination(DestinationPtr destination)
-{
-    if (!destination || !destination->isValid())
-    {
-        std::cerr << "GtLog: Invalid destination!\n";
-        return false;
-    }
-
-    MutexLocker lock(pimpl->logMutex);
-    pimpl->destinations.push_back({ std::string{}, std::move(destination) });
-    return true;
-}
 
 bool
 Logger::addDestination(std::string id, DestinationPtr destination)
 {
     if (!destination || !destination->isValid())
     {
-        std::cerr << "GtLog: Invalid destination!\n";
+        std::cerr << "GtLogging: Invalid destination!\n";
         return false;
     }
 
     if (id.empty())
     {
-        std::cerr << "GtLog: Invalid destination id!\n";
+        std::cerr << "GtLogging: Invalid destination id!\n";
         return false;
     }
 
     // mutex is already locked here
     if (hasDestination(id))
     {
-        std::cerr << "GtLog: The destination named '" << id
-                  << "' does already exsits and wont be added!\n";
+        std::cerr << "GtLogging: A destination named '" << id
+                  << "' already exsits!\n";
         return false;
     }
 
@@ -212,37 +123,7 @@ any_of(std::vector<DestinationEntry> const& destinations, Op op)
     return std::any_of(destinations.begin(), destinations.end(), op);
 }
 
-template <size_t N>
-inline void
-setCurrentTime(std::array<char, N>& buffer, const char* format)
-{
-    // get time
-    struct tm timebuf;
-    auto timep = std::chrono::system_clock::now();
-    auto time  = std::chrono::system_clock::to_time_t(timep);
-
-    // https://en.cppreference.com/w/c/chrono/localtime
-#ifdef _WIN32
-    tm* t = &timebuf;
-    localtime_s(&timebuf, &time);
-#else
-    tm* t = localtime_r(&time, &timebuf);
-#endif
-
-    strftime(buffer.data(), N, format, t);
-}
-
 } // namespace
-
-bool
-Logger::removeDestination(const DestinationPtr& destination)
-{
-    MutexLocker lock(pimpl->logMutex);
-
-    return erase(pimpl->destinations, [&](DestinationEntry const& dest){
-        return dest.ptr.get() == destination.get();
-    });
-}
 
 bool
 Logger::removeDestination(const std::string& id)
@@ -255,26 +136,6 @@ Logger::removeDestination(const std::string& id)
 }
 
 bool
-Logger::hasDestinationOfType(std::string const& type) const
-{
-    MutexLocker lock(pimpl->logMutex);
-
-    return any_of(pimpl->destinations, [&](DestinationEntry const& dest){
-        return dest.ptr->type() == type;
-    });
-}
-
-bool
-Logger::hasDestination(const DestinationPtr& destination)
-{
-    MutexLocker lock(pimpl->logMutex);
-
-    return any_of(pimpl->destinations, [&](DestinationEntry const& dest){
-        return dest.ptr.get() == destination.get();
-    });
-}
-
-bool
 Logger::hasDestination(const std::string& id)
 {
     MutexLocker lock(pimpl->logMutex);
@@ -282,6 +143,22 @@ Logger::hasDestination(const std::string& id)
     return any_of(pimpl->destinations, [&](DestinationEntry const& dest){
         return dest.id == id;
     });
+}
+
+Destination*
+Logger::destination(const std::string& id) const
+{
+    auto iter = std::find_if(pimpl->destinations.begin(),
+                             pimpl->destinations.end(),
+                             [&](DestinationEntry const& dest){
+        return dest.id == id;
+    });
+
+    if (iter != std::cend(pimpl->destinations))
+    {
+        return iter->ptr.get();
+    }
+    return {};
 }
 
 void
@@ -307,62 +184,41 @@ Logger::verbosity() const
     return pimpl->verbosity;
 }
 
-//! creates the complete log message and passes it to the logger
 void
 Logger::Helper::writeToLog()
 {
-    auto buffer = gtStream.str();
-    if (buffer.empty())
+    auto message = gtStream.str();
+    if (message.empty())
     {
         return;
     }
 
-    // string buffer
-    std::string streambuf;
-    streambuf.reserve(DEFAULT_BUFFER_SIZE);
-    std::ostringstream ostream(streambuf);
+    // get time
+    std::tm timebuf;
+    std::time_t rawtime;
+    std::time(&rawtime);
 
-    // make id string
-    if (!id.empty())
-    {
-        ostream << '[' << id << "] ";
-    }
+    // https://en.cppreference.com/w/c/chrono/localtime
+#ifdef _WIN32
+    std::tm* time = &timebuf;
+    localtime_s(&timebuf, &rawtime);
+#else
+    tm* time = localtime_r(&rawtime, &timebuf);
+#endif
 
-    // time format
-    static constexpr char timeFormat[] = "[%H:%M:%S] ";
-    // time buffer
-    std::array<char, sizeof(timeFormat)> time;
-
-    // convert time to string
-    setCurrentTime(time, timeFormat);
-
-    ostream << time.data();
-    ostream << std::move(buffer);
-
-    // write
-    Logger::instance().write(ostream.str(), level);
-}
-
-Logger::Helper::Helper(Level logLevel, std::string logId) :
-    level{logLevel},
-    id{std::move(logId)}
-{}
-
-Logger::Helper::~Helper()
-{
-    writeToLog();
+    Logger::instance().write(message, level, Details{id, *time});
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case
 //! it's useful for processing in the destination.
 void
-Logger::write(std::string const& message, Level level)
+Logger::write(std::string const& message, Level level, Details details)
 {
     MutexLocker lock(pimpl->logMutex);
 
     std::for_each(pimpl->destinations.begin(), pimpl->destinations.end(),
-                  [&message, level](DestinationEntry const& dest){
-        dest.ptr->write(message, level);
+                  [&](DestinationEntry const& dest){
+        dest.ptr->write(message, level, details);
     });
 }
 

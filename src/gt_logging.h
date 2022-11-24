@@ -35,11 +35,6 @@
 #include "gt_logdestfile.h"
 #include "gt_logdestfunctor.h"
 
-// Qt support
-#ifdef GT_LOG_USE_QT_BINDINGS
-#include "gt_logbindings_qt.h"
-#endif
-
 // macros to convert an argument to string
 #define GT_LOG_TO_STR_HELPER(X) #X
 #define GT_LOG_TO_STR(X) GT_LOG_TO_STR_HELPER(X)
@@ -62,49 +57,25 @@ public:
     static Logger& instance();
 
     GT_LOGGING_EXPORT
-    static Level levelFromString(const std::string& logMessage, bool* ok = {});
-
-    GT_LOGGING_EXPORT
-    static Level levelFromInt(const int lvl);
-
-    GT_LOGGING_EXPORT
-    static std::string levelToString(Level level);
-
-    GT_LOGGING_EXPORT
     ~Logger();
-
-    //! Adds a log message destination if its valid.
-    //! Will not skip duplicates.
-    GT_LOGGING_EXPORT
-    bool addDestination(DestinationPtr destination);
 
     //! Adds a named log message destination if its valid. Dont use use
     //! empty ids. Will skip duplicates (by name).
     GT_LOGGING_EXPORT
     bool addDestination(std::string id, DestinationPtr destination);
 
-    //! Removes a previously added destination. Returns true if a destination
-    //! was removed.
-    GT_LOGGING_EXPORT
-    bool removeDestination(const DestinationPtr& destination);
-
     //! Removes a previously added destination by name.Returns true if a
     //! destination was removed.
     GT_LOGGING_EXPORT
     bool removeDestination(const std::string& id);
 
-    //! Checks if a destination of a specific type has been added.
-    //! Pass T::type as parameter.
-    GT_LOGGING_EXPORT
-    bool hasDestinationOfType(const std::string& type) const;
-
-    //! Checks if the destination has been added.
-    GT_LOGGING_EXPORT
-    bool hasDestination(const DestinationPtr& destination);
-
     //! Checks if the named destination has been added.
     GT_LOGGING_EXPORT
     bool hasDestination(const std::string& id);
+
+    //! Checks if the named destination has been added.
+    GT_LOGGING_EXPORT
+    Destination* destination(const std::string& id) const;
 
     //! Logging at a level < 'newLevel' will be ignored
     GT_LOGGING_EXPORT
@@ -127,34 +98,34 @@ public:
     class Helper
     {
     public:
-        GT_LOGGING_EXPORT
-        explicit Helper(Level logLevel, std::string logId = GT_MODULE_ID);
 
-        GT_LOGGING_EXPORT
-        ~Helper();
+        explicit Helper(Level logLevel, std::string logId = GT_MODULE_ID) :
+            level{logLevel},
+            id{std::move(logId)}
+        {}
 
-        gt::log::Stream& stream()
-        {
-            return gtStream;
-        }
+        ~Helper() { writeToLog(); }
+
+        gt::log::Stream& stream() { return gtStream; }
 
     private:
-
-        void writeToLog();
 
         Level level;
         std::string id;
         gt::log::Stream gtStream;
+
+        GT_LOGGING_EXPORT void writeToLog();
     };
 
 private:
+
     Logger();
     Logger(Logger const&) = delete;
     Logger(Logger&&) = delete;
     Logger& operator=(Logger const&) = delete;
     Logger& operator=(Logger&&) = delete;
 
-    void write(const std::string& message, Level level);
+    void write(std::string const& message, Level level, Details details);
 
     struct Impl; // d pointer
     std::unique_ptr<Impl> pimpl;

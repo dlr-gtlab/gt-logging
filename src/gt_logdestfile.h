@@ -30,7 +30,6 @@
 
 #include <stdint.h>
 #include <fstream>
-#include <algorithm>
 
 namespace gt
 {
@@ -150,20 +149,26 @@ makeSizeRotationStrategy(FileSizeInBytes maxFileSize = {},
 }
 
 //! File destination sink
-class FileDestination : public Destination
+class FileDestination : public FormattedDestination
 {
 public:
 
-    GT_LOGGING_EXPORT FileDestination(std::string filePath, RotationStrategyPtr rotationStrategy);
+    //! ctor
+    GT_LOGGING_EXPORT FileDestination(std::string filePath,
+                                      RotationStrategyPtr rotationStrategy,
+                                      Formatter formatter = {});
+
+    //! dtor
     GT_LOGGING_EXPORT ~FileDestination();
 
+    //! Logs formatted text
     GT_LOGGING_EXPORT
     void write(std::string const& message, Level level) override;
 
+    //! is valid
     GT_LOGGING_EXPORT
     bool isValid() const override;
 
-    std::string type() const override { return "file"; }
 
 private:
 
@@ -172,23 +177,25 @@ private:
     RotationStrategyPtr m_rotationStrategy;
 };
 
-inline DestinationPtr
-makeFileDestination(std::string filePath)
+inline std::unique_ptr<FileDestination>
+makeFileDestination(std::string filePath, Formatter formatter = {})
 {
-    return std::make_shared<FileDestination>(
-                std::move(filePath), std::make_shared<NullRotationStrategy>());
+    return std::make_unique<FileDestination>(
+                std::move(filePath), std::make_shared<NullRotationStrategy>(),
+                std::move(formatter));
 }
 
-inline DestinationPtr
+inline std::unique_ptr<FileDestination>
 makeFileDestination(std::string filePath,
-                    std::shared_ptr<RotationStrategy> rotation)
+                    std::shared_ptr<RotationStrategy> rotation,
+                    Formatter formatter = {})
 {
     if (!rotation)
     {
-        rotation = std::make_shared<NullRotationStrategy>();
+        rotation = std::make_unique<NullRotationStrategy>();
     }
-    return std::make_shared<FileDestination>(
-                std::move(filePath), std::move(rotation));
+    return std::make_unique<FileDestination>(
+                std::move(filePath), std::move(rotation), std::move(formatter));
 }
 
 } // namespace log

@@ -3,8 +3,16 @@
 
 #include "gt_logging_exports.h"
 
+#include <algorithm>
 #include <sstream>
-#include <iostream>
+
+#ifdef __has_cpp_attribute
+  #if __has_cpp_attribute(nodiscard)
+    #define GT_LOG_NODISCARD [[nodiscard]]
+  #endif
+#else
+  #define GT_LOG_NODISCARD
+#endif
 
 namespace gt
 {
@@ -79,19 +87,22 @@ public:
     std::string str() { return m_stream.str(); }
 
     GT_LOGGING_EXPORT static bool mayLog(int level);
-    bool mayLog() const { return mayLog(m_vlevel); }
-    bool mayLogSpace() const { return m_flags & LogSpace; }
-    bool mayLogQuote() const { return m_flags & LogQuote; }
+    GT_LOG_NODISCARD bool mayLog() const { return mayLog(m_vlevel); }
+    GT_LOG_NODISCARD bool mayLogSpace() const { return m_flags & LogSpace; }
+    GT_LOG_NODISCARD bool mayLogQuote() const { return m_flags & LogQuote; }
 
     // pod
     inline Stream& operator<<(std::nullptr_t) { return doLog("(nullptr)"); }
     inline Stream& operator<<(void const* t)
     {
-        // format pointers
-        StreamStateSaver s{*this};
-        return nospace().
-                doLog(std::hex).
-                doLog("0x").doLog(reinterpret_cast<std::uint64_t>(t));
+        { // block for state saver
+            StreamStateSaver s{*this};
+            // format pointers
+            nospace().doLog(std::hex)
+                     .doLog("0x")
+                     .doLog(reinterpret_cast<std::uintptr_t>(t));
+        }
+        return doLogSpace();
     }
 
     inline Stream& operator<<(bool t) { return doLog(t); }
@@ -132,7 +143,16 @@ public:
 
     // strings
     inline Stream& operator<<(const char* t) { return doLog(t); }
-    inline Stream& operator<<(std::string const& t) { return doLog(t); }
+
+    template <typename... Ts>
+    inline Stream& operator<<(std::basic_string<Ts...> const& t) { return doLogQuoted(t); }
+
+    // ios flags
+    inline Stream& operator<<(std::ios_base&(*t)(std::ios_base&))
+    {
+        m_stream << t;
+        return *this;
+    }
 
     //! Default logging method
     template <typename T>
@@ -141,7 +161,7 @@ public:
         if (mayLog())
         {
             m_stream << t;
-            logSpace();
+            doLogSpace();
         }
         return *this;
     }
@@ -152,12 +172,32 @@ public:
     {
         if (mayLog())
         {
-            logQuote();
+            doLogQuote();
             m_stream << t;
-            logQuote().logSpace();
+            doLogQuote().doLogSpace();
         }
         return *this;
     }
+
+    template <typename Iter>
+    inline Stream& doLogIter(Iter a, Iter b,
+                             char const* pre = "(",
+                             char const* suf = ")",
+                             char const* sep = ", ") noexcept;
+
+    //! Helper function to log ' '
+    inline Stream& doLogSpace() noexcept
+    {
+        if (mayLogSpace()) m_stream << ' ';
+        return *this;
+    };
+
+    //! Helper function to log '"'
+    inline Stream& doLogQuote() noexcept
+    {
+        if (mayLogQuote()) m_stream << '"';
+        return *this;
+    };
 
 private:
 
@@ -167,20 +207,46 @@ private:
     int m_vlevel{gt::log::Silent};
     /// ostream
     std::ostringstream m_stream;
+};
 
-    //! Helper function to log ' '
-    inline Stream& logSpace() noexcept
+// pair
+template <typename T, typename U>
+inline Stream& operator<<(Stream& s, std::pair<T, U> const& t)
+{
+    if (s.mayLog())
     {
-        if (mayLogSpace()) m_stream << ' ';
-        return *this;
-    };
+        gt::log::StreamStateSaver saver{s};
+        s.nospace().quote() << '(' << t.first << ", " << t.second;
+    }
+    return s << ')';
+}
 
-    //! Helper function to log '"'
-    inline Stream& logQuote() noexcept
+template <typename Iter>
+inline Stream& Stream::doLogIter(Iter a, Iter b,
+                                 char const* pre,
+                                 char const* suf,
+                                 char const* sep) noexcept
+{
+    if (mayLog())
     {
-        if (mayLogQuote()) m_stream << '"';
-        return *this;
-    };
+        m_stream << pre;
+        if (a != b)
+        {
+            StreamStateSaver s{*this};
+            nospace().quote();
+            Iter llast = --b;
+            // log until nth - 1 element
+            std::for_each(a, llast, [this, sep](auto const& val){
+                *this << val;
+                m_stream << sep;
+            });
+            // log last lement
+            *this << *b;
+        }
+        m_stream << suf;
+        doLogSpace();
+    }
+    return *this;
 };
 
 } // namespace log
@@ -200,5 +266,15 @@ inline gt::log::StreamStateSaver::~StreamStateSaver()
     stream->m_flags = flags;
     stream->m_vlevel = vlevel;
 }
+
+// Additional stl bindings
+#ifdef GT_LOG_USE_EXTENDED_STL_BINDINGS
+#include "gt_logging/stl_bindings.h"
+#endif
+
+// Qt support
+#ifdef GT_LOG_USE_QT_BINDINGS
+#include "gt_logging/qt_bindings.h"
+#endif
 
 #endif // GT_LOGSTREAM_H
