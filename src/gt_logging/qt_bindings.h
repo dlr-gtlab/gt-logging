@@ -10,6 +10,7 @@
 #define GT_LOGGING_QT_BINDINGS_H
 
 #include "gt_logging.h"
+#include "gt_logging/stl_bindings.h"
 
 #include <QDebug>
 #include <QtGlobal>
