@@ -40,7 +40,14 @@ One may set a global logging by defining the macro `GT_MODULE_ID` globally.
 
 ### Qt Support:
 
-The library adds optionally support for Qt types. This must be enabled globally using the define `GT_LOG_USE_QT_BINDINGS`. Alternatively one may include `gt_logging_qt_bindings.h` together with `gt_logging.h`.
+The library adds optionally support for Qt types. This must be enabled globally using the define `GT_LOG_USE_QT_BINDINGS`.
+Alternatively one may include `gt_logging/qt_bindings.h` after `gt_logging.h`.
+
+### Additional STL Bindings:
+
+The library adds dedicated logging operators for STL classes like vectors, lists, maps, unique_ptrs etc.
+These can be included individually after `gt_logging.h`. These modules are named similarly to the STL counterpart (e.g. `gt_logging/memory.h`).
+Alternatively they may be included by defining `GT_LOG_USE_EXTENDED_STL_BINDINGS` globally or by including `gt_logging/stl_bindings.h` after `gt_logging.h`.
 
 ## Local Config:
 
