@@ -6,10 +6,8 @@
 #include <algorithm>
 #include <sstream>
 
-#ifdef __has_cpp_attribute
-  #if __has_cpp_attribute(nodiscard)
-    #define GT_LOG_NODISCARD [[nodiscard]]
-  #endif
+#if defined(__has_cpp_attribute) && __has_cpp_attribute(nodiscard)
+  #define GT_LOG_NODISCARD [[nodiscard]]
 #else
   #define GT_LOG_NODISCARD
 #endif
