@@ -94,7 +94,9 @@ unix:{
 KEEP_INCLUDEPATHS += \
     gt_logging
 
-copyHeaders($$HEADERS)
+PRIVATE_INCLUDEPATHS += \
+
+copyHeaders($$HEADERS, $$KEEP_INCLUDEPATHS, $$PRIVATE_INCLUDEPATHS)
 copyToEnvironmentPath()
 
 ######################################################################
