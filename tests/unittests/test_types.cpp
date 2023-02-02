@@ -71,7 +71,7 @@ TEST_F(Types, std_map)
     map.insert({41.2, "ABC"});
 
     gtWarning() << map;
-    EXPECT_TRUE(log.contains("map{(41.2, \"ABC\")}"));
+    EXPECT_TRUE(log.contains(R"(map{(41.2, "ABC")})"));
 }
 
 TEST_F(Types, std_multimap)
@@ -82,8 +82,8 @@ TEST_F(Types, std_multimap)
 
     gtWarning() << map;
     EXPECT_TRUE(log.contains("multimap{("));
-    EXPECT_TRUE(log.contains("(41.1, \"ABC\")"));
-    EXPECT_TRUE(log.contains("(41.2, \"Test\")"));
+    EXPECT_TRUE(log.contains(R"((41.1, "ABC"))"));
+    EXPECT_TRUE(log.contains(R"((41.2, "Test"))"));
     EXPECT_TRUE(log.contains("}"));
 }
 
@@ -101,7 +101,20 @@ TEST_F(Types, std_pair)
 {
     std::pair<std::string, int> pair{"test", 42};
     gtWarning() << pair;
-    EXPECT_TRUE(log.contains("(\"test\", 42)"));
+    EXPECT_TRUE(log.contains(R"(("test", 42))"));
+}
+
+TEST_F(Types, std_tuple)
+{
+    std::tuple<std::string, int> tuple{"test", 42};
+    gtWarning() << tuple;
+    EXPECT_TRUE(log.contains(R"(("test", 42))"));
+
+    std::tuple<double, std::pair<bool, float>, int, std::string> nested{
+        0.1234, {true, 42.1f}, 42, "test"
+    };
+    gtWarning() << nested;
+    EXPECT_TRUE(log.contains(R"((0.1234, (true, 42.1), 42, "test"))"));
 }
 
 TEST_F(Types, POD_other)
