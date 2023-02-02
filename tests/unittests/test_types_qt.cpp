@@ -61,7 +61,7 @@ TEST_F(TypesQt, std_map)
     map.insert({41.2, "ABC"});
 
     gtWarning() << map;
-    EXPECT_TRUE(log.contains("map{(41.2, \"ABC\")}"));
+    EXPECT_TRUE(log.contains(R"(map{(41.2, "ABC")})"));
 }
 
 TEST_F(TypesQt, std_multimap)
@@ -72,8 +72,8 @@ TEST_F(TypesQt, std_multimap)
 
     gtWarning() << map;
     EXPECT_TRUE(log.contains("multimap{("));
-    EXPECT_TRUE(log.contains("(41.1, \"ABC\")"));
-    EXPECT_TRUE(log.contains("(41.2, \"Test\")"));
+    EXPECT_TRUE(log.contains(R"((41.1, "ABC"))"));
+    EXPECT_TRUE(log.contains(R"((41.2, "Test"))"));
     EXPECT_TRUE(log.contains("}"));
 }
 
@@ -81,7 +81,7 @@ TEST_F(TypesQt, std_pair)
 {
     std::pair<QString, int> pair{"test", 42};
     gtWarning() << pair;
-    EXPECT_TRUE(log.contains("(\"test\", 42)"));
+    EXPECT_TRUE(log.contains(R"(("test", 42))"));
 }
 
 TEST_F(TypesQt, QStringList)

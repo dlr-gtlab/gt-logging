@@ -73,7 +73,8 @@ public:
     GT_LOGGING_EXPORT
     bool hasDestination(const std::string& id);
 
-    //! Checks if the named destination has been added.
+    //! Returns the destination specified by name. Returns null if the
+    //! destion was not found.
     GT_LOGGING_EXPORT
     Destination* destination(const std::string& id) const;
 

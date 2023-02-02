@@ -66,6 +66,7 @@ HEADERS += \
     gt_logging/qt_bindings.h \
     gt_logging/set.h \
     gt_logging/stl_bindings.h \
+    gt_logging/tuple.h \
     gt_logging/vector.h \
     gt_logging_exports.h \
     gt_logging.h \

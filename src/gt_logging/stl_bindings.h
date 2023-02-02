@@ -17,6 +17,7 @@
 #include "gt_logging/list.h"
 #include "gt_logging/map.h"
 #include "gt_logging/set.h"
+#include "gt_logging/tuple.h"
 
 
 #endif // GT_LOGGING_STL_BINDINGS_H
