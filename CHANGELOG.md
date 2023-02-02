@@ -6,16 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] 
 ### Added
-- Added support for `std::tuple` types
-
 ### Fixed
 ### Changed
 ### Deprecated
 ### Removed
 ### Security 
 
-## [4.0.0] - 2022-11-24 
+## [4.1.0] - 2023-02-02 
+### Added
+- Added support for `std::tuple` types
 
+## [4.0.0] - 2022-11-24 
 ### Changed
 - __Highlight__: GtLogging does not require Qt anymore. Optional Qt bindings may still be renabled using `GT_LOG_USE_QT_BINDINGS` - #33
 - `DestinationPtr` is now a `std::unique_ptr`. Destionations must be added/removed using a destionation id - #34
@@ -47,18 +48,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the `QS_LOG_LINE_NUMBERS` macro to `GT_LOG_LINE_NUMBERS` for logging file and line numbers
 
 ## [2.0.0] - 2022-07-15
-
 ### Changed
 - Switched to Qt 5.15 as a foundation for further development
 - Switched to Visual Studio 2019 as a foundation for further development
 
 ## [1.0.1] - 2021-03-03
-
 ### Fixed
 - R-Path link for linux - # 38
 
 
 ## [1.0.0] - 2021-03-02
-
 ### Added
 - CHANGELOG as initial commit
