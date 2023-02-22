@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] 
 ### Added
 ### Fixed
+- Fixed misleading output for unique and shared ptr - #42
+
 ### Changed
 ### Deprecated
 ### Removed

@@ -42,6 +42,7 @@ TEST_F(Types, memory_unique)
 
     gtError() << u;
     EXPECT_TRUE(log.contains(QString::number((size_t)u.get(), 16)));
+    EXPECT_TRUE(log.contains("unique"));
 };
 
 TEST_F(Types, memory_shared)
@@ -50,6 +51,7 @@ TEST_F(Types, memory_shared)
 
     gtError() << s;
     EXPECT_TRUE(log.contains(QString::number((size_t)s.get(), 16)));
+    EXPECT_TRUE(log.contains("shared"));
 };
 
 TEST_F(Types, std_vector)
