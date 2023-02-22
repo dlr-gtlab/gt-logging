@@ -25,7 +25,7 @@ inline Stream& operator<<(Stream& s, std::unique_ptr<T, U> const& t)
 {
     {
         StreamStateSaver saver{s};
-        s.nospace() << "shared_ptr(" << t.get();
+        s.nospace() << "unique_ptr(" << t.get();
     }
     return s << ')';
 }
@@ -35,7 +35,7 @@ inline Stream& operator<<(Stream& s, std::shared_ptr<T> const& t)
 {
     {
         StreamStateSaver saver{s};
-        s.nospace() << "unique_ptr(" << t.get();
+        s.nospace() << "shared_ptr(" << t.get();
     }
     return s << ')';
 }
