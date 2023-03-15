@@ -7,7 +7,7 @@ required_conan_version = ">=1.45.0"
 
 class GTlabLoggingConan(ConanFile):
     name = "gtlab-logging"
-    version = "3.0.0"
+    version = "4.1.0"
     license = "GTlab license"
     author = "Martin Siggel <martin.siggel@dlr.de>"
     url = "https://gitlab.dlr.de/at-twk/gtlab-logging"
@@ -23,13 +23,6 @@ class GTlabLoggingConan(ConanFile):
         CMakeToolchain(self).generate()
         CMakeDeps(self).generate()
   
-  
-    def requirements(self):
-        if self.options.build  == "stable":
-            self.requires("qt/5.12.5@dlr-at/stable")
-        else:
-            self.requires("qt/5.15.2")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -52,7 +45,7 @@ class GTlabLoggingConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["GTlabLogging"]
         
-        self.cpp_info.includedirs.append(os.path.join("include", "GTlabLogging"))
+        self.cpp_info.includedirs.append(os.path.join("include", "logging"))
 
         if self.settings.build_type != "Debug":
             self.cpp_info.libs = ['GTlabLogging']

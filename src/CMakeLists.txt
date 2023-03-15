@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(GTlabLogging VERSION 3.0.0)
+project(GTlabLogging VERSION 4.1.0)
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR "lib")
@@ -14,48 +14,50 @@ if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "-d")
 endif()
 
-# Get Qt5
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 # GTlab uses c++11
 # this needs cmake 3.1
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 
 set(SRC
-    gt_logmodel.cpp
-    gt_log.cpp
-    gt_logdest.cpp
     gt_logdestconsole.cpp
     gt_logdestfile.cpp
-    gt_logdestfunctor.cpp
+    gt_logging.cpp
+    gt_loglevel.cpp
 )
 
 SET(HDR
-    gt_logging_exports.h
-    gt_logging.h
-    gt_logmodel.h
     gt_logdest.h
     gt_logdestconsole.h
     gt_logdestfile.h
     gt_logdestfunctor.h
     gt_logdisablelogforfile.h
+    gt_logformatter.h
+    gt_logging/array.h
+    gt_logging/list.h
+    gt_logging/map.h
+    gt_logging/memory.h
+    gt_logging/qt_bindings.h
+    gt_logging/set.h
+    gt_logging/stl_bindings.h
+    gt_logging/tuple.h
+    gt_logging/vector.h
+    gt_logging_exports.h
+    gt_logging.h
     gt_loglevel.h
     gt_logstream.h
 )
 
 
 add_library(GTlabLogging ${SRC} ${HDR})
-set_property(TARGET GTlabLogging PROPERTY AUTOMOC ON)
 
 add_compile_definitions(GTlabLogging 
    PRIVATE GT_LOGGING_DLL GTLOG_IS_SHARED_LIBRARY GT_LOG_WIN_PRINTF_CONSOLE)
 
-target_link_libraries(GTlabLogging  PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
-
 target_include_directories(GTlabLogging PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
-    $<INSTALL_INTERFACE:include/GTlabLogging>
+    $<INSTALL_INTERFACE:include/logging>
 )
 
 # install library
@@ -67,7 +69,11 @@ install (TARGETS GTlabLogging
 )
 
 # install include files
-install(FILES ${HDR} DESTINATION include/GTlabLogging)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+        DESTINATION include/logging
+        FILES_MATCHING
+        PATTERN "*.h*"
+)
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
