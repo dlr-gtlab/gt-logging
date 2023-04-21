@@ -27,9 +27,6 @@ class GTlabLoggingConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        self.options["qt"].shared = True
-
     def build(self):    
         cmake = CMake(self)
         cmake.configure(build_script_folder="src")
