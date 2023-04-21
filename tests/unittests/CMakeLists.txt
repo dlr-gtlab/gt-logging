@@ -6,7 +6,7 @@ if (NOT TARGET GTlabLogging)
 endif()
 
 if (NOT TARGET Qt5::Core)
-    find_package(Qt5 COMPONENTS Core REQUIRED)
+    find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 endif()
 
 
@@ -18,16 +18,22 @@ endif()
 
 add_executable(GTlabLoggingTests
     main.cpp
-    test_basiclog.cpp
-    test_disable_logger.cpp
+    test_helper.h
     test_log_helper.h
-    myqobject.h
-    test_log_helper.cpp
+    test_logdest.cpp
+    test_logdestfile.cpp
+    test_logdisableforfile.cpp
+    test_logformatter.cpp 
+    test_logid.cpp  
+    test_loglevel.cpp  
     test_loglinenumbers.cpp
+    test_logquote.cpp
+    test_logstatesaver.cpp
     test_types.cpp
+    test_types_qt.cpp
     test_verbosity.cpp
 )
 
 set_property(TARGET GTlabLoggingTests PROPERTY AUTOMOC ON)
 
-target_link_libraries(GTlabLoggingTests PRIVATE GTlabLogging gtest Qt5::Core)
+target_link_libraries(GTlabLoggingTests PRIVATE GTlabLogging gtest Qt5::Core Qt5::Gui Qt5::Widgets)
