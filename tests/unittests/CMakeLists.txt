@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(GTlabLogging-tests)
 
-if (NOT TARGET GTlabLogging)
+if (NOT TARGET GTlab::Logging)
     find_package(GTlabLogging CONFIG REQUIRED)
 endif()
 
@@ -36,4 +36,4 @@ add_executable(GTlabLoggingTests
 
 set_property(TARGET GTlabLoggingTests PROPERTY AUTOMOC ON)
 
-target_link_libraries(GTlabLoggingTests PRIVATE GTlabLogging gtest Qt5::Core Qt5::Gui Qt5::Widgets)
+target_link_libraries(GTlabLoggingTests PRIVATE GTlab::Logging gtest Qt5::Core Qt5::Gui Qt5::Widgets)

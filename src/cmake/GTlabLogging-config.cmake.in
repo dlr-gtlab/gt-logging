@@ -14,3 +14,9 @@ endif()
 # These are IMPORTED targets created by GTlabLogging-targets.cmake
 set(GTlabLogging_LIBRARIES GTlabLogging)
 get_target_property(GTlabLogging_INCLUDE_DIRS GTlabLogging INTERFACE_INCLUDE_DIRECTORIES)
+
+# Create an alias
+add_library(GTlab::Logging INTERFACE IMPORTED)
+set_target_properties(GTlab::Logging PROPERTIES
+  INTERFACE_LINK_LIBRARIES "GTlabLogging"
+)

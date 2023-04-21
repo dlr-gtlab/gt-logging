@@ -50,4 +50,4 @@ class GTlabLoggingConan(ConanFile):
             self.cpp_info.libs = ['GTlabLogging-d']
 
         self.cpp_info.set_property("cmake_file_name", "GTlabLogging")
-        self.cpp_info.set_property("cmake_target_name", "GTlabLogging")
+        self.cpp_info.set_property("cmake_target_name", "GTlab::Logging")
