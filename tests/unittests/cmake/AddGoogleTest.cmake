@@ -6,6 +6,8 @@
 #
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
+# Build gtest as a static library
+set(BUILD_SHARED_LIBS OFF)
 if(CMAKE_VERSION VERSION_LESS 3.11)
     set(UPDATE_DISCONNECTED_IF_AVAILABLE "UPDATE_DISCONNECTED 1")
 
