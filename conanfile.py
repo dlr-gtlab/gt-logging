@@ -44,6 +44,8 @@ class GTlabLoggingConan(ConanFile):
         
         self.cpp_info.includedirs.append(os.path.join("include", "logging"))
 
+        self.cpp_info.libdirs = ['lib', 'lib/logging']
+
         if self.settings.build_type != "Debug":
             self.cpp_info.libs = ['GTlabLogging']
         else:

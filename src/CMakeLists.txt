@@ -66,8 +66,8 @@ target_include_directories(GTlabLogging PUBLIC
 install (TARGETS GTlabLogging
          EXPORT GTlabLogging-targets
          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/logging
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/logging
 )
 
 # install include files
