@@ -70,126 +70,128 @@ triggerDeployment:
   variables:
     STABLE_BASE: $BUILD_STABLE_BASE
 
-# DevTools update
-devtoolsUpdateWindows:
-  stage: update
-  extends: .devToolsUpdateWindows
+.win:
+  tags: ["windows", "docker"]
+  needs: []
+  before_script:
+    # activate compiler
+    - '& $VCvarsall'
+    # make cmake find qt
+    - $env:CMAKE_PREFIX_PATH=$env:QT_INSTALL_PATH
+  artifacts:
+    paths:
+      - build
+      - install-msvc*
 
-devtoolsUpdateLinux:
-  stage: update
-  extends: .devToolsUpdateLinux
+.win_20:
+  extends:
+    - .win
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-win
+  variables:
+    VCvarsall: $VCvarsall_515
+
+.win_17:
+  extends:
+    - .win
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-1_7-win
+  variables:
+    VCvarsall: $VCvarsall_512
 
 # build on Windows system
 windowsBuildDebug:
   stage: build
   extends: 
-    - .stable-debug
-    - .buildWinDebug
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Win_Stable
-    JOM_PATH: $JOM_PATH_512
-    QMAKE_PATH: $QMAKE_PATH_512
-    VCvarsall: $VCvarsall_512
-
+    - .win_17
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2017-dbg -DBUILD_UNITTESTS=ON
+    - cmake --build build --target install
+    
 windowsBuildDebugUnstable:
   stage: unstableBuild
   extends: 
-    - .unstable-debug
-    - .buildWinDebug
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Win_Unstable
-    JOM_PATH: $JOM_PATH_515
-    QMAKE_PATH: $QMAKE_PATH_515
-    VCvarsall: $VCvarsall_515
+    - .win_20
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DBUILD_UNITTESTS=ON
+    - cmake --build build --target install
+
 
 windowsBuildRelease:
   stage: build
   extends: 
-    - .stable-release
-    - .buildWinRelease
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Win_Stable
-    JOM_PATH: $JOM_PATH_512
-    QMAKE_PATH: $QMAKE_PATH_512
-    VCvarsall: $VCvarsall_512
+    - .win_17
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2017
+    - cmake --build build --target install
 
 windowsBuildReleaseUnstable:
   stage: unstableBuild
   extends: 
-    - .unstable-release
-    - .buildWinRelease
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Win_Unstable
-    JOM_PATH: $JOM_PATH_515
-    QMAKE_PATH: $QMAKE_PATH_515
-    VCvarsall: $VCvarsall_515
-    
+    - .win_20
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2019
+    - cmake --build build --target install
+
 # build on Linux system
+.linux:
+  tags: ["linux", "docker"]
+  needs: []
+  before_script:
+    # make cmake find qt
+    - export CMAKE_PREFIX_PATH=$QT_INSTALL_PATH
+  variables:
+    GIT_SUBMODULE_STRATEGY: "none"
+  artifacts:
+    paths:
+      - build
+      - install-linux*
+
+.linux_20:
+  extends:
+    - .linux
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+
+.linux_17:
+  extends:
+    - .linux
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-1_7-buster
+
 linuxBuildDebug:
   stage: build
   extends: 
-    - .stable-debug
-    - .buildLinuxDebug
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Stable
-    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
-
+    - .linux_17
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DBUILD_UNITTESTS=ON
+    - cmake --build build --target install
+    
 linuxBuildDebugUnstable:
   stage: unstableBuild
   extends: 
-    - .unstable-debug
-    - .buildLinuxDebug 
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
-    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
- 
+    - .linux_20
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DBUILD_UNITTESTS=ON
+    - cmake --build build --target install
+
 linuxBuildRelease:
   stage: build
   extends: 
-    - .stable-release
-    - .buildLinuxRelease 
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Stable
-    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
-
+    - .linux_17
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux
+    - cmake --build build --target install
+ 
 linuxBuildReleaseUnstable:
   stage: unstableBuild
   extends: 
-    - .unstable-release
-    - .buildLinuxRelease 
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
-    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
+    - .linux_20
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux
+    - cmake --build build --target install
+
 
 # run tests using the binary built before
 testWin:
   stage: test
   extends: 
-    - .stable-debug
     - .winTestTemplate
   needs: 
     - windowsBuildDebug
@@ -201,7 +203,6 @@ testWin:
 testWinUnstable:
   stage: unstableTest
   extends:
-    - .unstable-debug  
     - .winTestTemplate
   needs: 
     - windowsBuildDebugUnstable
@@ -213,12 +214,12 @@ testWinUnstable:
 testLinux:
   stage: test
   extends: 
-    - .stable-debug
     - .linuxTestTemplate
   needs: 
     - linuxBuildDebug
-  dependencies:
-    - linuxBuildDebug
+  script:
+    - export LD_LIBRARY_PATH=`pwd`/install-linux-dbg/lib/logging
+    - ./build/GTlabLoggingTests --gtest_output=xml:unittests.xml
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
@@ -228,15 +229,15 @@ testLinuxUnstable:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable 
     LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
   extends: 
-    - .unstable-debug
     - .linuxTestTemplate
   needs: 
     - linuxBuildDebugUnstable
-  dependencies:
-    - linuxBuildDebugUnstable
+  script:
+    - export LD_LIBRARY_PATH=`pwd`/install-linux-dbg/lib/logging
+    - ./build/GTlabLoggingTests --gtest_output=xml:unittests.xml
 
 # deployment
-createJobs:
+.createJobs:
   stage: deploy
   extends:
     - .createJobsTemplate
@@ -251,7 +252,7 @@ createJobs:
     LinDeStableJob: linuxBuildDebug
     LinDeUnstableJob: linuxBuildDebugUnstable
 
-triggerJobs:
+.triggerJobs:
   stage: deploy
   extends: .only-tags-child
   needs:
@@ -263,6 +264,44 @@ triggerJobs:
     strategy: depend
   variables:
     PARENT_PIPELINE_ID: $CI_PIPELINE_ID
+
+.package:
+  stage: package
+  tags: ["shell", "linux"]
+  script:
+    - cp -r install-$toolchain-dbg/* install-$toolchain
+    - mv install-$toolchain gtlab-logging-$toolchain
+    - tar czf gtlab-logging-$toolchain.tar.gz gtlab-logging-$toolchain
+  artifacts:
+    name: "gtlab-logging-$toolchain"
+    paths: ["gtlab-logging-$toolchain.tar.gz"]
+  variables:
+    toolchain: msvc2019
+    GIT_STRATEGY: "none"
+
+package-win-gtlab_2.0:
+  extends: [".package"]
+  needs: ["windowsBuildDebugUnstable", "windowsBuildReleaseUnstable"]
+  variables:
+    toolchain: msvc2019
+
+package-win-gtlab_1.7:
+  extends: [".package"]
+  needs: ["windowsBuildDebug", "windowsBuildRelease"]
+  variables:
+    toolchain: msvc2017
+
+package-linux-gtlab_2.0:
+  extends: [".package"]
+  needs: ["linuxBuildDebugUnstable", "linuxBuildReleaseUnstable"]
+  variables:
+    toolchain: linux
+
+package-linux-gtlab_1.7:
+  extends: [".package"]
+  needs: ["linuxBuildDebug", "linuxBuildRelease"]
+  variables:
+    toolchain: linux
 
 # code quality
 codingstyle:
@@ -277,10 +316,6 @@ cppcheck:
 pages:
   stage: badges
   extends: .pageTemplate
-
-package:
-  stage: package
-  extends: .packageTemplate
 
 # badges
 badges:
