@@ -314,7 +314,7 @@ package-linux-gtlab_1.7:
     # Remove all local packages matching at-twk/unstable
     - conan remote add gitlab  ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan --force
     - conan remove *$CONAN_CHANNEL_REFERENCE -f
-    - conan create . $CONAN_CHANNEL_REFERENCE  -pr $CONAN_PROFILE
+    - conan create . $CONAN_CHANNEL_REFERENCE  -pr $CONAN_PROFILE -pr:b $CONAN_PROFILE
   variables:
     CONAN_LOGIN_USERNAME: ci_user
     CONAN_PASSWORD: ${CI_JOB_TOKEN}
