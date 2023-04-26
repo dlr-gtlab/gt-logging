@@ -325,7 +325,7 @@ package-linux-gtlab_1.7:
 conan-pkg-linux:
   extends:
     - .conan
-  image: conanio/gcc6
+  image: conanio/gcc8
   tags: ["docker", "linux"]
   before_script:
     - pip install --upgrade conan==1.59.0 --quiet
@@ -334,9 +334,19 @@ conan-pkg-linux:
   after_script:
     # Upload all packages. This should only include the newly created ones
     - if [ $CI_COMMIT_TAG ]; then conan upload *$CONAN_CHANNEL_REFERENCE  --all -c -r gitlab; fi
-  variables:
-    CONAN_PROFILE: default
 
+conan-pkg-win:
+  extends:
+    - .conan
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/msvc-2019
+  tags: ["docker", "windows"]
+  before_script:
+    - $env:path += ";c:\Python3;c:\Python3\Scripts"
+    - pip install --upgrade conan==1.59.0 --quiet
+    - conan profile new default --detect --force
+  after_script:
+      # Upload all packages. This should only include the newly created ones
+    - if ($CI_COMMIT_TAG -ne $null) {conan upload *$CONAN_CHANNEL_REFERENCE  --all -c -r gitlab }
 
 # code quality
 codingstyle:
