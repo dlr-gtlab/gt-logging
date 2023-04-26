@@ -267,7 +267,8 @@ testLinuxUnstable:
 
 .package:
   stage: package
-  tags: ["shell", "linux"]
+  tags: ["docker", "linux"]
+  image: debian:buster
   script:
     - cp -r install-$toolchain-dbg/* install-$toolchain
     - mv install-$toolchain gtlab-logging-$toolchain
