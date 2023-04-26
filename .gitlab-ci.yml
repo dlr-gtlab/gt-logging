@@ -1,24 +1,3 @@
-#################################################################
-############### GTlab Standard Pipeline Version 2.1.0 ###########
-#################################################################
-# These variables are defined in the CI project settings:
-#  CATEGORY: 02_core
-#  PROFILENAME: logging.pro
-#  TARGETDIRNAME: logging
-#  TARGETNAME: GTlabLogging
-#  UNITTESTSNAME: GTlabUnitTest
-
-# These variables are defined in the AT-TWK group settings:
-#   DEVTOOLS_Linux_Stable
-#   DEVTOOLS_Linux_Unstable
-#   DEVTOOLS_Win_Stable 
-#   DEVTOOLS_Win_Unstable
-#   WIN_PYTHON
-#   STABLE_MAJOR
-#   STABLE_MINOR
-#   UNSTABLE_MAJOR
-#   UNSTABLE_MINOR
-
 # Variables that are defined globally for the pipeline
 variables:
   PIPELINEVERSION: "2.1.0"
@@ -50,26 +29,6 @@ stages:
   - package
   - badges
 
-# Tag pipeline jobs
-findCodeBaseStatus:
-  stage: .pre
-  extends: 
-    - .only-tags-parent
-    - .findCodeBaseStatusTemplate
-  tags:
-    - Win10
-
-triggerDeployment:
-  stage: deploy
-  extends: .only-tags-parent
-  trigger:
-    include: .gitlab-ci.yml
-    forward:
-      pipeline_variables: true
-    strategy: depend
-  variables:
-    STABLE_BASE: $BUILD_STABLE_BASE
-
 .win:
   tags: ["windows", "docker"]
   needs: []
@@ -82,6 +41,19 @@ triggerDeployment:
     paths:
       - build
       - install-msvc*
+
+.linux:
+  tags: ["linux", "docker"]
+  needs: []
+  before_script:
+    # make cmake find qt
+    - export CMAKE_PREFIX_PATH=$QT_INSTALL_PATH
+  variables:
+    GIT_SUBMODULE_STRATEGY: "none"
+  artifacts:
+    paths:
+      - build
+      - install-linux*
 
 .win_20:
   extends:
@@ -96,6 +68,16 @@ triggerDeployment:
   image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-1_7-win
   variables:
     VCvarsall: $VCvarsall_512
+
+.linux_20:
+  extends:
+    - .linux
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+
+.linux_17:
+  extends:
+    - .linux
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-1_7-buster
 
 # build on Windows system
 windowsBuildDebug:
@@ -114,7 +96,6 @@ windowsBuildDebugUnstable:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
 
-
 windowsBuildRelease:
   stage: build
   extends: 
@@ -132,29 +113,6 @@ windowsBuildReleaseUnstable:
     - cmake --build build --target install
 
 # build on Linux system
-.linux:
-  tags: ["linux", "docker"]
-  needs: []
-  before_script:
-    # make cmake find qt
-    - export CMAKE_PREFIX_PATH=$QT_INSTALL_PATH
-  variables:
-    GIT_SUBMODULE_STRATEGY: "none"
-  artifacts:
-    paths:
-      - build
-      - install-linux*
-
-.linux_20:
-  extends:
-    - .linux
-  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
-
-.linux_17:
-  extends:
-    - .linux
-  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-1_7-buster
-
 linuxBuildDebug:
   stage: build
   extends: 
@@ -236,35 +194,6 @@ testLinuxUnstable:
     - export LD_LIBRARY_PATH=`pwd`/install-linux-dbg/lib/logging
     - ./build/GTlabLoggingTests --gtest_output=xml:unittests.xml
 
-# deployment
-.createJobs:
-  stage: deploy
-  extends:
-    - .createJobsTemplate
-  dependencies: []
-  variables:
-    WinReStableJob: windowsBuildRelease
-    WinReUnstableJob: windowsBuildReleaseUnstable
-    WinDeStableJob: windowsBuildDebug
-    WinDeUnstableJob: windowsBuildDebugUnstable
-    LinReStableJob: linuxBuildRelease
-    LinReUnstableJob: linuxBuildReleaseUnstable
-    LinDeStableJob: linuxBuildDebug
-    LinDeUnstableJob: linuxBuildDebugUnstable
-
-.triggerJobs:
-  stage: deploy
-  extends: .only-tags-child
-  needs:
-    - createJobs
-  trigger:
-    include:
-      - artifact: deploy.yml
-        job: createJobs
-    strategy: depend
-  variables:
-    PARENT_PIPELINE_ID: $CI_PIPELINE_ID
-
 .package:
   stage: package
   tags: ["docker", "linux"]
@@ -312,7 +241,7 @@ package-linux-gtlab_1.7:
     - conan profile new default --detect --force
   script:
     # Remove all local packages matching at-twk/unstable
-    - conan remote add gitlab  ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan --force
+    - conan remote add gitlab https://gitlab.dlr.de/api/v4/projects/20199/packages/conan --force
     - conan remove *$CONAN_CHANNEL_REFERENCE -f
     - conan create . $CONAN_CHANNEL_REFERENCE  -pr $CONAN_PROFILE -pr:b $CONAN_PROFILE
   variables:
@@ -346,6 +275,7 @@ conan-pkg-win:
     - conan profile new default --detect --force
   after_script:
       # Upload all packages. This should only include the newly created ones
+    - $env:path += ";c:\Python3;c:\Python3\Scripts"
     - if ($CI_COMMIT_TAG -ne $null) {conan upload *$CONAN_CHANNEL_REFERENCE  --all -c -r gitlab }
 
 # code quality
