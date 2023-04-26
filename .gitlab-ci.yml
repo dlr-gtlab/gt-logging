@@ -304,6 +304,40 @@ package-linux-gtlab_1.7:
   variables:
     toolchain: linux
 
+.conan:
+  stage: package
+  needs: []
+  before_script:
+    - pip install --upgrade conan==1.59.0 --quiet
+    - conan profile new default --detect --force
+  script:
+    # Remove all local packages matching at-twk/unstable
+    - conan remote add gitlab  ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan --force
+    - conan remove *$CONAN_CHANNEL_REFERENCE -f
+    - conan create . $CONAN_CHANNEL_REFERENCE  -pr $CONAN_PROFILE
+  variables:
+    CONAN_LOGIN_USERNAME: ci_user
+    CONAN_PASSWORD: ${CI_JOB_TOKEN}
+    CONAN_CHANNEL_REFERENCE: at-twk/testing
+    CONAN_PROFILE: default
+    GIT_SUBMODULE_STRATEGY: "none"
+
+conan-pkg-linux:
+  extends:
+    - .conan
+  image: conanio/gcc6
+  tags: ["docker", "linux"]
+  before_script:
+    - pip install --upgrade conan==1.59.0 --quiet
+    - conan profile new default --detect --force
+    - conan profile update settings.compiler.libcxx=libstdc++11 default
+  after_script:
+    # Upload all packages. This should only include the newly created ones
+    - if [ $CI_COMMIT_TAG ]; then conan upload *$CONAN_CHANNEL_REFERENCE  --all -c -r gitlab; fi
+  variables:
+    CONAN_PROFILE: default
+
+
 # code quality
 codingstyle:
   stage: codequality
