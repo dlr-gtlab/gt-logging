@@ -14,7 +14,7 @@
   #if defined (GT_LOGGING_DLL)
     #define GT_LOGGING_EXPORT __declspec (dllexport)
   #else
-    #define GT_LOGGING_EXPORT __declspec (dllimport)
+    #define GT_LOGGING_EXPORT
   #endif
 #else
     #define GT_LOGGING_EXPORT
