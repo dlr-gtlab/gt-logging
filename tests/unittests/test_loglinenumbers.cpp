@@ -31,3 +31,11 @@ TEST_F(LogLineNo, callMemberMethod)
     EXPECT_TRUE(log.contains(__FILE__));
     EXPECT_TRUE(log.contains(QString::number(__LINE__ - 3)));
 }
+
+TEST_F(LogLineNo, verbosity_issue43)
+{
+    gt::log::Logger::instance().setVerbosity(gt::log::Silent);
+    
+    gtWarning().verbose().nospace() << "Test";
+    EXPECT_TRUE(log.isEmpty());
+}

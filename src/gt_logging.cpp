@@ -187,6 +187,8 @@ Logger::verbosity() const
 void
 Logger::Helper::writeToLog()
 {
+    if (!gtStream.mayLog()) return;
+
     auto message = gtStream.str();
     if (message.empty())
     {

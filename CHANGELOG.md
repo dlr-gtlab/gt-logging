@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Added support to create a conan recipe
 ### Fixed
 - Fixed misleading output for unique and shared ptr - #42
+- Fixed an issue where the file and line numbers were always printed even when logging a verbose message and the flag `GT_LOG_LINE_NUMBERS` was enabled - #43
 
 ### Changed
 ### Deprecated
