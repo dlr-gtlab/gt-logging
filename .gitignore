@@ -1,11 +1,11 @@
 Makefile*
-build/
+build*/
 debug/
 release/
 local_settings.pri
 !features/local_settings.pri
 !tests/build/
-*.pro.user
+*.txt.user
 *.autosave
 include/
 lib/
