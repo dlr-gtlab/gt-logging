@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] 
 ### Added
+ - Added support for the cmake build system
+ - Added support to build with conan
+ - Added support to create a conan recipe
 ### Fixed
 - Fixed misleading output for unique and shared ptr - #42
 
