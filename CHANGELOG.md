@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed a potential crash when removing a destination while messages are beeing logged - #44
+- Fixed invalid cmake config file casing, making them not found under linux - #46
 
 ### Added
 ### Security 

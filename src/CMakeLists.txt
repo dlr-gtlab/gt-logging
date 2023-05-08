@@ -64,7 +64,7 @@ target_include_directories(GTlabLogging PUBLIC
 
 # install library
 install (TARGETS GTlabLogging
-         EXPORT GTlabLogging-targets
+         EXPORT GTlabLoggingTargets
          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/logging
          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/logging
@@ -79,18 +79,18 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/GTlabLogging-config-version.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/GTlabLoggingConfigVersion.cmake"
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY AnyNewerVersion
 )
 
 file(GENERATE
-  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/GTlabLogging-config.cmake"
-  INPUT  "${PROJECT_SOURCE_DIR}/cmake/GTlabLogging-config.cmake.in"
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/GTlabLoggingConfig.cmake"
+  INPUT  "${PROJECT_SOURCE_DIR}/cmake/GTlabLoggingConfig.cmake.in"
 )
 
 
-install (EXPORT GTlabLogging-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GTlabLogging)
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/GTlabLogging-config-version.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/GTlabLogging-config.cmake
+install (EXPORT GTlabLoggingTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GTlabLogging)
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/GTlabLoggingConfigVersion.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/GTlabLoggingConfig.cmake
          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GTlabLogging)
