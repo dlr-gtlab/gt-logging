@@ -130,6 +130,8 @@ Logger::removeDestination(const std::string& id)
 {
     if (id.empty()) return false;
 
+    MutexLocker lock(pimpl->logMutex);
+
     return erase(pimpl->destinations, [&](DestinationEntry const& dest){
         return dest.id == id;
     });
@@ -148,6 +150,8 @@ Logger::hasDestination(const std::string& id)
 Destination*
 Logger::destination(const std::string& id) const
 {
+    MutexLocker lock(pimpl->logMutex);
+
     auto iter = std::find_if(pimpl->destinations.begin(),
                              pimpl->destinations.end(),
                              [&](DestinationEntry const& dest){

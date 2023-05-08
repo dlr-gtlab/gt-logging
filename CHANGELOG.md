@@ -4,19 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed 
+### Removed
+### Deprecated
+
+### Fixed
+- Fixed a potential crash when removing a destination while messages are beeing logged - #44
+
+### Added
+### Security 
+
 ## [4.1.1] - 2023-05-05 
 ### Added
  - Added support for the cmake build system
  - Added support to build with conan
  - Added support to create a conan recipe
+ 
 ### Fixed
 - Fixed misleading output for unique and shared ptr - #42
 - Fixed an issue where the file and line numbers were always printed even when logging a verbose message and the flag `GT_LOG_LINE_NUMBERS` was enabled - #43
-
-### Changed
-### Deprecated
-### Removed
-### Security 
 
 ## [4.1.0] - 2023-02-02 
 ### Added
