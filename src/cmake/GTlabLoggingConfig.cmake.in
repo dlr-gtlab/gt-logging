@@ -7,11 +7,11 @@ include(CMakeFindDependencyMacro)
 
 # Our library dependencies (contains definitions for IMPORTED targets)
 if(NOT TARGET GTlabLogging)
-  include("${CMAKE_CURRENT_LIST_DIR}/GTlabLogging-targets.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/GTlabLoggingTargets.cmake")
 endif()
 
  
-# These are IMPORTED targets created by GTlabLogging-targets.cmake
+# These are IMPORTED targets created by GTlabLoggingTargets.cmake
 set(GTlabLogging_LIBRARIES GTlabLogging)
 get_target_property(GTlabLogging_INCLUDE_DIRS GTlabLogging INTERFACE_INCLUDE_DIRECTORIES)
 
