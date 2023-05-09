@@ -64,7 +64,9 @@ target_include_directories(GTlabLogging PUBLIC
 
 set_target_properties(GTlabLogging PROPERTIES 
   VERSION ${PROJECT_VERSION}
-  SOVERSION ${PROJECT_VERSION_MAJOR})
+  SOVERSION ${PROJECT_VERSION_MAJOR}
+  # set rpath to lib directory, since it is installed to lib/logging
+  INSTALL_RPATH "\$ORIGIN/..") 
 
 # install library
 install (TARGETS GTlabLogging
