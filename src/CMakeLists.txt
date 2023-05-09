@@ -62,6 +62,10 @@ target_include_directories(GTlabLogging PUBLIC
     $<INSTALL_INTERFACE:include/logging>
 )
 
+set_target_properties(GTlabLogging PROPERTIES 
+  VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION_MAJOR})
+
 # install library
 install (TARGETS GTlabLogging
          EXPORT GTlabLoggingTargets
