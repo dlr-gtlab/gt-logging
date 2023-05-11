@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(GTlabLogging VERSION 4.1.2)
+project(GTlabLogging VERSION 4.1.3)
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR "lib")
