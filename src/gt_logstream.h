@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <iomanip>
 
 #if defined(__has_cpp_attribute) && __has_cpp_attribute(nodiscard)
   #define GT_LOG_NODISCARD [[nodiscard]]
@@ -112,17 +113,17 @@ public:
     {
         { // block for state saver
             StreamStateSaver s{*this};
-            nospace().operator<<("u'").doLog(t);
+            nospace().doLog("u'").doLog(t);
         }
-        return operator<<('\'');
+        return doLog('\'');
     }
     inline Stream& operator<<(char32_t t)
     {
         { // block for state saver
             StreamStateSaver s{*this};
-            nospace().operator<<("U'").doLog(t);
+            nospace().doLog("U'").doLog(t);
         }
-        return operator<<('\'');
+        return doLog('\'');
     }
 
     // ints
@@ -145,10 +146,29 @@ public:
     template <typename... Ts>
     inline Stream& operator<<(std::basic_string<Ts...> const& t) { return doLogQuoted(t); }
 
-    // ios flags
+    // ios flags, like std::hex
     inline Stream& operator<<(std::ios_base&(*t)(std::ios_base&))
     {
-        m_stream << t;
+        if (mayLog()) m_stream << t;
+        return *this;
+    }
+    // ios operators, like std::endl etc
+    inline Stream& operator<<(std::ostream&(*f)(std::ostream&))
+    {
+        if (mayLog()) f(m_stream);
+        return *this;
+    }
+    // ios modifers, like setw, setprecision...
+    // we have to check each type here, as the standard does not define a
+    // common return type for these modifieres
+    template <typename MANIP,
+              std::enable_if_t<
+                  std::is_same<MANIP, decltype(std::setw(0))>::value ||
+                  std::is_same<MANIP, decltype(std::setprecision(0))>::value ||
+                  std::is_same<MANIP, decltype(std::setbase(0))>::value, bool> = true>
+    inline Stream& operator<<(MANIP const& manip)
+    {
+        if (mayLog()) m_stream << manip;
         return *this;
     }
 

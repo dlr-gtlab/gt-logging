@@ -20,6 +20,115 @@ TEST_F(Types, Enum)
     EXPECT_TRUE(log.contains("96"));
 };
 
+TEST_F(Types, iomanip_flags)
+{
+    gtDebug() << std::hex << 15;
+    EXPECT_TRUE(log.contains("f"));
+
+    gtDebug() << std::noboolalpha << true << false;
+    EXPECT_TRUE(log.contains("1 0"));
+};
+
+TEST_F(Types, iomanip_endl)
+{
+    gtDebug().nospace() << "new" << std::endl << "line";
+    EXPECT_TRUE(log.contains("new\nline"));
+};
+
+TEST_F(Types, iomanip_setw)
+{
+    gtDebug() << std::left << std::setw(12) << "0123456789" << "Test";
+    EXPECT_TRUE(log.contains("0123456789   Test"));
+};
+
+TEST_F(Types, iomanip_setpreciosion)
+{
+    gtDebug() << std::setprecision(2) << 3.14159;
+    EXPECT_TRUE(log.contains("3.1"));
+    gtDebug() << std::setprecision(6) << 3.14159;
+    EXPECT_FALSE(log.contains("3.1459"));
+};
+
+TEST_F(Types, iomanip_setbase)
+{
+    // checking if this compiles
+    gtDebug() << std::setbase(8);
+};
+
+enum class Cap { Title, Middle, End };
+
+auto
+print(const char* text, double num, Cap c)
+{
+    gt::log::Stream str;
+    str.nospace();
+
+    if (c == Cap::Title)
+        str <<
+           "----------------------------------------------------\n"
+           "|  number  |   iomanip  |      representation      |\n"
+           "|----------|------------|--------------------------|\n";
+
+    str << std::left
+        << "| " << std::setw(8) << text << " | fixed      | "
+        << std::setw(24) << std::fixed        << num << " |\n"
+        << "| " << std::setw(8) << text << " | scientific | "
+        << std::setw(24) << std::scientific   << num << " |\n"
+        << "| " << std::setw(8) << text << " | hexfloat   | "
+        << std::setw(24) << std::setprecision(3) << std::hexfloat << num << " |\n"
+        << "| " << std::setw(8) << text << " | default    | "
+        << std::setw(24) << std::defaultfloat << num << " |\n";
+
+    if (c != Cap::End)
+        str <<
+            "|----------|------------|--------------------------|\n";
+    else
+        str <<
+            "----------------------------------------------------";
+
+    return str.str();
+}
+
+// fancy test to check if most modifers are supported
+// source: https://en.cppreference.com/w/cpp/io/manip/fixed
+TEST_F(Types, iomanips)
+{
+    gtInfo().nospace()
+        << std::endl
+        << print("0.25",     0.25,   Cap::Title)
+        << print("0.01",    0.01,    Cap::Middle)
+        << print("0.00001", 0.00001, Cap::End);
+
+    QString expected(
+"----------------------------------------------------\n"
+"|  number  |   iomanip  |      representation      |\n"
+"|----------|------------|--------------------------|\n"
+"| 0.25     | fixed      | 0.250000                 |\n"
+"| 0.25     | scientific | 2.500000e-01             |\n"
+#ifdef _WIN32
+"| 0.25     | hexfloat   | 0x1.0000000000000p-2     |\n"
+#else
+"| 0.25     | hexfloat   | 0x1p-2                   |\n"
+#endif
+"| 0.25     | default    | 0.25                     |\n"
+"|----------|------------|--------------------------|\n"
+"| 0.01     | fixed      | 0.010000                 |\n"
+"| 0.01     | scientific | 1.000000e-02             |\n"
+"| 0.01     | hexfloat   | 0x1.47ae147ae147bp-7     |\n"
+"| 0.01     | default    | 0.01                     |\n"
+"|----------|------------|--------------------------|\n"
+"| 0.00001  | fixed      | 0.000010                 |\n"
+"| 0.00001  | scientific | 1.000000e-05             |\n"
+"| 0.00001  | hexfloat   | 0x1.4f8b588e368f1p-17    |\n"
+"| 0.00001  | default    | 1e-05                    |\n"
+"----------------------------------------------------");
+    EXPECT_TRUE(log.contains(expected));
+
+    gtInfo().nospace()
+        << "VS EXPECTED:\n"
+        << expected.toStdString();
+}
+
 TEST_F(Types, QEnum)
 {
     auto e = MyQObject::FirstEntry;
