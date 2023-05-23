@@ -159,7 +159,7 @@ bool
 log::SizeRotationStrategy::fileExistsAtPath(const std::string& path)
 {
     // try to open file to read
-    std::ofstream file;
+    std::ifstream file;
     file.open(path);
     return file.is_open();
 }

@@ -2,6 +2,7 @@ Makefile*
 build*/
 debug/
 release/
+install*/
 local_settings.pri
 !features/local_settings.pri
 !tests/build/

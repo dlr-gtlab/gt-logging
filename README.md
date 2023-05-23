@@ -40,14 +40,13 @@ One may set a global logging by defining the macro `GT_MODULE_ID` globally.
 
 ### Qt Support:
 
-The library adds optionally support for Qt types. This must be enabled globally using the define `GT_LOG_USE_QT_BINDINGS`.
-Alternatively one may include `gt_logging/qt_bindings.h` after `gt_logging.h`.
+The library adds optionally support for Qt types. This must be enabled globally using the define `GT_LOG_USE_QT_BINDINGS` or by including `gt_logging/qt_bindings.h` instead.
 
 ### Additional STL Bindings:
 
-The library adds dedicated logging operators for STL classes like vectors, lists, maps, unique_ptrs etc.
-These can be included individually after `gt_logging.h`. These modules are named similarly to the STL counterpart (e.g. `gt_logging/memory.h`).
-Alternatively they may be included by defining `GT_LOG_USE_EXTENDED_STL_BINDINGS` globally or by including `gt_logging/stl_bindings.h` after `gt_logging.h`.
+The library adds dedicated logging operators for STL classes like vectors, lists, maps, unique_ptrs etc. 
+These can be included individually e.g. using `gt_logging/vector.h`.
+Alternatively they may be included automatically by defining `GT_LOG_USE_EXTENDED_STL_BINDINGS` globally or by using `gt_logging/stl_bindings.h` instead.
 
 ## Local Config:
 
@@ -71,9 +70,9 @@ This library can log Qt-String types with quotes. This can be enabled by definin
 
 ## Adding an Output Destination:
 
-> Note: No output destination is registered by default
+> Note: No output destination is registered by default!
 
-Optionally one may use a unique id when adding a destination. Destination with the same id will be skipped.
+Each destination must be registered using a unqiue id. Destination with the same id will be skipped.
 
 ### Stdout:
 
@@ -81,7 +80,7 @@ Will log everything to stdout or stderr (only if loglevel >= `ErrorLevel`).
 
 ```cpp
 gt::log::Logger& logger = gt::log::Logger::instance();
-logger.addDestination("default", gt::log::makeDebugDestination());
+logger.addDestination("default", gt::log::makeDebugOutputDestination());
 ```
 	
 Output:
@@ -116,29 +115,20 @@ One may register an logging destination at startup to not miss out on any loggin
 ```cpp
 static auto init_logger_once = [](){
     gt::log::Logger& logger = gt::log::Logger::instance();
-    logger.addDestination("default", gt::log::makeDebugDestination());
+    logger.addDestination("default", gt::log::makeDebugOutputDestination());
     return 0;
 }();
 ```
 
 ## Removing an Output Destination:
 
-Output destinations may be removed at any time. An unnamed destionation may only be removed using its pointer:
+Output destinations may be removed at any time. A destionation may only be removed by its unique id:
 
 ```cpp
-gt::log::DestinationPtr my_destination;
 gt::log::Logger& logger = gt::log::Logger::instance();
-logger.removeDestination(my_destination);
+logger.removeDestination("my_destination");
 ```
 
-Alternatively one may remove a destination using the unique id used, when registering a destination:
-
-```cpp
-gt::log::DestinationPtr my_destination;
-gt::log::Logger& logger = gt::log::Logger::instance();
-logger.removeDestination(my_destination);
-```
-
-One may check if a destination exists using `gt::log::Logger::hasDestination` or `gt::log::Logger::hasDestinationOfType`
+One may check if a destination exists using `gt::log::Logger::hasDestination`.
 
     

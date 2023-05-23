@@ -4,19 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.1.3] - 2023-05-11
+## [Unreleased]
+### Added
+- Added support for std::stream operators like `std::endl`, `std::setw`, `std::setprecision` etc. - #49
 
+## [4.1.3] - 2023-05-11
 ### Fixed
- - Fixed missing libGTlabLogging.so.4 library on linux - #47
+- Fixed missing libGTlabLogging.so.4 library on linux - #47
 
 ## [4.1.2] - 2023-05-08
-
 ### Fixed
 - Fixed a potential crash when removing a destination while messages are beeing logged - #44
 - Fixed invalid cmake config file casing, making them not found under linux - #46
-
-### Added
-### Security 
 
 ## [4.1.1] - 2023-05-05 
 ### Added

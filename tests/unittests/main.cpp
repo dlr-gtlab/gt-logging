@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 
-#include <QCoreApplication>
 #include "gt_logging.h"
+
+#include <QCoreApplication>
 
 // init at startup. Prints any output to stdout/stderr
 static auto init_logger_once = [](){
