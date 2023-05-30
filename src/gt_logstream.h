@@ -7,8 +7,12 @@
 #include <sstream>
 #include <iomanip>
 
-#if defined(__has_cpp_attribute) && __has_cpp_attribute(nodiscard)
-  #define GT_LOG_NODISCARD [[nodiscard]]
+#ifdef __has_cpp_attribute 
+  #if __has_cpp_attribute(nodiscard)
+    #define GT_LOG_NODISCARD [[nodiscard]]
+  #else
+    #define GT_LOG_NODISCARD
+  #endif
 #else
   #define GT_LOG_NODISCARD
 #endif

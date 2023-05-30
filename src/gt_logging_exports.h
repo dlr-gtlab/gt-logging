@@ -10,8 +10,8 @@
 #ifndef GT_LOGGING_EXPORTS_H
 #define GT_LOGGING_EXPORTS_H
 
-#if defined(WIN32)
-  #if defined (GT_LOGGING_DLL)
+#ifdef WIN32
+  #ifdef GT_LOGGING_DLL
     #define GT_LOGGING_EXPORT __declspec (dllexport)
   #else
     #define GT_LOGGING_EXPORT

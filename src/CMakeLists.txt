@@ -53,9 +53,7 @@ SET(HDR
 add_library(GTlabLogging ${SRC} ${HDR})
 add_library(GTlab::Logging ALIAS GTlabLogging)
 
-
-add_compile_definitions(GTlabLogging 
-   PRIVATE GT_LOGGING_DLL GTLOG_IS_SHARED_LIBRARY GT_LOG_WIN_PRINTF_CONSOLE)
+add_compile_definitions(GTlabLogging PRIVATE GT_LOGGING_DLL GT_LOG_WIN_PRINTF_CONSOLE)
 
 target_include_directories(GTlabLogging PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
