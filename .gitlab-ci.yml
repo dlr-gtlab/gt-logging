@@ -20,6 +20,7 @@ include:
 stages:
   - update
   - build
+  - buildStatic
   - test
   - regressionTest
   - unstableBuild
@@ -38,6 +39,16 @@ windowsBuildDebug:
   script:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2017-dbg -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
+
+windowsBuildStaticDebug:
+  stage: buildStatic
+  extends: 
+    - .build-win_17
+    - .run-master-and-tags
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2017-static-dbg -DBUILD_UNITTESTS=ON -DBUILD_SHARED_LIBS=OFF
+    - cmake --build build --target install
+    
     
 windowsBuildDebugUnstable:
   stage: unstableBuild
@@ -55,6 +66,15 @@ windowsBuildRelease:
     - .run-master-and-tags
   script:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2017
+    - cmake --build build --target install
+
+windowsBuildStaticRelease:
+  stage: buildStatic
+  extends: 
+    - .build-win_17
+    - .run-master-and-tags
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2017-static -DBUILD_SHARED_LIBS=OFF
     - cmake --build build --target install
 
 windowsBuildReleaseUnstable:
@@ -75,6 +95,15 @@ linuxBuildDebug:
   script:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
+
+linuxBuildStaticDebug:
+  stage: buildStatic
+  extends: 
+    - .build-linux_17
+    - .run-master-and-tags
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-static-dbg -DBUILD_UNITTESTS=ON -DBUILD_SHARED_LIBS=OFF
+    - cmake --build build --target install
     
 linuxBuildDebugUnstable:
   stage: unstableBuild
@@ -92,6 +121,15 @@ linuxBuildRelease:
     - .run-master-and-tags
   script:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux
+    - cmake --build build --target install
+
+linuxBuildStaticRelease:
+  stage: buildStatic
+  extends: 
+    - .build-linux_17
+    - .run-master-and-tags
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux-static -DBUILD_SHARED_LIBS=OFF
     - cmake --build build --target install
  
 linuxBuildReleaseUnstable:
@@ -193,6 +231,34 @@ package-linux-gtlab_2.0:
 package-linux-gtlab_1.7:
   extends: [".package"]
   needs: ["linuxBuildDebug", "linuxBuildRelease"]
+  variables:
+    toolchain: linux
+
+.package-static:
+  stage: package
+  tags: ["docker", "linux"]
+  extends: [".run-master-and-tags"]
+  image: debian:buster
+  script:
+    - cp -r install-$toolchain-static-dbg/* install-$toolchain-static
+    - mv install-$toolchain-static gtlab-logging-$toolchain-static
+    - tar czf gtlab-logging-$toolchain-static.tar.gz gtlab-logging-$toolchain-static
+  artifacts:
+    name: "gtlab-logging-$toolchain-static"
+    paths: ["gtlab-logging-$toolchain-static.tar.gz"]
+  variables:
+    toolchain: msvc2017
+    GIT_STRATEGY: "none"
+
+package-win-gtlab_1.7_static:
+  extends: [".package-static"]
+  needs: ["windowsBuildStaticDebug", "windowsBuildStaticRelease"]
+  variables:
+    toolchain: msvc2017
+
+package-linux-gtlab_1.7_static:
+  extends: [".package-static"]
+  needs: ["linuxBuildStaticDebug", "linuxBuildStaticRelease"]
   variables:
     toolchain: linux
 
