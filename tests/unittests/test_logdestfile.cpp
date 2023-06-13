@@ -79,8 +79,15 @@ TEST_F(LogFileDest, noRotation)
 
 TEST_F(LogFileDest, withRotation)
 {
-    uint64_t fileSize = 1024;
-    uint backups = 2;
+    // size of new line character
+    constexpr uint newLineSize = 1
+#ifdef WIN32
+        + 1 // for CR LF on windows
+#endif
+        ;
+    constexpr uint digitSize = 2; // two digits -> two characters
+    constexpr uint fileSize = (digitSize + newLineSize) * 20;
+    constexpr uint backups = 2;
     std::string filePath = TestHelper::instance().tempPath().toStdString() +
                            "rot_file.txt";
 
@@ -97,6 +104,11 @@ TEST_F(LogFileDest, withRotation)
     auto rot = gt::log::makeSizeRotationStrategy(gt::log::FileSizeInBytes{fileSize},
                                                  gt::log::BackupCount{backups});
     auto dest = gt::log::makeFileDestination(filePath, rot);
+    dest->setFormatter(gt::log::Formatter{
+        [](std::string const& msg, auto, auto){
+            return msg;
+        }
+    });
     EXPECT_TRUE(QFileInfo::exists(qFilePath));
     EXPECT_FALSE(QFileInfo::exists(qFilePath1));
 
@@ -107,11 +119,12 @@ TEST_F(LogFileDest, withRotation)
 
     QFileInfo fileInfo{qFilePath};
 
-    // write data until file "last size" has not changed
-    for (uint i = 0, lastSize = 0; (lastSize < fileSize && i < fileSize / 10);
+    // write data until we have reached max file size
+    // starting at 10 here, so that each entry has 2 digits thus 2 characters
+    for (uint i = 10, lastSize = 0; (lastSize < fileSize);
          ++i, fileInfo.refresh(), lastSize = fileInfo.size())
     {
-        gtDebug() << i;
+        gtDebug().nospace() << i;
     }
 
     // first file is "full" now
