@@ -172,3 +172,20 @@ TEST_F(LogFormatter, format)
 
     EXPECT_EQ(res, "[January - 2077 | TRACE] my_id: Hello");
 }
+
+TEST_F(LogFormatter, messageOnly)
+{
+    gt::log::Formatter f{ gt::log::Formatter::MessageOnly() };
+
+    auto trace = f.format("my fancy trace message", gt::log::TraceLevel, {});
+    EXPECT_EQ(trace, "my fancy trace message");
+
+    auto info = f.format("my fancy message", gt::log::InfoLevel, {});
+    EXPECT_EQ(info, "my fancy message");
+
+    auto warn = f.format("my fancy message", gt::log::WarnLevel, {});
+    EXPECT_EQ(warn, "WARN : my fancy message");
+
+    auto err = f.format("my fancy message", gt::log::ErrorLevel, {});
+    EXPECT_EQ(err, "ERROR: my fancy message");
+}

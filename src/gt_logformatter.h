@@ -22,12 +22,6 @@ namespace gt
 namespace log
 {
 
-struct Details
-{
-    std::string id;
-    std::tm time;
-};
-
 /**
  * @brief Formats the time struct depending on the format string. The time may
  * be formatted using the identifiers of std::put_string.
@@ -134,7 +128,15 @@ public:
     /// Default formatter functor
     struct Default
     {
-        std::string operator()(std::string const& msg, Level lvl, Details const& dts) const noexcept;
+        std::string
+        operator()(std::string const& msg, Level lvl, Details const& dts) const noexcept;
+    };
+
+    /// Message only (warnings and errors will be prefixed with the log level)
+    struct MessageOnly
+    {
+        std::string
+        operator()(std::string const& msg, Level lvl, Details const& dts) const noexcept;
     };
 
     //! Default ctor
@@ -189,6 +191,17 @@ Formatter::Default::operator()(std::string const& msg,
     }
 
     return gt::log::format("%1 [%2] [%3] %4", lvl, dts.time, dts.id, msg);
+}
+
+inline std::string
+Formatter::MessageOnly::operator()(const std::string& msg, Level lvl, const Details&) const noexcept
+{
+    if (lvl <= gt::log::InfoLevel)
+    {
+        return msg;
+    }
+
+    return gt::log::format("%1: %2", lvl, msg);
 }
 
 } // end namespace log

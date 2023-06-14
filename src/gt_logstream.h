@@ -1,7 +1,7 @@
 #ifndef GT_LOGSTREAM_H
 #define GT_LOGSTREAM_H
 
-#include "gt_logging_exports.h"
+#include "gt_loglevel.h"
 
 #include <algorithm>
 #include <sstream>
@@ -22,14 +22,6 @@ namespace gt
 
 namespace log
 {
-
-//! Enum for verbosity log levels
-enum Verbosity
-{
-    Silent = 0,
-    Medium = 5,
-    Everything = 9
-};
 
 //! Enum for setting certain flags of a stream
 enum StreamFlag

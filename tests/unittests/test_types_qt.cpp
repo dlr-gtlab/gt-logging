@@ -58,7 +58,7 @@ TEST_F(TypesQt, std_list)
 TEST_F(TypesQt, std_map)
 {
     std::map<float, QString> map;
-    map.insert({41.2, "ABC"});
+    map.insert({41.2f, "ABC"});
 
     gtWarning() << map;
     EXPECT_TRUE(log.contains(R"(map{(41.2, "ABC")})"));
@@ -67,8 +67,8 @@ TEST_F(TypesQt, std_map)
 TEST_F(TypesQt, std_multimap)
 {
     std::multimap<float, QString> map;
-    map.insert({41.1, "ABC"});
-    map.insert({41.2, "Test"});
+    map.insert({41.1f, "ABC"});
+    map.insert({41.2f, "Test"});
 
     gtWarning() << map;
     EXPECT_TRUE(log.contains("multimap{("));
