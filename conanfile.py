@@ -7,7 +7,7 @@ required_conan_version = ">=1.45.0"
 
 class GTlabLoggingConan(ConanFile):
     name = "gtlab-logging"
-    version = "4.2.2"
+    version = "4.3.0"
     license = "GTlab license"
     author = "Martin Siggel <martin.siggel@dlr.de>"
     url = "https://gitlab.dlr.de/at-twk/gtlab-logging"

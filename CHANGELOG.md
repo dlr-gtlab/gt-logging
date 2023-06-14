@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [4.3.0] - 2023-06-14
 ### Added
 - Added formatter preset for logging messages only without an id, timestamp or the log level (except for warnings and errors) - #54
+- Added method `Logger::destinationIds` for retrieving a list of a all destination ids - #57
+
+### Fixed
+- The file destination will now add line breaks between each logging statement - #56
 
 ## [4.2.2] - 2023-06-02
 ### Fixed
