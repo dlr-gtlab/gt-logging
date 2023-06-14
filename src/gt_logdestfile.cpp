@@ -199,8 +199,6 @@ log::FileDestination::FileDestination(std::string filePath,
 void
 log::FileDestination::write(std::string const& message, Level /*level*/)
 {
-    std::string msg = message;
-
     if (m_rotationStrategy->shouldRotate())
     {
         // close and rotate
@@ -208,8 +206,7 @@ log::FileDestination::write(std::string const& message, Level /*level*/)
         m_rotationStrategy->rotate();
 
         // open file
-        m_fstream.open(m_filePath,
-                            m_rotationStrategy->openMode());
+        m_fstream.open(m_filePath, m_rotationStrategy->openMode());
 
         if (!m_fstream.is_open())
         {
@@ -221,9 +218,14 @@ log::FileDestination::write(std::string const& message, Level /*level*/)
         m_rotationStrategy->setFileInfo(m_filePath);
     }
 
-    m_rotationStrategy->appendMessageSize(msg.size());
+    m_rotationStrategy->appendMessageSize(message.size()
+                                          + 1 // for new line
+#ifdef WIN32
+                                          + 1 // for CR LF on windows
+#endif
+                                          );
 
-    m_fstream << std::move(msg);
+    m_fstream << message << std::endl;
     m_fstream.flush();
 }
 

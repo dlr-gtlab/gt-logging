@@ -3,8 +3,6 @@
 
 #include "test_log_helper.h"
 
-#include <QDateTime>
-
 class LogId : public LogHelperTest
 {};
 
