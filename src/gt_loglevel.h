@@ -29,6 +29,7 @@
 #include "gt_logging_exports.h"
 
 #include <string>
+#include <ctime>
 
 namespace gt
 {
@@ -46,6 +47,21 @@ enum Level : int
     ErrorLevel = 16,
     FatalLevel = 32,
     OffLevel   =  0
+};
+
+//! Enum for verbosity log levels
+enum Verbosity
+{
+    Silent = 0,
+    Medium = 5,
+    Everything = 9
+};
+
+//! Struct for message details
+struct Details
+{
+    std::string id;
+    std::tm time;
 };
 
 GT_LOGGING_EXPORT

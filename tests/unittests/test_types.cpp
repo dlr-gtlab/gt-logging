@@ -179,7 +179,7 @@ TEST_F(Types, std_list)
 TEST_F(Types, std_map)
 {
     std::map<float, std::string> map;
-    map.insert({41.2, "ABC"});
+    map.insert({41.2f, "ABC"});
 
     gtWarning() << map;
     EXPECT_TRUE(log.contains(R"(map{(41.2, "ABC")})"));
@@ -188,8 +188,8 @@ TEST_F(Types, std_map)
 TEST_F(Types, std_multimap)
 {
     std::multimap<float, std::string> map;
-    map.insert({41.1, "ABC"});
-    map.insert({41.2, "Test"});
+    map.insert({41.1f, "ABC"});
+    map.insert({41.2f, "Test"});
 
     gtWarning() << map;
     EXPECT_TRUE(log.contains("multimap{("));
