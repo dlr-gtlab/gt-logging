@@ -7,7 +7,7 @@
 // init at startup. Prints any output to stdout/stderr
 static auto init_logger_once = [](){
     auto& logger = gt::log::Logger::instance();
-    logger.addDestination("output", gt::log::makeDebugOutputDestination());
+    logger.addDestination("console", gt::log::makeDebugOutputDestination());
     return 0;
 }();
 

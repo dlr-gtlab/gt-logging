@@ -31,6 +31,8 @@
 #include "gt_loglevel.h"
 #include "gt_logstream.h"
 
+#include <vector>
+
 #include "gt_logdestconsole.h"
 #include "gt_logdestfile.h"
 #include "gt_logdestfunctor.h"
@@ -77,6 +79,10 @@ public:
     //! destion was not found.
     GT_LOGGING_EXPORT
     Destination* destination(const std::string& id) const;
+
+    //! Returns a list of all registered destination ids
+    GT_LOGGING_EXPORT
+    std::vector<std::string> destinationIds() const;
 
     //! Logging at a level < 'newLevel' will be ignored
     GT_LOGGING_EXPORT

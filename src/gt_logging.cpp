@@ -165,6 +165,18 @@ Logger::destination(const std::string& id) const
     return {};
 }
 
+std::vector<std::string>
+Logger::destinationIds() const
+{
+    std::vector<std::string> ids;
+    ids.reserve(pimpl->destinations.size());
+    std::transform(pimpl->destinations.cbegin(), pimpl->destinations.cend(),
+                   std::back_inserter(ids), [](DestinationEntry const& dest){
+        return dest.id;
+    });
+    return ids;
+}
+
 void
 Logger::setLoggingLevel(Level newLevel)
 {
