@@ -8,7 +8,6 @@
 
 #include <gtest/gtest.h>
 #include "gt_logging.h"
-#include<QString>
 
 class DestTest : public testing::Test
 {
@@ -32,9 +31,9 @@ TEST_F(DestTest, nulldest)
 TEST_F(DestTest, namedDestination)
 {
     auto dest = gt::log::makeFunctorDestination(
-                    [](std::string const& /*msg*/,
-                    gt::log::Level /*lvl*/,
-                    gt::log::Details /*details*/){
+        [](std::string const& /*msg*/,
+           gt::log::Level /*lvl*/,
+           gt::log::Details /*details*/){
         // nothing to do here
     });
 
@@ -54,4 +53,24 @@ TEST_F(DestTest, namedDestination)
     EXPECT_FALSE(logger.hasDestination(destid));
 
     EXPECT_EQ(logger.destination(destid), nullptr);
+}
+
+TEST_F(DestTest, destinations)
+{
+    auto destinations = logger.destinationIds();
+    ASSERT_EQ(destinations.size(), 1);
+    EXPECT_EQ(destinations.front(), "console");
+
+    auto dest = gt::log::makeFunctorDestination(
+        [](std::string const& /*msg*/,
+           gt::log::Level /*lvl*/,
+           gt::log::Details /*details*/){
+        // nothing to do here
+    });
+
+    EXPECT_TRUE(logger.addDestination(destid, std::move(dest)));
+
+    destinations = logger.destinationIds();
+    ASSERT_EQ(destinations.size(), 2);
+    EXPECT_EQ(destinations.back(), destid);
 }
