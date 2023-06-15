@@ -88,7 +88,7 @@ Logger::addDestination(std::string id, DestinationPtr destination)
     if (hasDestination(id))
     {
         std::cerr << "GtLogging: A destination named '" << id
-                  << "' already exsits!\n";
+                  << "' already exists!\n";
         return false;
     }
 
