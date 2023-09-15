@@ -15,6 +15,8 @@
 #include <QDebug>
 #include <QtGlobal>
 #include <QObject>
+#include <QVector>
+#include <QList>
 
 namespace gt
 {
@@ -117,6 +119,14 @@ inline Stream& operator<<(Stream& s, T const* t) { return detail::doLogQt(s, t);
 // template based operators: non QObject*
 template <typename T, detail::if_not_base_of_qobject<T> = true>
 inline Stream& operator<<(Stream& s, T const* t) { return s << static_cast<void const*>(t); }
+
+// template based operators: non QObject*
+template <typename T>
+inline Stream& operator<<(Stream& s, QVector<T> const& t) { return s.doLogIter(t.begin(), t.end()); }
+
+// template based operators: non QObject*
+template <typename T>
+inline Stream& operator<<(Stream& s, QList<T> const& t) { return s.doLogIter(t.begin(), t.end()); }
 
 // check for ::operator<<(QDebug, T)
 template<typename T,

@@ -15,44 +15,44 @@ TEST_F(Types, Enum)
 
     AB e = A;
 
-    gtError() << e << AB{B};
+    gtInfo() << e << AB{B};
     EXPECT_TRUE(log.contains("42"));
     EXPECT_TRUE(log.contains("96"));
 };
 
 TEST_F(Types, iomanip_flags)
 {
-    gtDebug() << std::hex << 15;
+    gtInfo() << std::hex << 15;
     EXPECT_TRUE(log.contains("f"));
 
-    gtDebug() << std::noboolalpha << true << false;
+    gtInfo() << std::noboolalpha << true << false;
     EXPECT_TRUE(log.contains("1 0"));
 };
 
 TEST_F(Types, iomanip_endl)
 {
-    gtDebug().nospace() << "new" << std::endl << "line";
+    gtInfo().nospace() << "new" << std::endl << "line";
     EXPECT_TRUE(log.contains("new\nline"));
 };
 
 TEST_F(Types, iomanip_setw)
 {
-    gtDebug() << std::left << std::setw(12) << "0123456789" << "Test";
+    gtInfo() << std::left << std::setw(12) << "0123456789" << "Test";
     EXPECT_TRUE(log.contains("0123456789   Test"));
 };
 
 TEST_F(Types, iomanip_setpreciosion)
 {
-    gtDebug() << std::setprecision(2) << 3.14159;
+    gtInfo() << std::setprecision(2) << 3.14159;
     EXPECT_TRUE(log.contains("3.1"));
-    gtDebug() << std::setprecision(6) << 3.14159;
+    gtInfo() << std::setprecision(6) << 3.14159;
     EXPECT_FALSE(log.contains("3.1459"));
 };
 
 TEST_F(Types, iomanip_setbase)
 {
     // checking if this compiles
-    gtDebug() << std::setbase(8);
+    gtInfo() << std::setbase(8);
 };
 
 enum class Cap { Title, Middle, End };
@@ -133,7 +133,7 @@ TEST_F(Types, QEnum)
 {
     auto e = MyQObject::FirstEntry;
 
-    gtError() << e;
+    gtInfo() << e;
     EXPECT_TRUE(log.contains("0"));
 };
 
@@ -141,7 +141,7 @@ TEST_F(Types, QFlags)
 {
     MyQObject::Flags f = {MyQObject::A | MyQObject::C};
 
-    gtError() << f;
+    gtInfo() << f;
     EXPECT_TRUE(log.contains("5"));
 };
 
@@ -149,7 +149,7 @@ TEST_F(Types, memory_unique)
 {
     auto u = std::make_unique<int>(42);
 
-    gtError() << u;
+    gtInfo() << u;
     EXPECT_TRUE(log.contains(QString::number((size_t)u.get(), 16)));
     EXPECT_TRUE(log.contains("unique"));
 };
@@ -158,7 +158,7 @@ TEST_F(Types, memory_shared)
 {
     auto s = std::make_shared<int>(42);
 
-    gtError() << s;
+    gtInfo() << s;
     EXPECT_TRUE(log.contains(QString::number((size_t)s.get(), 16)));
     EXPECT_TRUE(log.contains("shared"));
 };
@@ -166,13 +166,13 @@ TEST_F(Types, memory_shared)
 TEST_F(Types, std_vector)
 {
     auto vec = std::vector<double>{14, 43, 15};
-    gtDebug() << vec;
+    gtInfo() << vec;
     EXPECT_TRUE(log.contains("(14, 43, 15)"));
 }
 
 TEST_F(Types, std_list)
 {
-    gtWarning() << std::list<float>{0.1f, 0.2f, 0.3f};
+    gtInfo() << std::list<float>{0.1f, 0.2f, 0.3f};
     EXPECT_TRUE(log.contains("(0.1, 0.2, 0.3)"));
 }
 
@@ -181,7 +181,7 @@ TEST_F(Types, std_map)
     std::map<float, std::string> map;
     map.insert({41.2f, "ABC"});
 
-    gtWarning() << map;
+    gtInfo() << map;
     EXPECT_TRUE(log.contains(R"(map{(41.2, "ABC")})"));
 }
 
@@ -189,12 +189,90 @@ TEST_F(Types, std_multimap)
 {
     std::multimap<float, std::string> map;
     map.insert({41.1f, "ABC"});
+    map.insert({41.1f, "ABCD"});
     map.insert({41.2f, "Test"});
 
-    gtWarning() << map;
+    gtInfo() << map;
     EXPECT_TRUE(log.contains("multimap{("));
     EXPECT_TRUE(log.contains(R"((41.1, "ABC"))"));
+    EXPECT_TRUE(log.contains(R"((41.1, "ABCD"))"));
     EXPECT_TRUE(log.contains(R"((41.2, "Test"))"));
+    EXPECT_TRUE(log.contains("}"));
+}
+
+TEST_F(Types, std_unordered_map)
+{
+    std::unordered_map<float, MyStruct> map{};
+    map.insert({42, MyStruct{42}});
+
+    gtInfo() << map;
+    EXPECT_TRUE(log.contains(R"(u_map{(42, MyStruct(42))})"));
+}
+
+TEST_F(Types, std_unordered_multimap)
+{
+    std::unordered_multimap<int, MyStruct> map;
+    map.insert({42, MyStruct{42}});
+    map.insert({42, MyStruct{12}});
+
+    gtInfo() << map;
+    EXPECT_TRUE(log.contains(R"(u_multimap{)"));
+    EXPECT_TRUE(log.contains(R"((42, MyStruct(42)))"));
+    EXPECT_TRUE(log.contains(R"((42, MyStruct(12)))"));
+    EXPECT_TRUE(log.contains(R"(})"));
+}
+
+TEST_F(Types, std_set)
+{
+    std::set<int> set;
+    set.insert(1);
+    set.insert(2);
+    set.insert(3);
+
+    gtInfo() << set;
+    EXPECT_TRUE(log.contains(R"(set{1, 2, 3})"));
+}
+
+TEST_F(Types, std_multiset)
+{
+    std::multiset<int> set;
+    set.insert(1);
+    set.insert(1);
+    set.insert(2);
+    set.insert(3);
+
+    gtInfo() << set;
+    EXPECT_TRUE(log.contains("multiset{1, 1, 2, 3}"));
+}
+
+TEST_F(Types, std_unordered_set)
+{
+    std::unordered_set<int> set;
+    set.insert(1);
+    set.insert(2);
+    set.insert(3);
+
+    gtInfo() << set;
+    EXPECT_TRUE(log.contains("u_set{"));
+    EXPECT_TRUE(log.contains("1"));
+    EXPECT_TRUE(log.contains("2"));
+    EXPECT_TRUE(log.contains("3"));
+    EXPECT_TRUE(log.contains("}"));
+}
+
+TEST_F(Types, std_unordered_multiset)
+{
+    std::unordered_multiset<int> set;
+    set.insert(1);
+    set.insert(1);
+    set.insert(2);
+    set.insert(3);
+
+    gtInfo() << set;
+    EXPECT_TRUE(log.contains("u_multiset{"));
+    EXPECT_TRUE(log.contains("1, 1"));
+    EXPECT_TRUE(log.contains("2"));
+    EXPECT_TRUE(log.contains("3"));
     EXPECT_TRUE(log.contains("}"));
 }
 
@@ -204,27 +282,27 @@ TEST_F(Types, std_array)
         "ABC", "DEF", "TEST", "1234", ""
     };
 
-    gtWarning() << array;
+    gtInfo() << array;
     EXPECT_TRUE(log.contains(R"(["ABC", "DEF", "TEST", "1234", ""])"));
 }
 
 TEST_F(Types, std_pair)
 {
     std::pair<std::string, int> pair{"test", 42};
-    gtWarning() << pair;
+    gtInfo() << pair;
     EXPECT_TRUE(log.contains(R"(("test", 42))"));
 }
 
 TEST_F(Types, std_tuple)
 {
     std::tuple<std::string, int> tuple{"test", 42};
-    gtWarning() << tuple;
+    gtInfo() << tuple;
     EXPECT_TRUE(log.contains(R"(("test", 42))"));
 
     std::tuple<double, std::pair<bool, float>, int, std::string> nested{
         0.1234, {true, 42.1f}, 42, "test"
     };
-    gtWarning() << nested;
+    gtInfo() << nested;
     EXPECT_TRUE(log.contains(R"((0.1234, (true, 42.1), 42, "test"))"));
 }
 
@@ -235,11 +313,11 @@ TEST_F(Types, POD_other)
     std::nullptr_t t{};
     bool b = true;
 
-    gtError() << v;
+    gtInfo() << v;
     EXPECT_TRUE(log.contains(QString::number((size_t)v, 16)));
-    gtError() << uiptr;
+    gtInfo() << uiptr;
     EXPECT_TRUE(log.contains(QString::number((size_t)uiptr, 16)));
-    gtError() << t;
+    gtInfo() << t;
     EXPECT_TRUE(log.contains("(nullptr)"));
     gtInfo() << b;
     EXPECT_TRUE(log.contains("true"));
@@ -307,6 +385,6 @@ TEST_F(Types, Strings)
     std::string s = "MyStdString";
 
     // also test for const
-    gtError() << s << qAsConst(s);
+    gtInfo() << s << qAsConst(s);
     EXPECT_TRUE(log.contains(s.c_str()));
 }
