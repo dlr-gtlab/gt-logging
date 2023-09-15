@@ -6,6 +6,7 @@
 
 #include <QString>
 #include <QObject>
+#include <QDebug>
 
 // log helper
 class LogHelperTest : public testing::Test
@@ -44,6 +45,12 @@ public:
     QString log;
 };
 
+// custom struct
+struct MyStruct
+{
+    int i = 0;
+};
+
 // QObject sample object (must be in header for Q_OBJECT to work)
 class MyQObject : public QObject
 {
@@ -69,5 +76,24 @@ public:
 
     MyQObject() = default;
 };
+
+inline gt::log::Stream& operator<<(gt::log::Stream& s, MyStruct const& t)
+{
+    {
+        gt::log::StreamStateSaver saver(s);
+        s.nospace() << "MyStruct(" << t.i << ")";
+    }
+    return s.doLogSpace();
+}
+
+inline std::ostream& operator<<(std::ostream& d, MyStruct const& /*obj*/)
+{
+    return d << "this_wont_be_used";
+}
+
+inline QDebug& operator<<(QDebug& d, MyStruct const& /*obj*/)
+{
+    return d << "this_wont_be_used_either";
+}
 
 #endif // TEST_LOG_HELPER_H

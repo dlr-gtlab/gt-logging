@@ -248,14 +248,17 @@ inline Stream& Stream::doLogIter(Iter a, Iter b,
         {
             StreamStateSaver s{*this};
             nospace().quote();
-            Iter llast = --b;
+            // some iterators can only iterate forward
+            Iter b_1 = std::next(a, std::distance(a, b)-1);
             // log until nth - 1 element
-            std::for_each(a, llast, [this, sep](auto const& val){
+            std::for_each(a, b_1, [this, sep](auto const& val){
                 *this << val;
                 m_stream << sep;
             });
-            // log last lement
-            *this << *b;
+            // log nth element
+            std::for_each(b_1, b, [this](auto const& val){
+                *this << val;
+            });
         }
         m_stream << suf;
         doLogSpace();
