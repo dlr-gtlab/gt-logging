@@ -18,16 +18,16 @@ static constexpr char WarnString[]  = "WARN ";
 static constexpr char ErrorString[] = "ERROR";
 static constexpr char FatalString[] = "FATAL";
 
-static const char* LevelToText(log::Level theLevel)
+inline const char* LevelToText(log::Level level)
 {
-    switch (theLevel) {
+    switch (level) {
         case log::TraceLevel:
             return TraceString;
         case log::DebugLevel:
             return DebugString;
         case log::InfoLevel:
             return InfoString;
-        case log::WarnLevel:
+        case log::WarningLevel:
             return WarnString;
         case log::ErrorLevel:
             return ErrorString;
@@ -59,7 +59,7 @@ log::levelFromString(std::string const& logMessage, bool* ok)
     if (logMessage.find(InfoString) != std::string::npos)
         return InfoLevel;
     if (logMessage.find(WarnString) != std::string::npos)
-        return WarnLevel;
+        return WarningLevel;
     if (logMessage.find(ErrorString) != std::string::npos)
         return ErrorLevel;
     if (logMessage.find(FatalString) != std::string::npos)
@@ -72,8 +72,6 @@ log::levelFromString(std::string const& logMessage, bool* ok)
 
     return OffLevel;
 }
-
-
 
 std::string
 log::levelToString(Level level)

@@ -31,12 +31,54 @@
 #include <vector>
 #include <algorithm>
 
+using MutexLocker = const std::lock_guard<std::mutex>;
+
 namespace gt
 {
 namespace log
 {
 
-using MutexLocker = const std::lock_guard<std::mutex>;
+hash_t hash(std::string const& msg, std::string const& id, Level level)
+{
+    std::hash<std::string> hasher;
+    return hasher(msg + id + std::to_string(level));
+}
+
+struct Logger::DefaultCache::Impl
+{
+    Impl()
+    {
+        cache.reserve(128);
+    }
+
+    std::mutex mutex;
+    std::vector<hash_t> cache;
+};
+
+Logger::DefaultCache::DefaultCache() : pimpl(std::make_unique<Impl>()) { }
+
+Logger::DefaultCache::~DefaultCache() = default;
+
+void
+Logger::DefaultCache::append(hash_t hash)
+{
+    MutexLocker locker(pimpl->mutex);
+    pimpl->cache.push_back(hash);
+}
+
+void
+Logger::DefaultCache::clear()
+{
+    MutexLocker locker(pimpl->mutex);
+    pimpl->cache.clear();
+}
+
+bool
+Logger::DefaultCache::find(hash_t hash) const noexcept
+{
+    MutexLocker locker(pimpl->mutex);
+    return std::find(pimpl->cache.begin(), pimpl->cache.end(), hash) != pimpl->cache.end();
+}
 
 struct DestinationEntry
 {
@@ -59,13 +101,6 @@ struct Logger::Impl
 };
 
 Logger::Logger() : pimpl(std::make_unique<Impl>()) { }
-
-hash_t
-Logger::hash(std::string const& msg, std::string const& id, Level level)
-{
-    std::hash<std::string> hasher;
-    return hasher(msg + id + std::to_string(level));
-}
 
 Logger&
 Logger::instance()
@@ -226,17 +261,6 @@ Logger::log(Level level, std::string id, std::string message)
     write(message, level, Details{id, *time});
 }
 
-void
-Logger::Helper::writeToLog()
-{
-    if (!gtStream.mayLog()) return;
-
-    auto message = gtStream.str();
-    if (message.empty()) return;
-
-    Logger::instance().log(level, std::move(id), std::move(message));
-}
-
 //! Sends the message to all the destinations. The level for this message is passed in case
 //! it's useful for processing in the destination.
 void
@@ -248,6 +272,17 @@ Logger::write(std::string const& message, Level level, Details details)
                   [&](DestinationEntry const& dest){
         dest.ptr->write(message, level, details);
     });
+}
+
+void
+Logger::Helper::writeToLog()
+{
+    if (!gtStream.mayLog()) return;
+
+    auto message = gtStream.str();
+    if (message.empty()) return;
+
+    Logger::instance().log(level, std::move(id), std::move(message));
 }
 
 } // end namespace log

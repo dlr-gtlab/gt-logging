@@ -66,7 +66,7 @@ TEST_F(LogFileDest, noRotation)
 
     // check warning message:
     // level
-    EXPECT_TRUE(data.contains(gt::log::levelToString(gt::log::WarnLevel).c_str()));
+    EXPECT_TRUE(data.contains(gt::log::levelToString(gt::log::WarningLevel).c_str()));
     // message
     EXPECT_TRUE(data.contains("m y boring warning!"));
 

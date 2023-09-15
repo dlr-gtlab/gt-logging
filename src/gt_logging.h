@@ -38,8 +38,8 @@
 #include "gt_logdestfunctor.h"
 
 // macros to convert an argument to string
-#define GT_LOG_TO_STR_HELPER(X) #X
-#define GT_LOG_TO_STR(X) GT_LOG_TO_STR_HELPER(X)
+#define GT_LOG_IMPL_TO_STR(X) #X
+#define GT_LOG_TO_STR(X) GT_LOG_IMPL_TO_STR(X)
 
 // logging id
 #ifndef GT_MODULE_ID
@@ -54,9 +54,40 @@ namespace log
 
 using hash_t = size_t;
 
+GT_LOGGING_EXPORT
+hash_t hash(std::string const& msg, std::string const& id, Level level);
+
+//! Main logger instance
 class Logger
 {
 public:
+
+    //! Default cache to store the hashes of the messages that should be
+    //! logged once. This cache is thread safe, thus may not have optimal
+    //! performance. Look up time is O(n).
+    class DefaultCache
+    {
+    public:
+        using value_type = hash_t;
+
+        GT_LOGGING_EXPORT DefaultCache();
+        GT_LOGGING_EXPORT ~DefaultCache();
+
+        //! Appends a new hash entry to the cache.
+        GT_LOGGING_EXPORT void append(hash_t hash);
+
+        //! Clears all saved hashes
+        GT_LOGGING_EXPORT void clear();
+
+        //! Returns whether the hash exists in the cache
+        GT_LOGGING_EXPORT bool find(hash_t hash) const noexcept;
+
+    private:
+        struct Impl;
+        std::unique_ptr<Impl> pimpl;
+    };
+
+    DefaultCache globalCache;
 
     GT_LOGGING_EXPORT
     static Logger& instance();
@@ -103,6 +134,7 @@ public:
     GT_LOGGING_EXPORT
     int verbosity() const;
 
+    GT_LOGGING_EXPORT
     void log(Level level, std::string id, std::string message);
 
     //! The helper forwards the streaming to QDebug and builds the final
@@ -111,9 +143,9 @@ public:
     {
     public:
 
-        explicit Helper(Level logLevel, std::string logId = GT_MODULE_ID) :
-            level{logLevel},
-            id{std::move(logId)}
+        explicit Helper(Level _level, std::string _id = GT_MODULE_ID) :
+            level{_level},
+            id{std::move(_id)}
         {}
 
         ~Helper() { writeToLog(); }
@@ -123,43 +155,12 @@ public:
 
         Level level;
         std::string id;
-        gt::log::Stream gtStream;
+        Stream gtStream;
 
         GT_LOGGING_EXPORT void writeToLog();
     };
 
-    template <typename Cache>
-    class LogOnce
-    {
-    public:
-
-        explicit LogOnce(Level logLevel, std::string logId = GT_MODULE_ID) :
-            level{logLevel},
-            id{std::move(logId)}
-        {}
-
-        LogOnce(LogOnce&&) = default;
-        ~LogOnce() {
-            auto str = gtStream.str();
-            hash_t hash = Logger::hash(str, id, level);
-
-
-        }
-
-        gt::log::Stream& stream() { return gtStream; }
-
-    private:
-
-        Level level;
-        std::string id;
-        gt::log::Stream gtStream;
-        std::reference_wrapper<Cache> cache;
-    };
-
 private:
-
-    GT_LOGGING_EXPORT
-    static hash_t hash(std::string const& msg, std::string const& id, Level level);
 
     Logger();
     Logger(Logger const&) = delete;
@@ -173,15 +174,60 @@ private:
     std::unique_ptr<Impl> pimpl;
 };
 
-Logger::LogOnce logOnce(Level level, std::string id  = GT_MODULE_ID)
+template <typename Cache>
+class LogOnce
 {
-    return Logger::LogOnce<>(level, std::move(id));
+public:
+
+    explicit LogOnce(Cache& _cache, Level _level, std::string _id = GT_MODULE_ID) :
+        level{_level},
+        id{std::move(_id)},
+        cache(&_cache)
+    {}
+
+    LogOnce(LogOnce&&) = default;
+    ~LogOnce()
+    {
+        if (!gtStream.mayLog()) return;
+
+        std::string message = gtStream.str();
+        if (message.empty()) return;
+
+        hash_t hash = gt::log::hash(message, id, level);
+
+        bool hashExists = cache->find(hash);
+        if (hashExists) return;
+
+        cache->append(hash);
+        Logger::instance().log(level, std::move(id), std::move(message));
+    }
+
+    gt::log::Stream& stream() { return gtStream; }
+
+private:
+
+    Level level;
+    std::string id;
+    Stream gtStream;
+    Cache* cache;
+};
+
+//! Constructs a LogOnce Helper object that uses a custom cache
+template <typename Cache>
+inline auto logOnce(Cache& cache, Level level, std::string id  = GT_MODULE_ID)
+{
+    return LogOnce<Cache>(cache, level, std::move(id));
+}
+
+//! Constructs a LogOnce Helper object that uses the global cache
+inline auto logOnce(Level level, std::string id  = GT_MODULE_ID)
+{
+    return logOnce(Logger::instance().globalCache, level, std::move(id));
 }
 
 } // namespace log
 
 } // namespace gt
-
 
 // log line numbers
 #ifdef GT_LOG_LINE_NUMBERS
@@ -205,39 +251,86 @@ Logger::LogOnce logOnce(Level level, std::string id  = GT_MODULE_ID)
 #define GT_LOG_IMPL_NOSPACE
 #endif
 
-#define GT_LOG_IMPL(LEVEL) \
-    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL) \
+////////// HELPER MACROS FOR COMON CODE //////////
+
+// log only if logging level matches
+#define GT_LOG_IMPL_IF_LEVEL(LEVEL) \
+    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL)
+
+// apply global flags (quote, nospace, line numbers)
+#define GT_LOG_IMPL_APPLY_FLAGS() \
+    GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+
+#define GT_LOG_IMPL_NO_ARG_EXPANDER() ,,
+
+////////// DEFAULT LOGGING MACROS //////////
+
+#define GT_LOG_IMPL_MESSAGE(LEVEL) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL) \
         gt::log::Logger::Helper(gt::log::LEVEL).stream() \
-            GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+            GT_LOG_IMPL_APPLY_FLAGS()
 
-#define GT_LOG_IMPL_ID(LEVEL, ID) \
-    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL) \
+//! Default logging macros
+#define gtTrace()       GT_LOG_IMPL_MESSAGE(TraceLevel)
+#define gtDebug()       GT_LOG_IMPL_MESSAGE(DebugLevel)
+#define gtInfo()        GT_LOG_IMPL_MESSAGE(InfoLevel)
+#define gtWarning()     GT_LOG_IMPL_MESSAGE(WarningLevel)
+#define gtError()       GT_LOG_IMPL_MESSAGE(ErrorLevel)
+#define gtFatal()       GT_LOG_IMPL_MESSAGE(FatalLevel)
+
+////////// DEFAULT LOGGING MACROS WITH ID //////////
+
+#define GT_LOG_IMPL_MEESAGE_ID(LEVEL, ID) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL) \
         gt::log::Logger::Helper(gt::log::LEVEL, ID).stream() \
-            GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+            GT_LOG_IMPL_APPLY_FLAGS()
 
-#define GT_LOG_ONCE_IMPL(LEVEL) \
-    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL) \
-        gt::log::logOnce(gt::log::LEVEL).stream() \
-            GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+#define gtTraceId(ID)   GT_LOG_IMPL_MEESAGE_ID(TraceLevel, ID)
+#define gtDebugId(ID)   GT_LOG_IMPL_MEESAGE_ID(DebugLevel, ID)
+#define gtInfoId(ID)    GT_LOG_IMPL_MEESAGE_ID(InfoLevel , ID)
+#define gtWarningId(ID) GT_LOG_IMPL_MEESAGE_ID(WarningLevel , ID)
+#define gtErrorId(ID)   GT_LOG_IMPL_MEESAGE_ID(ErrorLevel, ID)
+#define gtFatalId(ID)   GT_LOG_IMPL_MEESAGE_ID(FatalLevel, ID)
 
+////////// LOG ONCE MACRO //////////
 
-//! Default logging macros.
-#define gtTrace()       GT_LOG_IMPL(TraceLevel)
-#define gtDebug()       GT_LOG_IMPL(DebugLevel)
-#define gtInfo()        GT_LOG_IMPL(InfoLevel)
-#define gtWarning()     GT_LOG_IMPL(WarnLevel)
-#define gtError()       GT_LOG_IMPL(ErrorLevel)
-#define gtFatal()       GT_LOG_IMPL(FatalLevel)
+#define GT_LOG_IMPL_ONCE_F1(LEVEL, ...) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL ## Level) \
+        gt::log::logOnce(gt::log::LEVEL ## Level).stream() \
+            GT_LOG_IMPL_APPLY_FLAGS()
+#define GT_LOG_IMPL_ONCE_F2(LEVEL, CACHE, ...) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL ## Level) \
+        gt::log::logOnce(CACHE, gt::log::LEVEL ## Level).stream() \
+            GT_LOG_IMPL_APPLY_FLAGS()
 
-//! Logging macros with custom logging id
-#define gtTraceId(ID)   GT_LOG_IMPL_ID(TraceLevel, ID)
-#define gtDebugId(ID)   GT_LOG_IMPL_ID(DebugLevel, ID)
-#define gtInfoId(ID)    GT_LOG_IMPL_ID(InfoLevel , ID)
-#define gtWarningId(ID) GT_LOG_IMPL_ID(WarnLevel , ID)
-#define gtErrorId(ID)   GT_LOG_IMPL_ID(ErrorLevel, ID)
-#define gtFatalId(ID)   GT_LOG_IMPL_ID(FatalLevel, ID)
+// variadic macro magic
+#define GT_LOG_IMPL_ONCE_FUNC_CHOOSER(_f1, _f2, _f3, ...) _f3
+#define GT_LOG_IMPL_ONCE_FUNC_RECOMPOSER(ArgsWithBrackets) GT_LOG_IMPL_ONCE_FUNC_CHOOSER ArgsWithBrackets
+#define GT_LOG_IMPL_ONCE_CHOOSE_FROM_ARG_COUNT(...) GT_LOG_IMPL_ONCE_FUNC_RECOMPOSER((__VA_ARGS__, GT_LOG_IMPL_ONCE_F2, GT_LOG_IMPL_ONCE_F1, ))
+#define GT_LOG_IMPL_ONCE_MACRO_CHOOSER(...) GT_LOG_IMPL_ONCE_CHOOSE_FROM_ARG_COUNT(GT_LOG_IMPL_NO_ARG_EXPANDER __VA_ARGS__ ())
 
-#define gtLogOnce(LEVEL) GT_LOG_ONCE_IMPL(LEVEL ## Level)
+#define gtLogOnce(...) GT_LOG_IMPL_ONCE_MACRO_CHOOSER( __VA_ARGS__)( __VA_ARGS__)
+
+////////// LOG ONCE WITH ID MACRO //////////
+
+#define GT_LOG_IMPL_ONCE_ID_F2(LEVEL, ID, ...) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL ## Level) \
+        gt::log::logOnce(gt::log::LEVEL ## Level, ID).stream() \
+            GT_LOG_IMPL_APPLY_FLAGS()
+#define GT_LOG_IMPL_ONCE_ID_F3(LEVEL, ID, CACHE, ...) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL ## Level) \
+        gt::log::logOnce(CACHE, gt::log::LEVEL ## Level, ID).stream() \
+            GT_LOG_IMPL_APPLY_FLAGS()
+
+// variadic macro magic
+#define GT_LOG_IMPL_ONCE_ID_FUNC_CHOOSER(_f1, _f2, _f3, _f4, ...) _f4
+#define GT_LOG_IMPL_ONCE_ID_FUNC_RECOMPOSER(ArgsWithBrackets) GT_LOG_IMPL_ONCE_ID_FUNC_CHOOSER ArgsWithBrackets
+#define GT_LOG_IMPL_ONCE_ID_CHOOSE_FROM_ARG_COUNT(...) GT_LOG_IMPL_ONCE_ID_FUNC_RECOMPOSER((__VA_ARGS__, GT_LOG_IMPL_ONCE_ID_F3, GT_LOG_IMPL_ONCE_ID_F2, ,))
+#define GT_LOG_IMPL_ONCE_ID_MACRO_CHOOSER(...) GT_LOG_IMPL_ONCE_ID_CHOOSE_FROM_ARG_COUNT(GT_LOG_IMPL_NO_ARG_EXPANDER __VA_ARGS__ ())
+
+#define gtLogOnceId(...) GT_LOG_IMPL_ONCE_ID_MACRO_CHOOSER( __VA_ARGS__)( __VA_ARGS__)
+
+////////// APPLY GLOBAL DEFINES //////////
 
 #ifdef GT_LOG_DISABLE
 #include "gt_logdisablelogforfile.h"

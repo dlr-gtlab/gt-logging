@@ -41,7 +41,7 @@ TEST_F(LogFormatter, filterDefault)
     EXPECT_TRUE(formattedDest.filter(gt::log::TraceLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::DebugLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::InfoLevel));
-    EXPECT_TRUE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_TRUE(formattedDest.filter(gt::log::WarningLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::ErrorLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::FatalLevel));
 }
@@ -55,7 +55,7 @@ TEST_F(LogFormatter, filterNone)
     EXPECT_FALSE(formattedDest.filter(gt::log::TraceLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::DebugLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::InfoLevel));
-    EXPECT_FALSE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::WarningLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::ErrorLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::FatalLevel));
 }
@@ -72,7 +72,7 @@ TEST_F(LogFormatter, filterSelected)
     EXPECT_TRUE(formattedDest.filter(gt::log::TraceLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::DebugLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::InfoLevel));
-    EXPECT_FALSE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::WarningLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::ErrorLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::FatalLevel));
 
@@ -83,7 +83,7 @@ TEST_F(LogFormatter, filterSelected)
     EXPECT_TRUE(formattedDest.filter(gt::log::TraceLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::DebugLevel));
     EXPECT_TRUE(formattedDest.filter(gt::log::InfoLevel));
-    EXPECT_FALSE(formattedDest.filter(gt::log::WarnLevel));
+    EXPECT_FALSE(formattedDest.filter(gt::log::WarningLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::ErrorLevel));
     EXPECT_FALSE(formattedDest.filter(gt::log::FatalLevel));
 }
@@ -183,7 +183,7 @@ TEST_F(LogFormatter, messageOnly)
     auto info = f.format("my fancy message", gt::log::InfoLevel, {});
     EXPECT_EQ(info, "my fancy message");
 
-    auto warn = f.format("my fancy message", gt::log::WarnLevel, {});
+    auto warn = f.format("my fancy message", gt::log::WarningLevel, {});
     EXPECT_EQ(warn, "WARN : my fancy message");
 
     auto err = f.format("my fancy message", gt::log::ErrorLevel, {});
