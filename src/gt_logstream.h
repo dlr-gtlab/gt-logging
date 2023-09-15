@@ -63,9 +63,9 @@ public:
     ~Stream() = default;
 
     Stream(Stream const&) = delete;
-    Stream(Stream&&) = delete;
+    Stream(Stream&&) = default;
     Stream& operator=(Stream const&) = delete;
-    Stream& operator=(Stream&&) = delete;
+    Stream& operator=(Stream&&) = default;
 
     inline Stream& space()   { m_flags |=  LogSpace; return *this; }
     inline Stream& nospace() { m_flags &= ~LogSpace; return *this; }

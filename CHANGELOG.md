@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Added macro `gtLogOnce` to log a message once. One can also specify a custom cache - #60
 - `QVector<T>` and `QList<T>` can now be logged even if `T` is not loggable by `QDebug` - #61
+
+### Deprecated
+- Deprecated `WarnLevel` use `WarningLevel` instead - #60
 
 ## [4.3.0] - 2023-06-14
 ### Added

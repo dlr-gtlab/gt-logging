@@ -40,13 +40,14 @@ namespace log
 //! Log levels
 enum Level : int
 {
-    TraceLevel =  1,
-    DebugLevel =  2,
-    InfoLevel  =  4,
-    WarnLevel  =  8,
-    ErrorLevel = 16,
-    FatalLevel = 32,
-    OffLevel   =  0
+    TraceLevel   =  1,
+    DebugLevel   =  2,
+    InfoLevel    =  4,
+    WarnLevel [[deprecated("use WarningLevel instead")]] =  8,
+    WarningLevel = 8,
+    ErrorLevel   = 16,
+    FatalLevel   = 32,
+    OffLevel     =  0
 };
 
 //! Enum for verbosity log levels

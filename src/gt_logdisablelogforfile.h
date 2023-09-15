@@ -23,6 +23,9 @@
 #undef gtErrorId
 #undef gtFatalId
 
+#undef gtLogOnce
+#undef gtLogOnceId
+
 #define gtTrace()    if (!FORCE_LOGGING) {} else gt::log::Stream()
 #define gtDebug()    if (!FORCE_LOGGING) {} else gt::log::Stream()
 #define gtInfo()     if (!FORCE_LOGGING) {} else gt::log::Stream()
@@ -30,11 +33,14 @@
 #define gtError()    if (!FORCE_LOGGING) {} else gt::log::Stream()
 #define gtFatal()    if (!FORCE_LOGGING) {} else gt::log::Stream()
 
-#define gtTraceId(ID)   gtTrace()   .operator<<('[' + std::string{ID} + ']')
-#define gtDebugId(ID)   gtDebug()   .operator<<('[' + std::string{ID} + ']')
-#define gtInfoId(ID)    gtInfo()    .operator<<('[' + std::string{ID} + ']')
-#define gtWarningId(ID) gtWarning() .operator<<('[' + std::string{ID} + ']')
-#define gtErrorId(ID)   gtError()   .operator<<('[' + std::string{ID} + ']')
-#define gtFatalId(ID)   gtFatal()   .operator<<('[' + std::string{ID} + ']')
+#define gtLogOnce(...)  if (!FORCE_LOGGING) {} else gt::log::Stream()
+
+#define gtTraceId(ID)    gtTrace()   .operator<<('[' + std::string{ID} + ']')
+#define gtDebugId(ID)    gtDebug()   .operator<<('[' + std::string{ID} + ']')
+#define gtInfoId(ID)     gtInfo()    .operator<<('[' + std::string{ID} + ']')
+#define gtWarningId(ID)  gtWarning() .operator<<('[' + std::string{ID} + ']')
+#define gtErrorId(ID)    gtError()   .operator<<('[' + std::string{ID} + ']')
+#define gtFatalId(ID)    gtFatal()   .operator<<('[' + std::string{ID} + ']')
+#define gtLogOnceId(...) gtLogOnce()
 
 #endif // GT_LOGDISABLELOGFORFILE_H

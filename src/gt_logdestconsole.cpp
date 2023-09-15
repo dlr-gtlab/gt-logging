@@ -33,7 +33,7 @@
 void
 gt::log::DebugOutputDestination::output(std::string const& message, Level level)
 {
-    auto stream = level >= gt::log::WarnLevel ? stderr : stdout;
+    auto stream = level >= gt::log::WarningLevel ? stderr : stdout;
 
     fprintf(stream, "%s\n", message.c_str());
     fflush(stream);

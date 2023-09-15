@@ -16,6 +16,13 @@ TEST_F(TestDisableLogging, gtErrorId)
     EXPECT_TRUE(log.isEmpty());
 }
 
+TEST_F(TestDisableLogging, logOnce)
+{
+    gtLogOnce(Info).nospace() << "This should not be logged";
+    gtLogOnceId(Info).nospace() << "This should not be logged too";
+    EXPECT_TRUE(log.isEmpty());
+}
+
 // member methods should be callable as well
 TEST_F(TestDisableLogging, callMemberMethod)
 {

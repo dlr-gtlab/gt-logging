@@ -31,12 +31,54 @@
 #include <vector>
 #include <algorithm>
 
+using MutexLocker = const std::lock_guard<std::mutex>;
+
 namespace gt
 {
 namespace log
 {
 
-using MutexLocker = const std::lock_guard<std::mutex>;
+hash_t hash(std::string const& msg, std::string const& id, Level level)
+{
+    std::hash<std::string> hasher;
+    return hasher(msg + id + std::to_string(level));
+}
+
+struct Logger::DefaultCache::Impl
+{
+    Impl()
+    {
+        cache.reserve(128);
+    }
+
+    std::mutex mutex;
+    std::vector<hash_t> cache;
+};
+
+Logger::DefaultCache::DefaultCache() : pimpl(std::make_unique<Impl>()) { }
+
+Logger::DefaultCache::~DefaultCache() = default;
+
+void
+Logger::DefaultCache::append(hash_t hash)
+{
+    MutexLocker locker(pimpl->mutex);
+    pimpl->cache.push_back(hash);
+}
+
+void
+Logger::DefaultCache::clear()
+{
+    MutexLocker locker(pimpl->mutex);
+    pimpl->cache.clear();
+}
+
+bool
+Logger::DefaultCache::find(hash_t hash) const noexcept
+{
+    MutexLocker locker(pimpl->mutex);
+    return std::find(pimpl->cache.begin(), pimpl->cache.end(), hash) != pimpl->cache.end();
+}
 
 struct DestinationEntry
 {
@@ -201,22 +243,14 @@ Logger::verbosity() const
 }
 
 void
-Logger::Helper::writeToLog()
+Logger::log(Level level, std::string message, std::string id)
 {
-    if (!gtStream.mayLog()) return;
-
-    auto message = gtStream.str();
-    if (message.empty())
-    {
-        return;
-    }
-
     // get time
     std::tm timebuf;
     std::time_t rawtime;
     std::time(&rawtime);
 
-    // https://en.cppreference.com/w/c/chrono/localtime
+// https://en.cppreference.com/w/c/chrono/localtime
 #ifdef _WIN32
     std::tm* time = &timebuf;
     localtime_s(&timebuf, &rawtime);
@@ -224,7 +258,7 @@ Logger::Helper::writeToLog()
     tm* time = localtime_r(&rawtime, &timebuf);
 #endif
 
-    Logger::instance().write(message, level, Details{id, *time});
+    write(message, level, Details{id, *time});
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case
@@ -238,6 +272,17 @@ Logger::write(std::string const& message, Level level, Details details)
                   [&](DestinationEntry const& dest){
         dest.ptr->write(message, level, details);
     });
+}
+
+void
+Logger::Helper::writeToLog()
+{
+    if (!gtStream.mayLog()) return;
+
+    auto message = gtStream.str();
+    if (message.empty()) return;
+
+    Logger::instance().log(level, std::move(message), std::move(id));
 }
 
 } // end namespace log

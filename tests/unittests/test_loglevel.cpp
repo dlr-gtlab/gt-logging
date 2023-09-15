@@ -32,7 +32,7 @@ TEST_F(LogLevel, toString)
     testLevel(TraceLevel);
     testLevel(DebugLevel);
     testLevel(InfoLevel);
-    testLevel(WarnLevel);
+    testLevel(WarningLevel);
     testLevel(ErrorLevel);
     testLevel(FatalLevel);
 }
