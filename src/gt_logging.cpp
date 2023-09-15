@@ -60,6 +60,13 @@ struct Logger::Impl
 
 Logger::Logger() : pimpl(std::make_unique<Impl>()) { }
 
+hash_t
+Logger::hash(std::string const& msg, std::string const& id, Level level)
+{
+    std::hash<std::string> hasher;
+    return hasher(msg + id + std::to_string(level));
+}
+
 Logger&
 Logger::instance()
 {
@@ -201,22 +208,14 @@ Logger::verbosity() const
 }
 
 void
-Logger::Helper::writeToLog()
+Logger::log(Level level, std::string id, std::string message)
 {
-    if (!gtStream.mayLog()) return;
-
-    auto message = gtStream.str();
-    if (message.empty())
-    {
-        return;
-    }
-
     // get time
     std::tm timebuf;
     std::time_t rawtime;
     std::time(&rawtime);
 
-    // https://en.cppreference.com/w/c/chrono/localtime
+// https://en.cppreference.com/w/c/chrono/localtime
 #ifdef _WIN32
     std::tm* time = &timebuf;
     localtime_s(&timebuf, &rawtime);
@@ -224,7 +223,18 @@ Logger::Helper::writeToLog()
     tm* time = localtime_r(&rawtime, &timebuf);
 #endif
 
-    Logger::instance().write(message, level, Details{id, *time});
+    write(message, level, Details{id, *time});
+}
+
+void
+Logger::Helper::writeToLog()
+{
+    if (!gtStream.mayLog()) return;
+
+    auto message = gtStream.str();
+    if (message.empty()) return;
+
+    Logger::instance().log(level, std::move(id), std::move(message));
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case

@@ -52,9 +52,12 @@ namespace gt
 namespace log
 {
 
+using hash_t = size_t;
+
 class Logger
 {
 public:
+
     GT_LOGGING_EXPORT
     static Logger& instance();
 
@@ -100,6 +103,8 @@ public:
     GT_LOGGING_EXPORT
     int verbosity() const;
 
+    void log(Level level, std::string id, std::string message);
+
     //! The helper forwards the streaming to QDebug and builds the final
     //! log message.
     class Helper
@@ -114,7 +119,6 @@ public:
         ~Helper() { writeToLog(); }
 
         gt::log::Stream& stream() { return gtStream; }
-
     private:
 
         Level level;
@@ -124,7 +128,38 @@ public:
         GT_LOGGING_EXPORT void writeToLog();
     };
 
+    template <typename Cache>
+    class LogOnce
+    {
+    public:
+
+        explicit LogOnce(Level logLevel, std::string logId = GT_MODULE_ID) :
+            level{logLevel},
+            id{std::move(logId)}
+        {}
+
+        LogOnce(LogOnce&&) = default;
+        ~LogOnce() {
+            auto str = gtStream.str();
+            hash_t hash = Logger::hash(str, id, level);
+
+
+        }
+
+        gt::log::Stream& stream() { return gtStream; }
+
+    private:
+
+        Level level;
+        std::string id;
+        gt::log::Stream gtStream;
+        std::reference_wrapper<Cache> cache;
+    };
+
 private:
+
+    GT_LOGGING_EXPORT
+    static hash_t hash(std::string const& msg, std::string const& id, Level level);
 
     Logger();
     Logger(Logger const&) = delete;
@@ -137,6 +172,11 @@ private:
     struct Impl; // d pointer
     std::unique_ptr<Impl> pimpl;
 };
+
+Logger::LogOnce logOnce(Level level, std::string id  = GT_MODULE_ID)
+{
+    return Logger::LogOnce<>(level, std::move(id));
+}
 
 } // namespace log
 
@@ -166,16 +206,19 @@ private:
 #endif
 
 #define GT_LOG_IMPL(LEVEL) \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::LEVEL) \
-    {} \
-    else gt::log::Logger::Helper(gt::log::LEVEL).stream() \
-    GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL) \
+        gt::log::Logger::Helper(gt::log::LEVEL).stream() \
+            GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
 
 #define GT_LOG_IMPL_ID(LEVEL, ID) \
-    if (gt::log::Logger::instance().loggingLevel() > gt::log::LEVEL) \
-    {} \
-    else gt::log::Logger::Helper(gt::log::LEVEL, ID).stream() \
-    GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL) \
+        gt::log::Logger::Helper(gt::log::LEVEL, ID).stream() \
+            GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
+
+#define GT_LOG_ONCE_IMPL(LEVEL) \
+    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL) \
+        gt::log::logOnce(gt::log::LEVEL).stream() \
+            GT_LOG_IMPL_LINE_NUMBERS GT_LOG_IMPL_QUOTE GT_LOG_IMPL_NOSPACE
 
 
 //! Default logging macros.
@@ -193,6 +236,8 @@ private:
 #define gtWarningId(ID) GT_LOG_IMPL_ID(WarnLevel , ID)
 #define gtErrorId(ID)   GT_LOG_IMPL_ID(ErrorLevel, ID)
 #define gtFatalId(ID)   GT_LOG_IMPL_ID(FatalLevel, ID)
+
+#define gtLogOnce(LEVEL) GT_LOG_ONCE_IMPL(LEVEL ## Level)
 
 #ifdef GT_LOG_DISABLE
 #include "gt_logdisablelogforfile.h"

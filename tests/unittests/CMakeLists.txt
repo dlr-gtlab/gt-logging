@@ -27,6 +27,7 @@ add_executable(GTlabLoggingTests
     test_logid.cpp  
     test_loglevel.cpp  
     test_loglinenumbers.cpp
+    test_logonce.cpp
     test_logquote.cpp
     test_logstatesaver.cpp
     test_types.cpp

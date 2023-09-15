@@ -6,7 +6,6 @@
  *  E-Mail: marius.broecker@dlr.de
  */
 
-
 #include "test_log_helper.h"
 #include "gt_logging/qt_bindings.h"
 
