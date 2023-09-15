@@ -23,7 +23,7 @@ add_executable(GTlabLoggingTests
     test_logdest.cpp
     test_logdestfile.cpp
     test_logdisableforfile.cpp
-    test_logformatter.cpp 
+    test_logformatter.cpp
     test_logid.cpp  
     test_loglevel.cpp  
     test_loglinenumbers.cpp

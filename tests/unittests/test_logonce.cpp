@@ -6,6 +6,8 @@
  *  E-Mail: marius.broecker@dlr.de
  */
 
+#define GT_MODULE_ID "BasicLog"
+
 #include "test_log_helper.h"
 
 #include <unordered_set>
@@ -19,6 +21,7 @@ TEST_F(LogOnce, global_cache)
     ASSERT_EQ(log.count("log once"), 0);
 
     gtLogOnce(Debug) << "log once";
+    EXPECT_TRUE(log.contains("BasicLog")); // check that default id works
     EXPECT_EQ(log.count("log once"), 1);
 
     gtLogOnce(Debug) << "log once";
@@ -59,6 +62,7 @@ TEST_F(LogOnce, local_cache)
     ASSERT_EQ(log.count("log once"), 0);
 
     gtLogOnce(Info, localCache) << "log once";
+    EXPECT_TRUE(log.contains("BasicLog")); // check that default id works
     EXPECT_EQ(log.count("log once"), 1);
     EXPECT_EQ(localCache.cache.size(), 1);
 

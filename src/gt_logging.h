@@ -134,8 +134,9 @@ public:
     GT_LOGGING_EXPORT
     int verbosity() const;
 
+    //! Method to log a message to all destinations
     GT_LOGGING_EXPORT
-    void log(Level level, std::string id, std::string message);
+    void log(Level level, std::string message, std::string id = GT_MODULE_ID);
 
     //! The helper forwards the streaming to QDebug and builds the final
     //! log message.
@@ -199,7 +200,7 @@ public:
         if (hashExists) return;
 
         cache->append(hash);
-        Logger::instance().log(level, std::move(id), std::move(message));
+        Logger::instance().log(level, std::move(message), std::move(id));
     }
 
     gt::log::Stream& stream() { return gtStream; }

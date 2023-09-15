@@ -243,7 +243,7 @@ Logger::verbosity() const
 }
 
 void
-Logger::log(Level level, std::string id, std::string message)
+Logger::log(Level level, std::string message, std::string id)
 {
     // get time
     std::tm timebuf;
@@ -282,7 +282,7 @@ Logger::Helper::writeToLog()
     auto message = gtStream.str();
     if (message.empty()) return;
 
-    Logger::instance().log(level, std::move(id), std::move(message));
+    Logger::instance().log(level, std::move(message), std::move(id));
 }
 
 } // end namespace log
