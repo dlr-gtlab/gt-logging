@@ -60,6 +60,7 @@ hash_t hash(std::string const& msg, std::string const& id, Level level);
 //! Main logger instance
 class Logger
 {
+
 public:
 
     //! Default cache to store the hashes of the messages that should be
@@ -89,6 +90,7 @@ public:
 
     DefaultCache globalCache;
 
+    //! Global logging instance
     GT_LOGGING_EXPORT
     static Logger& instance();
 
@@ -136,7 +138,16 @@ public:
 
     //! Method to log a message to all destinations
     GT_LOGGING_EXPORT
-    void log(Level level, std::string message, std::string id = GT_MODULE_ID);
+    void log(Level level,
+             std::string message,
+             std::string id = GT_MODULE_ID);
+
+    //! Method to log a message to a single destinations
+    GT_LOGGING_EXPORT
+    void log(Destination& destionation,
+             Level level,
+             std::string const& message,
+             std::string const& id = GT_MODULE_ID);
 
     //! The helper forwards the streaming to QDebug and builds the final
     //! log message.
@@ -180,13 +191,19 @@ class LogOnce
 {
 public:
 
-    explicit LogOnce(Cache& _cache, Level _level, std::string _id = GT_MODULE_ID) :
+    explicit LogOnce(Cache& _cache,
+                     Level _level,
+                     std::string _id = GT_MODULE_ID) :
         level{_level},
         id{std::move(_id)},
         cache(&_cache)
     {}
 
     LogOnce(LogOnce&&) = default;
+    LogOnce(LogOnce const&) = delete;
+    LogOnce& operator=(LogOnce const&) = delete;
+    LogOnce& operator=(LogOnce&&) = delete;
+
     ~LogOnce()
     {
         if (!gtStream.mayLog()) return;
@@ -225,6 +242,41 @@ inline auto logOnce(Level level, std::string id  = GT_MODULE_ID)
 {
     return logOnce(Logger::instance().globalCache, level, std::move(id));
 }
+
+class LogTo
+{
+public:
+
+    LogTo(Destination* _destination, Level _level, std::string _id = GT_MODULE_ID) :
+        level(_level),
+        id(std::move(_id)),
+        destination(_destination)
+    {}
+
+    LogTo(LogTo&&) = default;
+    LogTo(LogTo const&) = delete;
+    LogTo& operator=(LogTo const&) = delete;
+    LogTo& operator=(LogTo&&) = delete;
+
+    ~LogTo()
+    {
+        if (!gtStream.mayLog() || !destination) return;
+
+        std::string message = gtStream.str();
+        if (message.empty()) return;
+
+        Logger::instance().log(*destination, level, message, id);
+    }
+
+    gt::log::Stream& stream() { return gtStream; }
+
+private:
+
+    Level level;
+    std::string id;
+    Stream gtStream;
+    Destination* destination;
+};
 
 } // namespace log
 
@@ -330,6 +382,18 @@ inline auto logOnce(Level level, std::string id  = GT_MODULE_ID)
 #define GT_LOG_IMPL_ONCE_ID_MACRO_CHOOSER(...) GT_LOG_IMPL_ONCE_ID_CHOOSE_FROM_ARG_COUNT(GT_LOG_IMPL_NO_ARG_EXPANDER __VA_ARGS__ ())
 
 #define gtLogOnceId(...) GT_LOG_IMPL_ONCE_ID_MACRO_CHOOSER( __VA_ARGS__)( __VA_ARGS__)
+
+////////// LOG TO MACRO //////////
+
+#define gtLogTo(LEVEL, DESTINATION) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL ## Level) \
+        gt::log::LogTo(DESTINATION, gt::log::LEVEL ## Level).stream() \
+            GT_LOG_IMPL_APPLY_FLAGS()
+
+#define gtLogToId(LEVEL, DESTINATION, ID) \
+    GT_LOG_IMPL_IF_LEVEL(LEVEL ## Level) \
+        gt::log::LogTo(DESTINATION, gt::log::LEVEL ## Level, ID).stream() \
+            GT_LOG_IMPL_APPLY_FLAGS()
 
 ////////// APPLY GLOBAL DEFINES //////////
 

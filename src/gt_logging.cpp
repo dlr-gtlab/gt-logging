@@ -165,6 +165,24 @@ any_of(std::vector<DestinationEntry> const& destinations, Op op)
     return std::any_of(destinations.begin(), destinations.end(), op);
 }
 
+inline auto
+currentTime()
+{
+    // get time
+    std::tm timebuf;
+    std::time_t rawtime;
+    std::time(&rawtime);
+
+// https://en.cppreference.com/w/c/chrono/localtime
+#ifdef _WIN32
+    std::tm* time = &timebuf;
+    localtime_s(&timebuf, &rawtime);
+#else
+    tm* time = localtime_r(&rawtime, &timebuf);
+#endif
+    return *time;
+}
+
 } // namespace
 
 bool
@@ -245,20 +263,17 @@ Logger::verbosity() const
 void
 Logger::log(Level level, std::string message, std::string id)
 {
-    // get time
-    std::tm timebuf;
-    std::time_t rawtime;
-    std::time(&rawtime);
+    write(message, level, Details{id, currentTime()});
+}
 
-// https://en.cppreference.com/w/c/chrono/localtime
-#ifdef _WIN32
-    std::tm* time = &timebuf;
-    localtime_s(&timebuf, &rawtime);
-#else
-    tm* time = localtime_r(&rawtime, &timebuf);
-#endif
-
-    write(message, level, Details{id, *time});
+void
+Logger::log(Destination& destionation,
+            Level level,
+            const std::string& message,
+            const std::string& id)
+{
+    // Mutex lock required?
+    destionation.write(message, level, Details{id, currentTime()});
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case
@@ -282,7 +297,7 @@ Logger::Helper::writeToLog()
     auto message = gtStream.str();
     if (message.empty()) return;
 
-    Logger::instance().log(level, std::move(message), std::move(id));
+    Logger::instance().log(level, message, id);
 }
 
 } // end namespace log
