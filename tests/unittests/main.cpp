@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+// SPDX-License-Identifier: BSD-3-Clause
+
 #include "gtest/gtest.h"
 
 #include "gt_logging.h"

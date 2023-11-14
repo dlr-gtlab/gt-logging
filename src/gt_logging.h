@@ -1,6 +1,8 @@
 // Based on QsLog 2.1
 
-// Copyright (c) 2013, Razvan Petru
+// SPDX-FileCopyrightText: 2013, Razvan Petru
+// SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+// SPDX-License-Identifier: BSD-3-Clause
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without modification,
