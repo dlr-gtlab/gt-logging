@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+// SPDX-License-Identifier: BSD-3-Clause
+
 #ifndef GT_LOGSTREAM_H
 #define GT_LOGSTREAM_H
 

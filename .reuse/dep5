@@ -1,0 +1,14 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: gt-logging
+Upstream-Contact: Martin Siggel <martin.siggel@dlr.de>
+Source: https://github.com/dlr-gtlab/gt-logging
+
+# Sample paragraph, commented out:
+#
+# Files: src/*
+# Copyright: $YEAR $NAME <$CONTACT>
+# License: ...
+
+Files: .gitlab/** .* *.md
+Copyright: 2023 German Aerospace Center (DLR) <martin.siggel@dlr.de>
+License: BSD-3-Clause

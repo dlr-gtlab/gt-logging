@@ -1,6 +1,18 @@
 # GTlab Logging
 
-Basic C++14 logging library. 
+Basic C++14 logging library based on [QsLog](https://github.com/victronenergy/QsLog).
+
+## Differences to QsLog
+
+ - Removed Qt depdendency. Logging Qt types is still supported, see below.
+ - Logging of STL types.
+ - Verbosity levels.
+ - Custom log destinations using lambdas and functors.
+ - Full CMake support.
+
+## License
+ 
+GTlab logging is licensed under the __3-Clause BSD License__, see LICENSES folder.
 
 ## Logging Macros:
 

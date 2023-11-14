@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+# SPDX-License-Identifier: BSD-3-Clause
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools import files

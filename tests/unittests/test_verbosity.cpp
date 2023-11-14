@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+// SPDX-License-Identifier: BSD-3-Clause
 
 #include "test_log_helper.h"
 

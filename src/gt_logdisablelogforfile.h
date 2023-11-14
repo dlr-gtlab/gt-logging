@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+// SPDX-License-Identifier: BSD-3-Clause
+
 #ifndef GT_LOGDISABLELOGFORFILE_H
 #define GT_LOGDISABLELOGFORFILE_H
 

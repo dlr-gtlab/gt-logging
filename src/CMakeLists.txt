@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+# SPDX-License-Identifier: BSD-3-Clause
+
 cmake_minimum_required(VERSION 3.12)
 project(GTlabLogging VERSION 4.4.0)
 
