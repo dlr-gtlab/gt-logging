@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+# SPDX-License-Identifier: BSD-3-Clause
+
 LIB_DIR=./lib/$TARGETDIRNAME
 QT_DIR=/opt/Qt/5.12.5/gcc_64
 

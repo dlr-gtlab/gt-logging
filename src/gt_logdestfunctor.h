@@ -1,5 +1,9 @@
-// Copyright (c) 2014, Razvan Petru
-// Copyright (c) 2014, Omar Carey
+// SPDX-FileCopyrightText: 2014, Razvan Petru
+// SPDX-FileCopyrightText: 2014, Omar Carey
+// SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without modification,
