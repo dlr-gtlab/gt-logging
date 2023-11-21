@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 cmake_minimum_required(VERSION 3.12)
-project(GTlabLogging VERSION 4.4.0)
+project(GTlabLogging VERSION 4.4.1)
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR "lib")
