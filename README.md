@@ -1,5 +1,7 @@
 # GTlab Logging
 
+Just a test... don't merge
+
 Basic C++14 logging library based on [QsLog](https://github.com/victronenergy/QsLog).
 
 ## Differences to QsLog
