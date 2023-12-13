@@ -144,7 +144,7 @@ public:
 
     //! Method to log a message to a single destinations
     GT_LOGGING_EXPORT
-    void log(Destination& destionation,
+    void log(Destination& destination,
              Level level,
              std::string const& message,
              std::string const& id = GT_MODULE_ID);
@@ -340,8 +340,8 @@ private:
 
 #define gtTraceId(ID)   GT_LOG_IMPL_MEESAGE_ID(TraceLevel, ID)
 #define gtDebugId(ID)   GT_LOG_IMPL_MEESAGE_ID(DebugLevel, ID)
-#define gtInfoId(ID)    GT_LOG_IMPL_MEESAGE_ID(InfoLevel , ID)
-#define gtWarningId(ID) GT_LOG_IMPL_MEESAGE_ID(WarningLevel , ID)
+#define gtInfoId(ID)    GT_LOG_IMPL_MEESAGE_ID(InfoLevel, ID)
+#define gtWarningId(ID) GT_LOG_IMPL_MEESAGE_ID(WarningLevel, ID)
 #define gtErrorId(ID)   GT_LOG_IMPL_MEESAGE_ID(ErrorLevel, ID)
 #define gtFatalId(ID)   GT_LOG_IMPL_MEESAGE_ID(FatalLevel, ID)
 

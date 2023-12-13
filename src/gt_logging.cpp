@@ -267,13 +267,13 @@ Logger::log(Level level, std::string message, std::string id)
 }
 
 void
-Logger::log(Destination& destionation,
+Logger::log(Destination& destination,
             Level level,
             const std::string& message,
             const std::string& id)
 {
     // Mutex lock required?
-    destionation.write(message, level, Details{id, currentTime()});
+    destination.write(message, level, Details{id, currentTime()});
 }
 
 //! Sends the message to all the destinations. The level for this message is passed in case
