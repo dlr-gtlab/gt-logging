@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "gt_logging.h"
-#include <gtest/gtest.h>
 
-struct LogLevel : public testing::Test
+#include "test_log_helper.h"
+
+struct LogLevel : public LogHelperTest
 {
-    void testLevel(gt::log::Level level)
+    static void testLevel(gt::log::Level level)
     {
         using namespace gt::log;
         // print current iteration
@@ -30,4 +30,35 @@ TEST_F(LogLevel, toString)
     testLevel(WarningLevel);
     testLevel(ErrorLevel);
     testLevel(FatalLevel);
+}
+
+// member methods should be callable as well
+TEST_F(LogLevel, offLevel)
+{
+    using namespace gt::log;
+
+    Logger::instance().setLoggingLevel(gt::log::DebugLevel);
+
+    gtDebug() << "Test";
+    EXPECT_TRUE(log.contains("Test"));
+
+    gtInfo() << "Hello";
+    EXPECT_TRUE(log.contains("Hello"));
+
+    gtTrace() << "Trace";
+    EXPECT_FALSE(log.contains("Trace"));
+
+    log.clear();
+
+    // turn logging off
+    Logger::instance().setLoggingLevel(gt::log::OffLevel);
+
+    gtDebug() << "Test";
+    EXPECT_FALSE(log.contains("Test"));
+
+    gtInfo() << "Hello";
+    EXPECT_FALSE(log.contains("Hello"));
+
+    gtFatal() << "Fatal";
+    EXPECT_FALSE(log.contains("Fatal"));
 }
