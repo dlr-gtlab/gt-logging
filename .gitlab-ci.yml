@@ -189,10 +189,10 @@ testWinUnstable:
     GIT_SUBMODULE_STRATEGY: "none"
   artifacts:
     paths:
-      - "build/unittests.xml"
+      - "unittests.xml"
     expire_in: 1 week
     reports:
-      junit: build/unittests.xml
+      junit: unittests.xml
 
 testLinux:
   stage: test
