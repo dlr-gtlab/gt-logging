@@ -90,7 +90,7 @@ struct DestinationEntry
 
 struct Logger::Impl
 {
-    Impl() : level()
+    Impl()
     {
         // assume at least file + console
         destinations.reserve(2);
