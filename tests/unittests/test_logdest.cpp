@@ -9,6 +9,17 @@ class DestTest : public testing::Test
 public:
     DestTest() : logger(gt::log::Logger::instance()) { }
 
+    void SetUp() override
+    {
+        logger.setLoggingLevel(gt::log::DebugLevel);
+    }
+
+    void TearDown() override
+    {
+        // reset logging level
+        logger.setLoggingLevel(gt::log::DebugLevel);
+    }
+
     std::string destid = "my_id";
     gt::log::DestinationPtr dest;
     gt::log::Logger& logger;

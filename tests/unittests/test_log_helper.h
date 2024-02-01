@@ -19,6 +19,8 @@ public:
 
     void SetUp() override
     {
+        logger.setLoggingLevel(gt::log::DebugLevel);
+
         auto dest = gt::log::makeFunctorDestination(
                         [this](std::string const& msg,
                         gt::log::Level level,
@@ -39,6 +41,8 @@ public:
     void TearDown() override
     {
         logger.removeDestination(destid);
+        // reset logging level
+        logger.setLoggingLevel(gt::log::DebugLevel);
 
         ASSERT_FALSE(logger.hasDestination(destid));
     }

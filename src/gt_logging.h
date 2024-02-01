@@ -258,7 +258,7 @@ inline auto logOnce(Level level, std::string id  = GT_MODULE_ID)
 
 // log only if logging level matches
 #define GT_LOG_IMPL_IF_LEVEL(LEVEL) \
-    if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL)
+if (gt::log::Logger::instance().loggingLevel() <= gt::log::LEVEL)
 
 // apply global flags (quote, nospace, line numbers)
 #define GT_LOG_IMPL_APPLY_FLAGS() \

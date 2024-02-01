@@ -17,10 +17,14 @@ public:
 
     void SetUp() override
     {
+        logger.setLoggingLevel(gt::log::DebugLevel);
     }
 
     void TearDown() override
     {
+        // reset logging level
+        logger.setLoggingLevel(gt::log::DebugLevel);
+
         logger.removeDestination(noRotId);
         logger.removeDestination(rotId);
         ASSERT_FALSE(logger.hasDestination(rotId));
@@ -114,9 +118,12 @@ TEST_F(LogFileDest, withRotation)
 
     QFileInfo fileInfo{qFilePath};
 
+    constexpr uint maxIter = 1000;
+
     // write data until we have reached max file size
     // starting at 10 here, so that each entry has 2 digits thus 2 characters
-    for (uint i = 10, lastSize = 0; (lastSize < fileSize);
+    for (uint i = 10, lastSize = 0;
+         lastSize < fileSize && i < maxIter;
          ++i, fileInfo.refresh(), lastSize = fileInfo.size())
     {
         gtDebug().nospace() << i;
