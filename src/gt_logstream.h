@@ -70,9 +70,16 @@ public:
     Stream& operator=(Stream const&) = delete;
     Stream& operator=(Stream&&) = default;
 
+    /// enables space flag, thus outputs a space after logging an element.
+    /// Will only affect the next message.
     inline Stream& space()   { m_flags |=  LogSpace; return *this; }
+    /// disables space flag, thus outputs no space after logging an element.
+    /// Will only affect the next message.
     inline Stream& nospace() { m_flags &= ~LogSpace; return *this; }
+    /// enables the quote flag, which adds quotes around the next string
+    /// type to log.
     inline Stream& quote()   { m_flags |=  LogQuote; return *this; }
+    /// disbales the quote flag, thus logging string type without decorations.
     inline Stream& noquote() { m_flags &= ~LogQuote; return *this; }
 
     Stream& medium() { return verbose(gt::log::Medium); }
@@ -228,7 +235,8 @@ private:
 
 // pair
 template <typename T, typename U>
-inline Stream& operator<<(Stream& s, std::pair<T, U> const& t)
+inline Stream&
+operator<<(Stream& s, std::pair<T, U> const& t)
 {
     if (s.mayLog())
     {
@@ -268,6 +276,18 @@ inline Stream& Stream::doLogIter(Iter a, Iter b,
     }
     return *this;
 };
+
+inline Stream& nospace(Stream& s) { return s.nospace(); }
+inline Stream& space(Stream& s) { return s.space(); }
+
+inline Stream& noquote(Stream& s) { return s.noquote(); }
+inline Stream& quote(Stream& s) { return s.quote(); }
+
+inline gt::log::Stream&
+operator<<(gt::log::Stream& s, gt::log::Stream&(*f)(gt::log::Stream&))
+{
+    return f(s);
+}
 
 } // namespace log
 

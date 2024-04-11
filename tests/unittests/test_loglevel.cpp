@@ -20,8 +20,8 @@ struct LogLevel : public LogHelperTest
 
 };
 
-// member methods should be callable as well
-TEST_F(LogLevel, toString)
+/// convert levels to string and from string
+TEST_F(LogLevel, toStringFromString)
 {
     using namespace gt::log;
     testLevel(TraceLevel);
@@ -32,7 +32,7 @@ TEST_F(LogLevel, toString)
     testLevel(FatalLevel);
 }
 
-// member methods should be callable as well
+/// OffLevel should deactive logging of messages
 TEST_F(LogLevel, offLevel)
 {
     using namespace gt::log;
