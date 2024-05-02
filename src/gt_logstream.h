@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <cstdint>
 
 #ifdef __has_cpp_attribute 
   #if __has_cpp_attribute(nodiscard)
