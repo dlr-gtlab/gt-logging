@@ -37,6 +37,7 @@ windowsBuildDebug:
     - .build-win_17
     - .run-always
   script:
+    - $env:PATH+=";"
     - $env:PATH+=$env:QT_INSTALL_PATH
     - $env:PATH+="\bin;"
     - echo $env:PATH
@@ -49,8 +50,10 @@ windowsBuildStaticDebug:
     - .build-win_17
     - .run-master-and-tags
   script:
+    - $env:PATH+=";"
     - $env:PATH+=$env:QT_INSTALL_PATH
     - $env:PATH+="\bin;"
+    - echo $env:PATH
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2017-static-dbg -DBUILD_UNITTESTS=ON -DBUILD_SHARED_LIBS=OFF
     - cmake --build build --target install
     
@@ -61,8 +64,10 @@ windowsBuildDebugUnstable:
     - .build-win_20
     - .run-always
   script:
+    - $env:PATH+=";"
     - $env:PATH+=$env:QT_INSTALL_PATH
     - $env:PATH+="\bin;"
+    - echo $env:PATH
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
 
