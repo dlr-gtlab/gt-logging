@@ -43,4 +43,4 @@ set_property(TARGET GTlabLoggingTests PROPERTY AUTOMOC ON)
 target_link_libraries(GTlabLoggingTests PRIVATE GTlab::Logging gtest Qt5::Core Qt5::Gui Qt5::Widgets)
 
 include(GoogleTest)
-gtest_discover_tests(GTlabLoggingTests TEST_PREFIX "Logging.")
+gtest_discover_tests(GTlabLoggingTests TEST_PREFIX "Logging." DISCOVERY_MODE PRE_TEST)
