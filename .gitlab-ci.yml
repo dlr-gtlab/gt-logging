@@ -149,56 +149,70 @@ linuxBuildReleaseUnstable:
 
 
 # run tests using the binary built before
+.testWinTemplate:
+  tags: ["windows", "docker"]
+  extends: 
+    - .run-always
+  before_script:
+    - '& $env:GTLAB_UPDATE_TOOL up --confirm-command; $null'
+  script:
+    - $env:path = "$env:GTLAB_DEV_TOOLS\binDebug;$env:path"
+    - cd build
+    - .\GTlabLoggingTests.exe --gtest_output=xml:unittests.xml
+  artifacts:
+    paths:
+      - "build/unittests.xml"
+    expire_in: 1 week
+    reports:
+      junit: build/unittests.xml
+
+# run tests using the binary built before
 testWin:
   stage: test
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-1_7-win
   extends: 
-    - .winTestTemplate
-    - .run-always
-  needs: 
-    - windowsBuildDebug
-  dependencies: 
-    - windowsBuildDebug
-  variables:
-    DEVTOOLS: $DEVTOOLS_Win_Stable
+    - .testWinTemplate
+  needs: ["windowsBuildDebug"]
 
 testWinUnstable:
   stage: unstableTest
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-win
   extends:
-    - .winTestTemplate
+    - .testWinTemplate
+  needs: ["windowsBuildDebugUnstable"]
+
+.testLinuxTemplate:
+  tags: ["linux", "docker"]
+  extends: 
     - .run-always
-  needs: 
-    - windowsBuildDebugUnstable
-  dependencies: 
-    - windowsBuildDebugUnstable
+  before_script:
+    # update to latest dev tools
+    - '"$GTLAB_UPDATE_TOOL" up --confirm-command'
+  script:
+    - export LD_LIBRARY_PATH=`pwd`/install-linux-dbg/lib/logging
+    - ./build/GTlabLoggingTests --gtest_output=xml:unittests.xml
   variables:
-    DEVTOOLS: $DEVTOOLS_Win_Unstable  
+    GIT_SUBMODULE_STRATEGY: "none"
+  artifacts:
+    paths:
+      - "unittests.xml"
+    expire_in: 1 week
+    reports:
+      junit: unittests.xml
 
 testLinux:
   stage: test
   extends: 
-    - .linuxTestTemplate
-    - .run-always
-  needs: 
-    - linuxBuildDebug
-  script:
-    - export LD_LIBRARY_PATH=`pwd`/install-linux-dbg/lib/logging
-    - ./build/GTlabLoggingTests --gtest_output=xml:unittests.xml
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Stable    
+    - .testLinuxTemplate
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-1_7-buster
+  needs: ["linuxBuildDebug"]
 
 testLinuxUnstable:
   stage: unstableTest
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable 
-    LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
   extends: 
-    - .linuxTestTemplate
-    - .run-always
-  needs: 
-    - linuxBuildDebugUnstable
-  script:
-    - export LD_LIBRARY_PATH=`pwd`/install-linux-dbg/lib/logging
-    - ./build/GTlabLoggingTests --gtest_output=xml:unittests.xml
+    - .testLinuxTemplate
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+  needs: ["linuxBuildDebugUnstable"]
 
 .package:
   stage: package
