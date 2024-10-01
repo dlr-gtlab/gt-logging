@@ -381,3 +381,52 @@ TEST_F(Types, Strings)
     gtInfo() << s << qAsConst(s);
     EXPECT_TRUE(log.contains(s.c_str()));
 }
+
+TEST_F(Types, iterator_range)
+{
+    std::vector<int> vec{1, 2, 3, 4};
+
+    gtInfo() << gt::log::range(vec.begin(), vec.end());
+    EXPECT_TRUE(log.contains("(1, 2, 3, 4)"));
+
+    log.clear();
+    gtInfo() << gt::log::range(vec.begin(), vec.end(), "range: ", "", ";");
+    EXPECT_TRUE(log.contains("range: 1;2;3;4"));
+}
+
+TEST_F(Types, iterator_range_custom_type)
+{
+    class MyContainer
+    {
+    public:
+        auto begin() const { return data.begin(); }
+        auto end() const { return data.end(); }
+
+        void resize(size_t size) {
+            data.resize(size);
+            // make objects unique
+            int i = 0;
+            for (auto& entry : data) entry.i = i++;
+        }
+
+    private:
+        std::vector<MyStruct> data;
+    };
+
+    MyContainer con;
+    con.resize(10);
+
+    // log a subrange
+    gtInfo() << gt::log::range(con.begin() + 5, con.begin() + 5 + 2);
+    EXPECT_TRUE(log.contains("(MyStruct(5), MyStruct(6))"));
+
+    log.clear();
+    // empty range
+    gtInfo() << gt::log::range(con.end(), con.end(), "{", "}");
+    EXPECT_TRUE(log.contains("{}"));
+
+    log.clear();
+    // log whole range
+    gtInfo() << gt::log::range(con);
+    EXPECT_EQ(log.count("MyStruct"), 10);
+}

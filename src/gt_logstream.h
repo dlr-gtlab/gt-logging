@@ -284,10 +284,66 @@ inline Stream& space(Stream& s) { return s.space(); }
 inline Stream& noquote(Stream& s) { return s.noquote(); }
 inline Stream& quote(Stream& s) { return s.quote(); }
 
-inline gt::log::Stream&
-operator<<(gt::log::Stream& s, gt::log::Stream&(*f)(gt::log::Stream&))
+inline Stream&
+operator<<(Stream& s, Stream&(*f)(Stream&))
 {
     return f(s);
+}
+
+namespace detail
+{
+
+template <typename Iter>
+struct RangeType
+{
+    Iter begin = {}, end = {};
+    char const* pre = {}, *suf = {}, *sep{};
+};
+
+} // namespace detail
+
+/**
+ * @brief Allows to log a range of iterators.
+ * @param begin Begin iterator
+ * @param end End iterator
+ * @param pre Prefix for range
+ * @param suf Suffix for range
+ * @param sep Separator for range
+ * @return Helper object to log the range defined by the iterators
+ */
+template <typename Iter>
+inline detail::RangeType<Iter> range(Iter begin, Iter end,
+                                     char const* pre = "(",
+                                     char const* suf = ")",
+                                     char const* sep = ", ")
+{
+    return {begin, end, pre, suf, sep};
+}
+
+/**
+ * @brief Overlaod that calls `begin()` and `end()` on the range `r` to log
+ * the range.
+ * @param r Range object
+ * @param pre Prefix for range
+ * @param suf Suffix for range
+ * @param sep Separator for range
+ * @return Helper object to log the range `r`
+ */
+template <typename Range>
+inline auto range(Range const& r,
+                  char const* pre = "(",
+                  char const* suf = ")",
+                  char const* sep = ", ")
+{
+    return range(r.begin(), r.end(), pre, suf, sep);
+}
+
+/// operator to log range
+template <typename Iter>
+inline Stream&
+operator<<(Stream& s, detail::RangeType<Iter> r)
+{
+    return s.doLogIter(r.begin, r.end, r.pre, r.suf, r.sep);
 }
 
 } // namespace log

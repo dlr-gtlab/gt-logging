@@ -285,3 +285,21 @@ TEST_F(TypesQt, QWidget)
                 log.contains("QObject(0x0)"));
 }
 
+TEST_F(TypesQt, iterator_range)
+{
+    QMap<QString, int> map;
+    map.insert("a", 11);
+    map.insert("b", 22);
+
+    // default iterators
+    gtInfo() << gt::log::range(map.begin(), map.end());
+    EXPECT_TRUE(log.contains("(11, 22)"));
+
+    log.clear();
+    // custom iterators
+    gtInfo() << gt::log::range(map.constKeyValueBegin(),
+                               map.constKeyValueEnd());
+    EXPECT_TRUE(log.contains(R"((("a", 11), ("b", 22)))") ||
+                log.contains(R"((("b", 22), ("a", 11)))"));
+}
+

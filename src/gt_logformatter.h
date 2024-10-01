@@ -87,7 +87,7 @@ formatImpl(size_t idx, Iter begin, Iter end, Arg const& arg, Args const&... args
     return formatImpl(idx + 1, begin, end, args...);
 }
 
-} // namespace details
+} // namespace detail
 
 /**
  * @brief Formats the argument list depending on the format string similar to
