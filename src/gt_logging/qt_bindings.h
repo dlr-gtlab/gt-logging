@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QVector>
 #include <QList>
+#include <QVariant>
 
 namespace gt
 {
@@ -115,9 +116,11 @@ inline Stream& operator<<(Stream& s, T const* t) { return detail::doLogQt(s, t);
 template <typename T, detail::if_not_base_of_qobject<T> = true>
 inline Stream& operator<<(Stream& s, T const* t) { return s << static_cast<void const*>(t); }
 
+#if QT_VERSION < 0x060000
 // template based operators: non QObject*
 template <typename T>
 inline Stream& operator<<(Stream& s, QVector<T> const& t) { return s.doLogIter(t.begin(), t.end()); }
+#endif
 
 // template based operators: non QObject*
 template <typename T>
