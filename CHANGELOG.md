@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Fixed
+- Fixed compilation with Qt6
+
 ### Added
 - Added `(no)space` and `(no)quote` manipulators to alter flags of the stream on the fly. - #129
 - Added `range` function to log a range of iterators. Can be used to log any custom container type as long as its value type can be logged. Can also be used to customize how a range/container is logged by specifying a custom formatting. - #137
