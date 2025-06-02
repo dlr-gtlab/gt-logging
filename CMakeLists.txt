@@ -7,7 +7,7 @@ if (EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
     include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 endif()
 
-project(GTlabLogging VERSION 4.4.1)
+project(GTlabLogging VERSION 4.4.2)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
