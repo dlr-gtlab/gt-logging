@@ -211,7 +211,7 @@ testLinuxUnstable:
   stage: unstableTest
   extends: 
     - .testLinuxTemplate
-  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+    - .linuxdocker
   needs: ["linuxBuildDebugUnstable"]
 
 .package:
