@@ -14,5 +14,21 @@
 #include "gt_logging/set.h"
 #include "gt_logging/tuple.h"
 
+namespace gt
+{
+
+namespace log
+{
+
+// make std::string explicitly match, to avoid collision with qt types
+inline Stream& operator<<(Stream& s, std::string const& t)
+{
+    s.operator <<(t);
+    return s;
+}
+
+} // namespace log
+} // namespace gt
+
 
 #endif // GT_LOGGING_STL_BINDINGS_H

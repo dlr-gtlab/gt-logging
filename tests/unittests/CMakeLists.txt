@@ -4,16 +4,16 @@
 cmake_minimum_required(VERSION 3.8)
 project(GTlabLogging-tests)
 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
 if (NOT TARGET GTlab::Logging)
     find_package(GTlabLogging CONFIG REQUIRED)
 endif()
 
-if (NOT TARGET Qt5::Core)
-    find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+if (NOT TARGET Qt5::Core AND NOT TARGET Qt6::Core)
+    include(RequireQt)
+    require_qt(COMPONENTS Core Gui Widgets)
 endif()
-
-
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 if (NOT TARGET gtest)
     include(AddGoogleTest)
@@ -40,7 +40,7 @@ add_executable(GTlabLoggingTests
 
 set_property(TARGET GTlabLoggingTests PROPERTY AUTOMOC ON)
 
-target_link_libraries(GTlabLoggingTests PRIVATE GTlab::Logging gtest Qt5::Core Qt5::Gui Qt5::Widgets)
+target_link_libraries(GTlabLoggingTests PRIVATE GTlab::Logging gtest Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets)
 
 include(GoogleTest)
 gtest_discover_tests(GTlabLoggingTests TEST_PREFIX "Logging." DISCOVERY_MODE PRE_TEST)
