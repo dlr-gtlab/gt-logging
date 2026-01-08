@@ -133,7 +133,12 @@ TEST_F(TypesQt, QPair)
 {
     QPair<QString, int> pair{"test", 42};
     gtInfo() << pair;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     EXPECT_TRUE(log.contains("QPair(test,42)"));
+#else
+    // In Qt6, QPair is an alias to std::pair
+    EXPECT_TRUE(log.contains(R"(("test", 42))"));
+#endif
 }
 
 TEST_F(TypesQt, QSharedPointer)
