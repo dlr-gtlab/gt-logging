@@ -7,12 +7,15 @@
 #include "gt_logging.h"
 #include "gt_logging/stl_bindings.h"
 
-#include <QDebug>
 #include <QtGlobal>
 #include <QObject>
 #include <QVector>
 #include <QList>
 #include <QVariant>
+#include <QStringList>
+
+#include <QDebug>
+
 
 namespace gt
 {
@@ -129,7 +132,10 @@ inline Stream& operator<<(Stream& s, QList<T> const& t) { return s.doLogIter(t.b
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 // With Qt6, QStringList matches QList<QString> resulting in a different output
 // Hence, we need to provide a custom operator for QStringList
-inline Stream& operator<<(Stream& s, QStringList const& t) { return detail::doLogQt(s, t); }
+inline Stream& operator<<(Stream& s, QStringList const& t)
+{
+    return s << QStringLiteral("(%1)").arg(t.join(QStringLiteral(", ")));
+}
 #endif
 
 // check for ::operator<<(QDebug, T)
