@@ -126,6 +126,12 @@ inline Stream& operator<<(Stream& s, QVector<T> const& t) { return s.doLogIter(t
 template <typename T>
 inline Stream& operator<<(Stream& s, QList<T> const& t) { return s.doLogIter(t.begin(), t.end()); }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+// With Qt6, QStringList matches QList<QString> resulting in a different output
+// Hence, we need to provide a custom operator for QStringList
+inline Stream& operator<<(Stream& s, QStringList const& t) { return detail::doLogQt(s, t); }
+#endif
+
 // check for ::operator<<(QDebug, T)
 template<typename T,
          detail::if_not_integral_and_pointer<T> = true,
