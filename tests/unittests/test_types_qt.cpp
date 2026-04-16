@@ -12,6 +12,7 @@
 
 #include <QWidget>
 #include <QJsonValue>
+#include <QString>
 
 // test fixture
 class TypesQt : public LogHelperTest {};
@@ -132,7 +133,12 @@ TEST_F(TypesQt, QPair)
 {
     QPair<QString, int> pair{"test", 42};
     gtInfo() << pair;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     EXPECT_TRUE(log.contains("QPair(test,42)"));
+#else
+    // In Qt6, QPair is an alias to std::pair
+    EXPECT_TRUE(log.contains(R"(("test", 42))"));
+#endif
 }
 
 TEST_F(TypesQt, QSharedPointer)
@@ -225,6 +231,9 @@ TEST_F(TypesQt, Strings)
     EXPECT_TRUE(log.contains("Test"));
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+// Qt6 does not have a QStringRef type
+
 TEST_F(TypesQt, QStringRef)
 {
     QString qstr = "MyFancyString";
@@ -233,6 +242,8 @@ TEST_F(TypesQt, QStringRef)
     gtInfo() << qstrr;
     EXPECT_TRUE(log.contains(qstr));
 }
+
+#endif
 
 TEST_F(TypesQt, StringViews)
 {
