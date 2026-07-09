@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changes
+ - The logging library is now installed to the "lib" dir in favor to the old "lib/logging",
+   to improve compatibility with a standard unix installation layout. 
+
+### Fixed
+ - Fixed some Qt6 related issues when building tests
+
 ## [4.4.2] - 2025-06-02
 
 ### Fixed
