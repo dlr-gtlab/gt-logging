@@ -196,12 +196,12 @@ public:
         std::string message = gtStream.str();
         if (message.empty()) return;
 
-        hash_t hash = gt::log::hash(message, id, level);
+        hash_t hashValue = gt::log::hash(message, id, level);
 
-        bool hashExists = cache->find(hash);
+        bool hashExists = cache->find(hashValue);
         if (hashExists) return;
 
-        cache->append(hash);
+        cache->append(hashValue);
         Logger::instance().log(level, std::move(message), std::move(id));
     }
 
