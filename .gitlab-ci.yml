@@ -111,10 +111,8 @@ linuxBuildRelease_2.1:
   tags: ["windows", "docker"]
   extends: 
     - .run-always
-  before_script:
-    - '& $env:GTLAB_UPDATE_TOOL up --confirm-command; $null'
   script:
-    - $env:path = "$env:GTLAB_DEV_TOOLS\binDebug;$env:path"
+    - $env:PATH+=(";"+$env:QT_INSTALL_PATH+"\bin;")
     - cd build
     - .\GTlabLoggingTests.exe --gtest_output=xml:unittests.xml
   artifacts:
