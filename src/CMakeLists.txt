@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.15)
 project(GTlabLogging VERSION 4.4.2)
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
@@ -73,8 +73,8 @@ set_target_properties(GTlabLogging PROPERTIES
 install (TARGETS GTlabLogging
          EXPORT GTlabLoggingTargets
          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/logging
-         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/logging
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 # install include files

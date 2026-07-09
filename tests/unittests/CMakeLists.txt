@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023, German Aerospace Center (DLR)
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(GTlabLogging-tests)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
