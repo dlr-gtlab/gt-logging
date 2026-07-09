@@ -275,7 +275,7 @@ conan-pkg 2/2:
 # code quality
 cppcheck:
   stage: codequality
-  extends: .cppCheckReportTemplate
+  extends: .cppCheckTemplate
   allow_failure: true
 
 check-license:
